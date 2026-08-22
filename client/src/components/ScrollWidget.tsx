@@ -8,12 +8,16 @@ interface ScrollWidgetProps {
 }
 
 const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }) => {
-  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  const [scrollState, setScrollState] = useState<'top' | 'scrolling' | 'bottom'>('top');
+  const widgetRef = useRef<HTMLElement>(null);
   const atomImgRef = useRef<HTMLImageElement>(null);
 
-  // Velocity & rotation physics tracking
+  // Velocity, progress & rotation physics tracking
   const rotationRef = useRef<number>(0);
   const velocityRef = useRef<number>(0);
+  const progressRef = useRef<number>(0);
+  const currentYRef = useRef<number>(20);
+  const targetYRef = useRef<number>(20);
   const lastScrollYRef = useRef<number>(0);
   const lastScrollTimeRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
@@ -28,48 +32,76 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
       const timeDelta = Math.max(1, now - lastScrollTimeRef.current);
       const scrollDelta = currentScrollY - lastScrollYRef.current;
 
-      // Scroll threshold for state change
-      setIsScrolledDown(currentScrollY > 260);
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+      const maxScroll = Math.max(1, docHeight - winHeight);
+      const progress = Math.min(1, Math.max(0, currentScrollY / maxScroll));
+      progressRef.current = progress;
+
+      // Determine state based on scroll progress & bottom proximity
+      const isBottom = progress >= 0.88 || (winHeight + currentScrollY >= docHeight - 80);
+      const isTop = progress <= 0.05 && currentScrollY < 120;
+
+      if (isBottom) {
+        setScrollState('bottom');
+      } else if (isTop) {
+        setScrollState('top');
+      } else {
+        setScrollState('scrolling');
+      }
 
       // Calculate instantaneous scroll speed (px/ms)
       const scrollSpeed = (scrollDelta / timeDelta) * 16;
-      // Add directional momentum: faster scrolling adds faster rotation
       velocityRef.current += scrollSpeed;
-
-      // Clamp velocity to ensure a smooth, comfortable visual range
       velocityRef.current = Math.max(-50, Math.min(50, velocityRef.current));
 
       lastScrollYRef.current = currentScrollY;
       lastScrollTimeRef.current = now;
     };
 
+    // Initial position & state check
+    handleScroll();
+
     // Physics animation loop (smooth 60-120fps direct GPU transform)
     const updatePhysics = () => {
-      // Baseline gentle idle rotation (0.75 deg/frame)
+      const isMobile = window.innerWidth <= 768;
       const baseSpeed = 0.75;
-
-      // Update rotation angle with base speed + scroll momentum
       rotationRef.current += baseSpeed + velocityRef.current;
 
-      // Apply friction damping (0.92 per frame)
+      // Apply friction damping
       velocityRef.current *= 0.92;
       if (Math.abs(velocityRef.current) < 0.005) {
         velocityRef.current = 0;
       }
 
-      // Directly update transform style without React re-render overhead
       if (atomImgRef.current) {
         atomImgRef.current.style.transform = `rotate(${rotationRef.current % 360}deg)`;
+      }
+
+      // Calculate vertical screen travel from top to bottom
+      const winHeight = window.innerHeight;
+      const topOffset = isMobile ? 18 : 28;
+      const bottomMargin = isMobile ? 65 : 75;
+      const travelRange = Math.max(0, winHeight - topOffset - bottomMargin);
+      targetYRef.current = topOffset + progressRef.current * travelRange;
+
+      // Smooth vertical lerp interpolation
+      currentYRef.current += (targetYRef.current - currentYRef.current) * 0.18;
+
+      if (widgetRef.current) {
+        widgetRef.current.style.transform = `translate3d(0, ${currentYRef.current}px, 0)`;
       }
 
       rafIdRef.current = requestAnimationFrame(updatePhysics);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
     rafIdRef.current = requestAnimationFrame(updatePhysics);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
@@ -77,7 +109,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
   }, []);
 
   const handleClick = () => {
-    if (isScrolledDown) {
+    if (scrollState === 'bottom' || scrollState === 'scrolling') {
       onBackToTop();
     } else {
       if (onScrollDown) {
@@ -90,11 +122,12 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
 
   return (
     <aside
-      className={`cyber-scroll-widget ${isScrolledDown ? 'mode-back-top' : 'mode-scroll-down'}`}
+      ref={widgetRef}
+      className={`cyber-scroll-widget state-${scrollState}`}
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      title={isScrolledDown ? 'Back to Top' : 'Scroll Down'}
+      title={scrollState === 'bottom' || scrollState === 'scrolling' ? 'Back to Top' : 'Scroll Down'}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -114,10 +147,10 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
 
       <div className="scroll-widget-label-group">
         <span className="scroll-widget-text font-orbitron">
-          {isScrolledDown ? 'BACK TO TOP' : 'SCROLL DOWN'}
+          {scrollState === 'bottom' ? 'BACK TO TOP' : 'SCROLL DOWN'}
         </span>
         <div className="scroll-widget-icon-sub">
-          {isScrolledDown ? (
+          {scrollState === 'bottom' ? (
             <ArrowUp size={13} className="widget-arrow-icon text-accent" />
           ) : (
             <ChevronDown size={13} className="widget-arrow-icon text-accent bounce-subtle" />
