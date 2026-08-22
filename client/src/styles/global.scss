@@ -1,0 +1,55 @@
+/* Infinite loop animation */
+[class^="particle"] {
+    position: absolute;
+    top: 45%;
+    // left: 50%;
+    animation: floatParticle 4.5s infinite linear;
+    border: 1px solid #33d39d;
+    // border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    filter: blur(4px);
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+}
+
+@for $i from 1 through 20 {
+    .particle:nth-child(#{$i}) {
+        animation-delay: $i * 0.26s;
+    }
+}
+
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 180deg;
+    inherits: true;
+}
+
+@keyframes floatParticle {
+    0% {
+        --angle: 180deg;
+        --radius: calc(min(400px, 50vw));
+        translate:
+            calc(cos(var(--angle)) * var(--radius))
+            calc(sin(var(--angle)) * var(--radius) * -1);
+        opacity: 1;
+    }
+
+    50% {
+        --angle: 0deg;
+        --radius: calc(min(400px, 50vw));
+        translate:
+            calc(cos(var(--angle)) * var(--radius))
+            calc(sin(var(--angle)) * var(--radius) * 1);
+        opacity: 1;
+    }
+
+    100% {
+        --angle: -180deg;
+        --radius: calc(min(400px, 50vw));
+        translate:
+            calc(cos(var(--angle)) * var(--radius))
+            calc(sin(var(--angle)) * var(--radius) * -1);
+        opacity: 1;
+    }
+}

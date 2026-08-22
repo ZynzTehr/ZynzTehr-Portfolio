@@ -1,0 +1,342 @@
+[
+  {
+    "id": "capstone-project",
+    "name": "Capstone Project",
+    "rawName": "capstone-project",
+    "description": "A vanilla JavaScript web app featuring a Mad Libs word game with animated text, user authentication, a personalized home page with live chat, avatar-based profiles,  and birthday greetings, a shopping cart with checkout and confirmation codes — built with HTML, CSS, Bootstrap, and jQuery.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/capstone-project",
+    "liveUrl": "https://zynztehr.github.io/capstone-project/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/capstone-project/main/preview.gif",
+    "updatedAt": "2026-08-22T17:48:13Z"
+  },
+  {
+    "id": "zynztehr-profile",
+    "name": "ZynzTehr Profile",
+    "rawName": "ZynzTehr-Profile",
+    "description": "Profile of ZynzTehr",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/ZynzTehr-Profile",
+    "liveUrl": "https://zynztehr.github.io/ZynzTehr-Profile/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/ZynzTehr-Profile/main/preview.gif",
+    "updatedAt": "2026-08-22T17:00:43Z"
+  },
+  {
+    "id": "tic-tac-toe-withai",
+    "name": "Tic Tac Toe with AI",
+    "rawName": "tic-tac-toe-withAi",
+    "description": "Tic Tac Toe with AI is a React app built with Vite and Tailwind CSS. Play against a friend or challenge an AI opponent that uses the minimax algorithm. Features smooth Framer Motion animations and multiple difficulty settings.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/tic-tac-toe-withAi",
+    "liveUrl": "https://zynztehr.github.io/tic-tac-toe-withAi/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/tic-tac-toe-withAi/main/preview.gif",
+    "updatedAt": "2026-08-21T17:54:09Z"
+  },
+  {
+    "id": "match-maker",
+    "name": "Match Maker",
+    "rawName": "match-maker",
+    "description": "A friend match-making web app built with Node.js, Express, and EJS. Take a 10-question survey about your interests and get matched with your closest compatible friend. Server-rendered templates with EJS, RESTful routing, and a score-based matching algorithm.",
+    "category": "Web Application",
+    "language": "EJS",
+    "topics": [
+      "EJS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/match-maker",
+    "liveUrl": "https://match-maker-1.onrender.com",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/match-maker/main/preview.gif",
+    "updatedAt": "2026-08-20T20:07:19Z"
+  },
+  {
+    "id": "soda-diner",
+    "name": "Soda Diner",
+    "rawName": "soda-diner",
+    "description": "Soda Diner is a full-stack CRUD web app built with Node.js, Express, and MongoDB. Users can manage a catalog of sodas and diners; adding, editing, deleting entries, and assign sodas to specific diners based on their serving status. Includes API tests using Mocha and Chai.",
+    "category": "Full-Stack",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/soda-diner",
+    "liveUrl": "https://soda-diner.onrender.com",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/soda-diner/main/preview.gif",
+    "updatedAt": "2026-08-20T20:06:57Z"
+  },
+  {
+    "id": "super-quiz",
+    "name": "Super Quiz",
+    "rawName": "super-quiz",
+    "description": "Super Quiz is an interactive web app featuring dynamic grid animations powered by Anime.js. It offers multiple quiz categories (Math, Coding, etc.), tracks user progress across playthroughs using session storage, and allows players to add custom questions to a local storage bank.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/super-quiz",
+    "liveUrl": "https://zynztehr.github.io/super-quiz/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/preview.gif",
+    "updatedAt": "2026-08-20T17:53:04Z"
+  },
+  {
+    "id": "school-directory",
+    "name": "School Directory",
+    "rawName": "school-directory",
+    "description": "School Directory is a TypeScript project demonstrating OOP principles through class inheritance. It models a school system with a hierarchy of  Students, Teachers, Administrators, and Custodians, parsing and organizing data from a text file input.",
+    "category": "Web Application",
+    "language": "TypeScript",
+    "topics": [
+      "TypeScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/school-directory",
+    "liveUrl": null,
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/school-directory/main/preview.gif",
+    "updatedAt": "2026-08-19T19:43:01Z"
+  },
+  {
+    "id": "loancalculator",
+    "name": "Loan Calculator",
+    "rawName": "loanCalculator",
+    "description": "A loan calculator and financial literacy web app built with JavaScript, HTML5, and CSS3. Calculate payment breakdowns, interest costs, and payoff savings across 5 financing types. Features real-time synchronized input sliders, dynamic amortization schedule generation, LocalStorage state persistence, and printable PDF analysis reports.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/loanCalculator",
+    "liveUrl": "https://zynztehr.github.io/loanCalculator/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/loanCalculator/main/preview.gif",
+    "updatedAt": "2026-07-29T14:56:05Z"
+  },
+  {
+    "id": "auralist-web",
+    "name": "Auralist Web",
+    "rawName": "auralist-web",
+    "description": "Official legal documentation and web assets for the AuraList iOS application",
+    "category": "Web Application",
+    "language": "HTML",
+    "topics": [
+      "HTML",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/auralist-web",
+    "liveUrl": "https://zynztehr.github.io/auralist-web/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/auralist-web/main/preview.gif",
+    "updatedAt": "2026-04-17T21:38:32Z"
+  },
+  {
+    "id": "tic-tac-toe",
+    "name": "Tic Tac Toe",
+    "rawName": "tic-tac-toe",
+    "description": "Tic Tac Toe is a two-player browser game built with React. Players take turns placing X's and O's on a 3x3 grid, with automatic win detection for rows, columns, and diagonals. Includes a live scoreboard that tracks wins across multiple rounds and a reset button to start a new game.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/tic-tac-toe",
+    "liveUrl": "https://zynztehr.github.io/tic-tac-toe/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/tic-tac-toe/main/preview.gif",
+    "updatedAt": "2026-03-11T18:55:02Z"
+  },
+  {
+    "id": "tlm-website-redesign",
+    "name": "TLM Website Redesign",
+    "rawName": "tlm-website-redesign",
+    "description": "A tailored redesign of The Last Mile Website focusing on symmetry, readable typography, and cohesive branding. Built with HTML, CSS, JavaScript, and Bootstrap, it features a responsive layout, custom aesthetics, interactive UI elements, and a unique resizing cursor Easter egg.",
+    "category": "Web Application",
+    "language": "HTML",
+    "topics": [
+      "HTML",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/tlm-website-redesign",
+    "liveUrl": "https://zynztehr.github.io/tlm-website-redesign/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/tlm-website-redesign/main/preview.gif",
+    "updatedAt": "2026-03-11T18:23:00Z"
+  },
+  {
+    "id": "rock-paper-scissors-spock",
+    "name": "Rock Paper Scissors Spock",
+    "rawName": "rock-paper-scissors-spock",
+    "description": "An advanced Web-based Rock, Paper, Scissors, Lizard, Spock game. Features a responsive 5-way pentagon layout, local storage state caching, scalable vector layout mapping, and modern CSS interactive micro-animations.",
+    "category": "Web Application",
+    "language": "CSS",
+    "topics": [
+      "CSS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/rock-paper-scissors-spock",
+    "liveUrl": "https://zynztehr.github.io/rock-paper-scissors-spock/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/rock-paper-scissors-spock/main/preview.gif",
+    "updatedAt": "2026-03-11T17:19:33Z"
+  },
+  {
+    "id": "advanced-rock-paper-scissors",
+    "name": "Advanced Rock Paper Scissors",
+    "rawName": "advanced-rock-paper-scissors",
+    "description": "An advanced, fully responsive take on the classic web-based Rock, Paper, Scissors game. Built utilizing modern CSS architecture, scalable vector graphics, and native JavaScript LocalStorage state persistence.",
+    "category": "Web Application",
+    "language": "CSS",
+    "topics": [
+      "CSS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/advanced-rock-paper-scissors",
+    "liveUrl": "https://zynztehr.github.io/advanced-rock-paper-scissors/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/advanced-rock-paper-scissors/main/preview.gif",
+    "updatedAt": "2026-03-11T17:19:00Z"
+  },
+  {
+    "id": "basic-rock-paper-scissors",
+    "name": "Basic Rock Paper Scissors",
+    "rawName": "basic-rock-paper-scissors",
+    "description": "A custom Rock, Paper, Scissors game built with HTML, CSS, Bootstrap, and Vanilla JavaScript. Features personalized UI enhancements, smooth CSS animations, dynamic gradients, and score tracking.",
+    "category": "Web Application",
+    "language": "HTML",
+    "topics": [
+      "HTML",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/basic-rock-paper-scissors",
+    "liveUrl": "https://zynztehr.github.io/basic-rock-paper-scissors/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/basic-rock-paper-scissors/main/preview.gif",
+    "updatedAt": "2026-03-11T17:18:03Z"
+  },
+  {
+    "id": "testimonial-layout",
+    "name": "Testimonial Layout",
+    "rawName": "testimonial-layout",
+    "description": "A fully responsive social proof and testimonial section built with HTML5 and CSS3 (Flexbox/Grid). Features modern styling, custom typography, and scalable layouts for mobile and desktop.",
+    "category": "Web Application",
+    "language": "CSS",
+    "topics": [
+      "CSS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/testimonial-layout",
+    "liveUrl": "https://zynztehr.github.io/testimonial-layout/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/testimonial-layout/main/preview.gif",
+    "updatedAt": "2026-03-11T17:17:29Z"
+  },
+  {
+    "id": "nextchapter",
+    "name": "Next Chapter",
+    "rawName": "NextChapter",
+    "description": "This project was created with the purpose of being accepted into the Next Chapter Bootcamp. Built with HTML, CSS, and JS. It features a glass-morphism aesthetic, glowing animations, an interactive media gallery, and a dynamic client-side comment form. Media queries ensure responsiveness on all screen sizes.",
+    "category": "Web Application",
+    "language": "CSS",
+    "topics": [
+      "CSS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/NextChapter",
+    "liveUrl": "https://zynztehr.github.io/NextChapter/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/NextChapter/main/preview.gif",
+    "updatedAt": "2026-03-11T17:10:18Z"
+  },
+  {
+    "id": "python-rock-paper-scissors",
+    "name": "Python Rock Paper Scissors",
+    "rawName": "python-rock-paper-scissors",
+    "description": "A classic Rock, Paper, Scissors game implemented in Python with one version using dictionaries, and others using lists and if-elif-else statements. Features a playable command-line interface, randomized computer logic, and round-by-round score tracking.",
+    "category": "Web Application",
+    "language": "Python",
+    "topics": [
+      "Python",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/python-rock-paper-scissors",
+    "liveUrl": null,
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/python-rock-paper-scissors/main/preview.gif",
+    "updatedAt": "2026-03-10T02:11:13Z"
+  }
+]
