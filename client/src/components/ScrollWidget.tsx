@@ -16,8 +16,8 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
   const rotationRef = useRef<number>(0);
   const velocityRef = useRef<number>(0);
   const progressRef = useRef<number>(0);
-  const currentYRef = useRef<number>(20);
-  const targetYRef = useRef<number>(20);
+  const currentYRef = useRef<number>(180);
+  const targetYRef = useRef<number>(180);
   const lastScrollYRef = useRef<number>(0);
   const lastScrollTimeRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
@@ -80,10 +80,16 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
 
       // Calculate vertical screen travel from top to bottom
       const winHeight = window.innerHeight;
-      const topOffset = isMobile ? 18 : 28;
+      const hudEl = document.querySelector('.dev-hud') as HTMLElement | null;
+      let startTopOffset = isMobile ? 220 : 160;
+      if (hudEl) {
+        startTopOffset = hudEl.offsetTop + hudEl.offsetHeight + 10;
+      }
+      
       const bottomMargin = isMobile ? 65 : 75;
-      const travelRange = Math.max(0, winHeight - topOffset - bottomMargin);
-      targetYRef.current = topOffset + progressRef.current * travelRange;
+      startTopOffset = Math.min(startTopOffset, winHeight - bottomMargin - 40);
+      const travelRange = Math.max(0, (winHeight - bottomMargin) - startTopOffset);
+      targetYRef.current = startTopOffset + progressRef.current * travelRange;
 
       // Smooth vertical lerp interpolation
       currentYRef.current += (targetYRef.current - currentYRef.current) * 0.18;
