@@ -1077,4 +1077,53 @@ body {
   .carousel-controls .btn-play-pause {
     display: none; /* Hide 3D orbit button on mobile */
   }
+
+  /* Half-size 2-Column Archive Cards on Mobile */
+  .archive-cards-grid {
+    --bs-gutter-x: 0.65rem;
+    --bs-gutter-y: 0.65rem;
+  }
+
+  .project-grid-card {
+    border-radius: 12px;
+  }
+
+  .grid-card-media {
+    height: 100px;
+  }
+
+  .grid-category-badge {
+    top: 6px;
+    left: 6px;
+    font-size: 0.52rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 10px;
+  }
+
+  .grid-card-body {
+    padding: 0.6rem 0.65rem !important;
+  }
+
+  .project-grid-card h3 {
+    font-size: 0.76rem !important;
+    margin: 0 !important;
+    line-height: 1.25 !important;
+  }
+
+  .project-grid-card p {
+    font-size: 0.66rem !important;
+    -webkit-line-clamp: 2 !important;
+    margin-bottom: 0.35rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .project-grid-card .tech-pill-small {
+    font-size: 0.54rem !important;
+    padding: 0.1rem 0.3rem !important;
+  }
+
+  .project-grid-card .border-top {
+    padding-top: 0.3rem !important;
+    font-size: 0.62rem !important;
+  }
 }

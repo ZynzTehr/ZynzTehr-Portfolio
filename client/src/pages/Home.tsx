@@ -208,9 +208,9 @@ const Home: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div ref={gridContainerRef} className="row g-4 archive-cards-grid">
+          <div ref={gridContainerRef} className="row g-3 g-md-4 archive-cards-grid">
             {filteredProjects.map((project) => (
-              <div key={project.id} className="col-12 col-md-6 col-lg-4 project-card-col">
+              <div key={project.id} className="col-6 col-md-6 col-lg-4 project-card-col">
                 <div
                   className="project-grid-card h-100"
                   onClick={() => setSelectedProject(project)}
@@ -227,7 +227,7 @@ const Home: React.FC = () => {
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                  <div className="grid-card-body p-3 p-md-4 d-flex flex-column justify-content-between flex-grow-1">
                     <div>
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <h3 className="h5 text-white font-orbitron m-0 text-truncate">
