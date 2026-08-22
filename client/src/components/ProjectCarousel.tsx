@@ -73,7 +73,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const handleRotate = useCallback(
     (direction: 'left' | 'right') => {
       if (sliderRef.current && window.innerWidth <= 768) {
-        const scrollAmount = direction === 'left' ? -216 : 216;
+        const scrollAmount = direction === 'left' ? -137 : 137;
         sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         return;
       }

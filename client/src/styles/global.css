@@ -964,9 +964,9 @@ body {
     top: auto !important;
     left: auto !important;
     transform: none !important;
-    width: clamp(190px, 48vw, 230px) !important;
-    height: clamp(190px, 48vw, 230px) !important;
-    margin: 0 auto 0.75rem auto !important;
+    width: clamp(160px, 42vw, 200px) !important;
+    height: clamp(160px, 42vw, 200px) !important;
+    margin: 0 auto 0.5rem auto !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -998,20 +998,20 @@ body {
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    gap: 16px;
-    padding: 0.5rem 1.25rem 1.25rem 1.25rem;
+    gap: 12px;
+    padding: 0.5rem 1rem 1rem 1rem;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 255, 200, 0.4) rgba(255, 255, 255, 0.05);
   }
 
   .banner .slider::-webkit-scrollbar {
-    height: 5px;
+    height: 4px;
   }
 
   .banner .slider::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.04);
     border-radius: 4px;
-    margin: 0 1.25rem;
+    margin: 0 1rem;
   }
 
   .banner .slider::-webkit-scrollbar-thumb {
@@ -1019,13 +1019,14 @@ body {
     border-radius: 4px;
   }
 
+  /* Half-size compact carousel cards on Mobile */
   .banner .slider .item {
     position: relative;
     inset: auto;
     transform: none !important;
-    flex: 0 0 200px;
-    width: 200px;
-    height: 240px;
+    flex: 0 0 125px;
+    width: 125px;
+    height: 155px;
     scroll-snap-align: center;
     scroll-snap-stop: normal;
   }
@@ -1036,17 +1037,41 @@ body {
     animation: none !important;
     opacity: 1 !important;
     border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  .banner .slider .item .tile-media-wrapper {
+    height: 75px;
+  }
+
+  .banner .slider .item .tile-info {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .banner .slider .item .tile-category-tag {
+    font-size: 0.52rem;
+    letter-spacing: 0.2px;
+  }
+
+  .banner .slider .item .tile-title {
+    font-size: 0.68rem;
+    margin: 1px 0 2px 0;
+    line-height: 1.2;
+  }
+
+  .banner .slider .item .tile-inspect-hint {
+    font-size: 0.58rem;
   }
 
   .banner .slider .item:hover,
   .banner .slider .item:active {
-    transform: translateY(-4px) !important;
+    transform: translateY(-3px) !important;
   }
 
   .carousel-controls {
     display: flex !important;
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1.25rem;
   }
 
   .carousel-controls .btn-play-pause {
