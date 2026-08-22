@@ -1068,6 +1068,44 @@ body {
     transform: translateY(-3px) !important;
   }
 
+  /* Mobile Active Tile Mimicking Hover State */
+  .banner .slider .item.active-tile {
+    transform: translateY(-4px) scale(1.04) !important;
+  }
+
+  .banner .slider .item.active-tile .project-tile-3d {
+    background:
+      linear-gradient(rgba(12, 14, 28, 0.98), rgba(12, 14, 28, 0.98)) padding-box,
+      conic-gradient(
+        from var(--border-angle),
+        transparent 0%,
+        transparent 55%,
+        rgba(0, 255, 65, 0.4) 70%,
+        var(--accent-color) 85%,
+        #ffffff 92%,
+        var(--accent-color) 96%,
+        transparent 100%
+      ) border-box !important;
+    animation: rotateBorderBeam 2.2s linear infinite !important;
+    opacity: 1 !important;
+    box-shadow: 0 0 24px rgba(0, 255, 200, 0.6), 0 10px 25px rgba(0, 0, 0, 0.95) !important;
+    border-color: transparent !important;
+  }
+
+  .banner .slider .item.active-tile .tile-default-media {
+    opacity: 0 !important;
+  }
+
+  .banner .slider .item.active-tile .tile-hover-art {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+
+  .banner .slider .item.active-tile .tile-inspect-hint {
+    color: var(--accent-color) !important;
+    opacity: 1 !important;
+  }
+
   .carousel-controls {
     display: flex !important;
     margin-top: 0.25rem;

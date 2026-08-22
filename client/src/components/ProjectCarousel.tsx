@@ -23,6 +23,8 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [rotationAngle, setRotationAngle] = useState(0);
   const [isStepping, setIsStepping] = useState(false);
 
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+
   const sliderRef = useRef<HTMLDivElement>(null);
   const angleRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
@@ -62,19 +64,51 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     };
   }, [isRotating, isHovered, isStepping]);
 
-  // Reset horizontal slider scroll position when category changes on mobile
+  // Reset horizontal slider scroll position and active index when category changes on mobile
   useEffect(() => {
+    setActiveMobileIndex(0);
     if (sliderRef.current && window.innerWidth <= 768) {
       sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
     }
   }, [activeCategory]);
 
+  // Track active item when user swipes horizontally on mobile
+  const handleSliderScroll = () => {
+    if (!sliderRef.current || window.innerWidth > 768) return;
+    const container = sliderRef.current;
+    const center = container.scrollLeft + container.clientWidth / 2;
+    let closestIdx = 0;
+    let minDiff = Infinity;
+    Array.from(container.children).forEach((child, idx) => {
+      const childEl = child as HTMLElement;
+      const childCenter = childEl.offsetLeft + childEl.offsetWidth / 2;
+      const diff = Math.abs(center - childCenter);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = idx;
+      }
+    });
+    setActiveMobileIndex(closestIdx);
+  };
+
   // Handle manual rotation stepping (or horizontal scroll on mobile)
   const handleRotate = useCallback(
     (direction: 'left' | 'right') => {
       if (sliderRef.current && window.innerWidth <= 768) {
-        const scrollAmount = direction === 'left' ? -137 : 137;
-        sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        setActiveMobileIndex((prev) => {
+          const nextIndex =
+            direction === 'left'
+              ? Math.max(0, prev - 1)
+              : Math.min(displayProjects.length - 1, prev + 1);
+
+          const targetItem = sliderRef.current?.children[nextIndex] as HTMLElement;
+          if (targetItem && sliderRef.current) {
+            const targetLeft =
+              targetItem.offsetLeft - (sliderRef.current.clientWidth - targetItem.clientWidth) / 2;
+            sliderRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
+          }
+          return nextIndex;
+        });
         return;
       }
 
@@ -91,7 +125,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         setIsStepping(false);
       }, 550);
     },
-    [quantity]
+    [displayProjects.length, quantity]
   );
 
   const togglePlayPause = () => {
@@ -122,8 +156,11 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }, 60);
   };
 
-  const handleCardClick = (project: Project) => {
+  const handleCardClick = (project: Project, index: number) => {
     if (isDraggingRef.current) return;
+    if (window.innerWidth <= 768) {
+      setActiveMobileIndex(index);
+    }
     onSelectProject(project);
   };
 
@@ -142,6 +179,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         <div
           ref={sliderRef}
           className="slider"
+          onScroll={handleSliderScroll}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -153,9 +191,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           {displayProjects.map((project, index) => (
             <div
               key={project.id}
-              className="item"
+              className={`item ${index === activeMobileIndex ? 'active-tile' : ''}`}
               style={{ '--position': index + 1 } as React.CSSProperties}
-              onClick={() => handleCardClick(project)}
+              onClick={() => handleCardClick(project, index)}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
