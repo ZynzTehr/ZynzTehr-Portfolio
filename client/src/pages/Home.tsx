@@ -141,6 +141,9 @@ const Home: React.FC = () => {
       {/* Top Profile HUD */}
       <DevHud projectCount={projects.length} />
 
+      {/* Interactive Scroll Down & Back to Top Widget with React SVG */}
+      <ScrollWidget onBackToTop={handleBackToTop} onScrollDown={handleScrollDown} />
+
       {/* 3D Orbiting Earth & Interactive Carousel Showcase */}
       <div className="w-100 my-2">
         <ProjectCarousel
@@ -304,9 +307,6 @@ const Home: React.FC = () => {
         isOpen={!!selectedProject}
         onClose={() => setSelectedProject(null)}
       />
-
-      {/* Floating Interactive Scroll Down & Back to Top Widget with React SVG */}
-      <ScrollWidget onBackToTop={handleBackToTop} onScrollDown={handleScrollDown} />
 
     </section>
   );

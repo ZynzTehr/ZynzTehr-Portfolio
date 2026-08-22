@@ -890,12 +890,29 @@ body {
 
 @media screen and (max-width: 768px) {
   .cyber-scroll-widget {
-    bottom: 1.2rem;
-    right: 1.2rem;
-    padding: 0.45rem 0.75rem;
+    position: sticky;
+    top: 0.75rem;
+    align-self: flex-end;
+    margin: -0.5rem 0.25rem 0.5rem auto;
+    bottom: auto;
+    right: auto;
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 216, 255, 0.25);
   }
+
+  .scroll-widget-atom-wrap {
+    width: 24px;
+    height: 24px;
+  }
+
+  .scroll-widget-react-svg {
+    width: 22px;
+    height: 22px;
+  }
+
   .scroll-widget-text {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
   }
 }
 
