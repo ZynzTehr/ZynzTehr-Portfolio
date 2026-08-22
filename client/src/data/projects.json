@@ -1,9 +1,9 @@
 [
   {
-    "id": "capstone-project",
-    "name": "Capstone Project",
-    "rawName": "capstone-project",
-    "description": "A vanilla JavaScript web app featuring a Mad Libs word game with animated text, user authentication, a personalized home page with live chat, avatar-based profiles,  and birthday greetings, a shopping cart with checkout and confirmation codes — built with HTML, CSS, Bootstrap, and jQuery.",
+    "id": "loancalculator",
+    "name": "Loan Calculator",
+    "rawName": "loanCalculator",
+    "description": "A loan calculator and financial literacy web app built with JavaScript, HTML5, and CSS3. Calculate payment breakdowns, interest costs, and payoff savings across 5 financing types. Features real-time synchronized input sliders, dynamic amortization schedule generation, LocalStorage state persistence, and printable PDF analysis reports.",
     "category": "Web Application",
     "language": "JavaScript",
     "topics": [
@@ -13,11 +13,11 @@
     ],
     "stars": 0,
     "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/capstone-project",
-    "liveUrl": "https://zynztehr.github.io/capstone-project/",
+    "githubUrl": "https://github.com/ZynzTehr/loanCalculator",
+    "liveUrl": "https://zynztehr.github.io/loanCalculator/",
     "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/capstone-project/main/preview.gif",
-    "updatedAt": "2026-08-22T17:48:13Z"
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/loanCalculator/main/preview.gif",
+    "updatedAt": "2026-08-22T22:21:36Z"
   },
   {
     "id": "zynztehr-profile",
@@ -37,7 +37,27 @@
     "liveUrl": "https://zynztehr.github.io/ZynzTehr-Profile/",
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/ZynzTehr-Profile/main/preview.gif",
-    "updatedAt": "2026-08-22T17:00:43Z"
+    "updatedAt": "2026-08-22T21:28:49Z"
+  },
+  {
+    "id": "capstone-project",
+    "name": "Capstone Project",
+    "rawName": "capstone-project",
+    "description": "A vanilla JavaScript web app featuring a Mad Libs word game with animated text, user authentication, a personalized home page with live chat, avatar-based profiles,  and birthday greetings, a shopping cart with checkout and confirmation codes — built with HTML, CSS, Bootstrap, and jQuery.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/capstone-project",
+    "liveUrl": "https://zynztehr.github.io/capstone-project/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/capstone-project/main/preview.gif",
+    "updatedAt": "2026-08-22T17:48:13Z"
   },
   {
     "id": "tic-tac-toe-withai",
@@ -138,26 +158,6 @@
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/school-directory/main/preview.gif",
     "updatedAt": "2026-08-19T19:43:01Z"
-  },
-  {
-    "id": "loancalculator",
-    "name": "Loan Calculator",
-    "rawName": "loanCalculator",
-    "description": "A loan calculator and financial literacy web app built with JavaScript, HTML5, and CSS3. Calculate payment breakdowns, interest costs, and payoff savings across 5 financing types. Features real-time synchronized input sliders, dynamic amortization schedule generation, LocalStorage state persistence, and printable PDF analysis reports.",
-    "category": "Web Application",
-    "language": "JavaScript",
-    "topics": [
-      "JavaScript",
-      "Vite",
-      "React"
-    ],
-    "stars": 0,
-    "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/loanCalculator",
-    "liveUrl": "https://zynztehr.github.io/loanCalculator/",
-    "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/loanCalculator/main/preview.gif",
-    "updatedAt": "2026-07-29T14:56:05Z"
   },
   {
     "id": "auralist-web",

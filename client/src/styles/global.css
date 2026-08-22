@@ -916,44 +916,140 @@ body {
   backdrop-filter: blur(10px);
 }
 
-/* Mobile Responsiveness */
+/* Dynamic Laptop & Tablet Scaling (769px to 1199px) */
+@media screen and (min-width: 769px) and (max-width: 1199px) {
+  .banner {
+    height: clamp(500px, 48vw + 80px, 640px);
+  }
+
+  .banner .slider {
+    top: calc(25% - 95px);
+  }
+
+  .banner .slider .item {
+    transform:
+      rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+      translateZ(clamp(280px, 33vw, 410px));
+  }
+
+  .banner .slider .item:hover {
+    transform:
+      rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+      translateZ(clamp(300px, 35vw, 440px)) scale(1.1);
+  }
+
+  .earth-container {
+    transform: translate(-50%, -50%) scale(clamp(0.68, calc(0.68 + (100vw - 769px) / (1200 - 769) * 0.32), 1));
+  }
+}
+
+/* Mobile Responsiveness: Horizontal Snap Scroll with Touch Swipe (<= 768px) */
 @media screen and (max-width: 768px) {
   .banner {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
     height: auto;
-    padding: 1.5rem 0;
+    min-height: auto;
+    padding: 0.5rem 0 0.25rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+  }
+
+  /* Centered Mini Earth Globe above the swipe stream on Mobile */
+  .earth-container {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: clamp(190px, 48vw, 230px) !important;
+    height: clamp(190px, 48vw, 230px) !important;
+    margin: 0 auto 0.75rem auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1;
+    pointer-events: auto;
+  }
+
+  .earth-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    display: block;
   }
 
   .banner .slider {
     position: relative;
+    top: auto;
+    left: auto;
     width: 100%;
     height: auto;
     inset: auto;
     transform: none !important;
     animation: none !important;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
     gap: 16px;
-    padding: 0 1rem;
+    padding: 0.5rem 1.25rem 1.25rem 1.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 200, 0.4) rgba(255, 255, 255, 0.05);
+  }
+
+  .banner .slider::-webkit-scrollbar {
+    height: 5px;
+  }
+
+  .banner .slider::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+    margin: 0 1.25rem;
+  }
+
+  .banner .slider::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, var(--accent-color), #00a8ff);
+    border-radius: 4px;
   }
 
   .banner .slider .item {
     position: relative;
     inset: auto;
     transform: none !important;
-    width: 150px;
-    height: 190px;
+    flex: 0 0 200px;
+    width: 200px;
+    height: 240px;
+    scroll-snap-align: center;
+    scroll-snap-stop: normal;
   }
 
-  .banner .slider .item:hover {
+  .banner .slider .item .project-tile-3d {
+    width: 100% !important;
+    height: 100% !important;
+    animation: none !important;
+    opacity: 1 !important;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .banner .slider .item:hover,
+  .banner .slider .item:active {
     transform: translateY(-4px) !important;
   }
 
-  .earth-container {
-    display: none; /* Hide center globe on mobile to ensure clean grid */
+  .carousel-controls {
+    display: flex !important;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
-  .carousel-controls {
-    display: none !important;
+  .carousel-controls .btn-play-pause {
+    display: none; /* Hide 3D orbit button on mobile */
   }
 }

@@ -27,11 +27,13 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const angleRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
   const stepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
 
   const displayProjects = projects.slice(0, 10); // Optimal quantity for the 3D cylinder
   const quantity = displayProjects.length || 1;
 
-  // Continuous 60fps auto-orbit loop
+  // Continuous 60fps auto-orbit loop (active on larger screens)
   useEffect(() => {
     let lastTimestamp = performance.now();
 
@@ -60,9 +62,22 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     };
   }, [isRotating, isHovered, isStepping]);
 
-  // Handle manual rotation stepping (Rotate Left / Rotate Right)
+  // Reset horizontal slider scroll position when category changes on mobile
+  useEffect(() => {
+    if (sliderRef.current && window.innerWidth <= 768) {
+      sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  }, [activeCategory]);
+
+  // Handle manual rotation stepping (or horizontal scroll on mobile)
   const handleRotate = useCallback(
     (direction: 'left' | 'right') => {
+      if (sliderRef.current && window.innerWidth <= 768) {
+        const scrollAmount = direction === 'left' ? -216 : 216;
+        sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        return;
+      }
+
       setIsRotating(false);
       setIsStepping(true);
 
@@ -84,6 +99,34 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     setIsRotating((prev) => !prev);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      isDraggingRef.current = false;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current || e.touches.length === 0) return;
+    const deltaX = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
+    const deltaY = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
+    if (deltaX > 8 || deltaY > 8) {
+      isDraggingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => {
+      isDraggingRef.current = false;
+      touchStartPos.current = null;
+    }, 60);
+  };
+
+  const handleCardClick = (project: Project) => {
+    if (isDraggingRef.current) return;
+    onSelectProject(project);
+  };
+
   return (
     <div className="project-showcase-wrapper w-100 d-flex flex-column align-items-center">
       
@@ -95,10 +138,13 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         {/* Three.js 3D Earth in the Center */}
         <Earth3D reverse={true} size={650} />
 
-        {/* 3D Cylinder Slider */}
+        {/* 3D Cylinder Slider / Mobile Horizontal Snap Slider */}
         <div
           ref={sliderRef}
           className="slider"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           style={{
             transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
             transition: isStepping ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
@@ -109,7 +155,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               key={project.id}
               className="item"
               style={{ '--position': index + 1 } as React.CSSProperties}
-              onClick={() => onSelectProject(project)}
+              onClick={() => handleCardClick(project)}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
