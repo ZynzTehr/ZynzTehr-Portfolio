@@ -237,7 +237,7 @@ const Home: React.FC = () => {
                       </div>
 
                       <p
-                        className="text-secondary small mb-3"
+                        className="text-secondary small mb-3 project-card-desc"
                         style={{
                           display: '-webkit-box',
                           WebkitLineClamp: 3,

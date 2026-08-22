@@ -1110,11 +1110,9 @@ body {
     line-height: 1.25 !important;
   }
 
+  .project-grid-card .project-card-desc,
   .project-grid-card p {
-    font-size: 0.66rem !important;
-    -webkit-line-clamp: 2 !important;
-    margin-bottom: 0.35rem !important;
-    line-height: 1.35 !important;
+    display: none !important;
   }
 
   .project-grid-card .tech-pill-small {
