@@ -17,7 +17,7 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
           <div className="text-center text-md-start">
             <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
               <h1 className="h3 m-0 text-gradient font-orbitron">
-                Jorge Bucio
+                ZynzTehr
               </h1>
               <span className="badge-status-pulse">
                 <span className="status-dot"></span>
