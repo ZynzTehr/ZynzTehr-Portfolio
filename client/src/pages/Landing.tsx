@@ -23,68 +23,62 @@ const Landing: React.FC = () => {
       tl.to('.char-p1', {
         yPercent: 0,
         opacity: 1,
-        stagger: 0.045,
-        duration: 0.7,
-        delay: 0.25,
+        stagger: 0.055,
+        duration: 0.85,
+        delay: 0.35,
       });
 
-      // Pause to let user read (1.4s)
-      tl.to({}, { duration: 1.4 });
+      // Reading pause (1.8s)
+      tl.to({}, { duration: 1.8 });
 
-      // 2. Transition 1: "Zynz Tehr" slides UP out while "Full-Stack & Web3 Developer" slides in
-      tl.to(
-        '.char-p1',
-        {
-          yPercent: -115,
-          opacity: 0,
-          stagger: 0.02,
-          duration: 0.5,
-          ease: 'power3.in',
-        },
-        'p1-to-p2'
-      );
+      // 2. Transition 1: "Zynz Tehr" slides UP out of screen
+      tl.to('.char-p1', {
+        yPercent: -115,
+        opacity: 0,
+        stagger: 0.03,
+        duration: 0.65,
+        ease: 'power3.in',
+      });
 
+      // 0.25s separation gap, then "Full-Stack & Web3 Developer" slides in
       tl.to(
         '.char-p2',
         {
           yPercent: 0,
           opacity: 1,
-          stagger: 0.02,
-          duration: 0.6,
+          stagger: 0.038,
+          duration: 0.85,
           ease: 'power3.out',
         },
-        'p1-to-p2+=0.12'
+        '+=0.25'
       );
 
-      // Pause to let user read (1.5s)
-      tl.to({}, { duration: 1.5 });
+      // Reading pause (2.0s)
+      tl.to({}, { duration: 2.0 });
 
-      // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out while "Explore My World" slides in
-      tl.to(
-        '.char-p2',
-        {
-          yPercent: -115,
-          opacity: 0,
-          stagger: 0.016,
-          duration: 0.5,
-          ease: 'power3.in',
-        },
-        'p2-to-p3'
-      );
+      // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out of screen
+      tl.to('.char-p2', {
+        yPercent: -115,
+        opacity: 0,
+        stagger: 0.022,
+        duration: 0.65,
+        ease: 'power3.in',
+      });
 
+      // 0.25s separation gap, then "Explore My World" slides in
       tl.to(
         '.char-p3',
         {
           yPercent: 0,
           opacity: 1,
-          stagger: 0.035,
-          duration: 0.7,
+          stagger: 0.055,
+          duration: 0.9,
           ease: 'power3.out',
         },
-        'p2-to-p3+=0.12'
+        '+=0.25'
       );
 
-      // Final stop: Reveal CTA button
+      // Final stop: Reveal CTA button smoothly
       tl.call(() => {
         setShowButton(true);
       });
