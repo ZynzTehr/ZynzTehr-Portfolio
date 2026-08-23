@@ -9,11 +9,11 @@ const Landing: React.FC = () => {
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 0.25s timer to remove display: none class after mount
+  // 0.5s timer to remove display: none class after mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 250);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
