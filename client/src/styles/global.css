@@ -770,6 +770,21 @@ body {
   }
 }
 
+/* Landing Page Animated Letters */
+.char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: 1.15;
+}
+
+.char-letter {
+  display: inline-block;
+  will-change: transform, opacity;
+  transform: translate3d(0, 115%, 0);
+  opacity: 0;
+}
+
 /* ==========================================================================
    Cyber Scroll Widget with React SVG (Dynamic Traveling Orbit)
    ========================================================================== */
