@@ -9,16 +9,16 @@ const Landing: React.FC = () => {
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 0.5s timer to remove display: none class after mount
+  // Mount timer to flip isReady to true
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 500);
+    }, 900);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Run GSAP letter animations once display: none is removed
+  // Run GSAP letter animations once isReady is active
   useEffect(() => {
     if (!isReady) return;
 
@@ -190,11 +190,13 @@ const Landing: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            opacity: !isReady ? 0 : 1,
+            transition: 'opacity 0.2s ease',
           }}
         >
           {/* Phrase 1: Zynz Tehr */}
           <h1
-            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(2.4rem, 7.5vw, 5.5rem)',
               position: 'absolute',
@@ -205,6 +207,7 @@ const Landing: React.FC = () => {
               letterSpacing: '4px',
               margin: 0,
               pointerEvents: 'none',
+              opacity: !isReady ? 0 : 1,
             }}
           >
             {renderAnimatedLetters('Zynz Tehr', 'char-p1', {
@@ -215,7 +218,7 @@ const Landing: React.FC = () => {
 
           {/* Phrase 2: Full-Stack & Web3 Developer */}
           <h1
-            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(1.4rem, 4.8vw, 3.6rem)',
               position: 'absolute',
@@ -226,6 +229,7 @@ const Landing: React.FC = () => {
               letterSpacing: '2px',
               margin: 0,
               pointerEvents: 'none',
+              opacity: !isReady ? 0 : 1,
             }}
           >
             {renderAnimatedLetters('Full-Stack & Web3 Developer', 'char-p2', {
@@ -236,7 +240,7 @@ const Landing: React.FC = () => {
 
           {/* Phrase 3: Explore My World */}
           <h1
-            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(1.9rem, 6vw, 4.5rem)',
               position: 'absolute',
@@ -247,6 +251,7 @@ const Landing: React.FC = () => {
               letterSpacing: '3px',
               margin: 0,
               pointerEvents: 'none',
+              opacity: !isReady ? 0 : 1,
             }}
           >
             {renderAnimatedLetters('Explore My World', 'char-p3', {
