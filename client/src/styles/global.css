@@ -782,6 +782,8 @@ body {
 .char-letter {
   display: inline-block;
   will-change: transform, opacity;
+  opacity: 0;
+  transform: translateY(115%);
 }
 
 /* ==========================================================================
