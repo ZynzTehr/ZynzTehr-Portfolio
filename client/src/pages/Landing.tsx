@@ -5,13 +5,26 @@ import gsap from 'gsap';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [isReady, setIsReady] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 0.25s timer to remove display: none class after mount
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Run GSAP letter animations once display: none is removed
+  useEffect(() => {
+    if (!isReady) return;
+
     const ctx = gsap.context(() => {
-      // Set all character groups to full opacity and positioned below their masks
-      gsap.set('.char-letter', { yPercent: 115, opacity: 1 });
+      // Initialize all character groups below their masks
+      gsap.set('.char-letter', { yPercent: 115, opacity: 0 });
 
       const tl = gsap.timeline({
         defaults: {
@@ -22,9 +35,10 @@ const Landing: React.FC = () => {
       // 1. Initial entrance: "Zynz Tehr" letters slide up into place
       tl.to('.char-p1', {
         yPercent: 0,
+        opacity: 1,
         stagger: 0.055,
         duration: 0.85,
-        delay: 0.35,
+        delay: 0.1,
       });
 
       // Reading pause (1.8s)
@@ -33,6 +47,7 @@ const Landing: React.FC = () => {
       // 2. Transition 1: "Zynz Tehr" slides UP out of screen
       tl.to('.char-p1', {
         yPercent: -115,
+        opacity: 0,
         stagger: 0.03,
         duration: 0.65,
         ease: 'power3.in',
@@ -43,6 +58,7 @@ const Landing: React.FC = () => {
         '.char-p2',
         {
           yPercent: 0,
+          opacity: 1,
           stagger: 0.038,
           duration: 0.85,
           ease: 'power3.out',
@@ -56,6 +72,7 @@ const Landing: React.FC = () => {
       // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out of screen
       tl.to('.char-p2', {
         yPercent: -115,
+        opacity: 0,
         stagger: 0.022,
         duration: 0.65,
         ease: 'power3.in',
@@ -66,6 +83,7 @@ const Landing: React.FC = () => {
         '.char-p3',
         {
           yPercent: 0,
+          opacity: 1,
           stagger: 0.055,
           duration: 0.9,
           ease: 'power3.out',
@@ -80,7 +98,7 @@ const Landing: React.FC = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isReady]);
 
   // Helper to split text into words and masked animated letters with solid styling
   const renderAnimatedLetters = (text: string, phraseClass: string, colorStyle: React.CSSProperties) => {
@@ -176,7 +194,7 @@ const Landing: React.FC = () => {
         >
           {/* Phrase 1: Zynz Tehr */}
           <h1
-            className="title font-orbitron"
+            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
             style={{
               fontSize: 'clamp(2.4rem, 7.5vw, 5.5rem)',
               position: 'absolute',
@@ -197,7 +215,7 @@ const Landing: React.FC = () => {
 
           {/* Phrase 2: Full-Stack & Web3 Developer */}
           <h1
-            className="title font-orbitron"
+            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
             style={{
               fontSize: 'clamp(1.4rem, 4.8vw, 3.6rem)',
               position: 'absolute',
@@ -218,7 +236,7 @@ const Landing: React.FC = () => {
 
           {/* Phrase 3: Explore My World */}
           <h1
-            className="title font-orbitron"
+            className={`title font-orbitron ${!isReady ? 'd-none' : ''}`}
             style={{
               fontSize: 'clamp(1.9rem, 6vw, 4.5rem)',
               position: 'absolute',
