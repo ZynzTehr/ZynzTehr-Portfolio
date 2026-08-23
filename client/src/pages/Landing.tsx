@@ -13,7 +13,7 @@ const Landing: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 900);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
