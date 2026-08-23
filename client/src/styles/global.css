@@ -774,15 +774,14 @@ body {
 .char-mask {
   display: inline-block;
   overflow: hidden;
-  vertical-align: top;
+  vertical-align: bottom;
   line-height: 1.15;
+  padding: 0 1px;
 }
 
 .char-letter {
   display: inline-block;
   will-change: transform, opacity;
-  transform: translate3d(0, 115%, 0);
-  opacity: 0;
 }
 
 /* ==========================================================================

@@ -10,8 +10,8 @@ const Landing: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Ensure all letter elements start hidden below their overflow masks
-      gsap.set('.char-letter', { y: '115%', opacity: 0 });
+      // Initialize all character groups below their masks
+      gsap.set('.char-letter', { yPercent: 115, opacity: 0 });
 
       const tl = gsap.timeline({
         defaults: {
@@ -21,23 +21,23 @@ const Landing: React.FC = () => {
 
       // 1. Initial entrance: "Zynz Tehr" letters slide up into place
       tl.to('.char-p1', {
-        y: '0%',
+        yPercent: 0,
         opacity: 1,
-        stagger: 0.04,
-        duration: 0.65,
-        delay: 0.35,
+        stagger: 0.045,
+        duration: 0.7,
+        delay: 0.25,
       });
 
-      // Pause to let user read
+      // Pause to let user read (1.4s)
       tl.to({}, { duration: 1.4 });
 
-      // 2. Transition 1: "Zynz Tehr" slides UP out of screen while "Full-Stack & Web3 Developer" slides in
+      // 2. Transition 1: "Zynz Tehr" slides UP out while "Full-Stack & Web3 Developer" slides in
       tl.to(
         '.char-p1',
         {
-          y: '-115%',
+          yPercent: -115,
           opacity: 0,
-          stagger: 0.022,
+          stagger: 0.02,
           duration: 0.5,
           ease: 'power3.in',
         },
@@ -47,25 +47,25 @@ const Landing: React.FC = () => {
       tl.to(
         '.char-p2',
         {
-          y: '0%',
+          yPercent: 0,
           opacity: 1,
-          stagger: 0.022,
+          stagger: 0.02,
           duration: 0.6,
           ease: 'power3.out',
         },
         'p1-to-p2+=0.12'
       );
 
-      // Pause to let user read
+      // Pause to let user read (1.5s)
       tl.to({}, { duration: 1.5 });
 
-      // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out of screen while "Explore My World" slides in
+      // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out while "Explore My World" slides in
       tl.to(
         '.char-p2',
         {
-          y: '-115%',
+          yPercent: -115,
           opacity: 0,
-          stagger: 0.018,
+          stagger: 0.016,
           duration: 0.5,
           ease: 'power3.in',
         },
@@ -75,9 +75,9 @@ const Landing: React.FC = () => {
       tl.to(
         '.char-p3',
         {
-          y: '0%',
+          yPercent: 0,
           opacity: 1,
-          stagger: 0.03,
+          stagger: 0.035,
           duration: 0.7,
           ease: 'power3.out',
         },
@@ -93,8 +93,8 @@ const Landing: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  // Helper to split text into words and masked animated letters
-  const renderAnimatedLetters = (text: string, phraseClass: string) => {
+  // Helper to split text into words and masked animated letters with solid styling
+  const renderAnimatedLetters = (text: string, phraseClass: string, colorStyle: React.CSSProperties) => {
     return text.split(' ').map((word, wordIdx, wordsArr) => (
       <span
         key={wordIdx}
@@ -108,7 +108,7 @@ const Landing: React.FC = () => {
             style={{
               display: 'inline-block',
               overflow: 'hidden',
-              verticalAlign: 'top',
+              verticalAlign: 'bottom',
               lineHeight: 1.15,
             }}
           >
@@ -117,6 +117,7 @@ const Landing: React.FC = () => {
               style={{
                 display: 'inline-block',
                 willChange: 'transform, opacity',
+                ...colorStyle,
               }}
             >
               {char}
@@ -186,7 +187,7 @@ const Landing: React.FC = () => {
         >
           {/* Phrase 1: Zynz Tehr */}
           <h1
-            className="title text-gradient font-orbitron"
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(2.4rem, 7.5vw, 5.5rem)',
               position: 'absolute',
@@ -199,12 +200,15 @@ const Landing: React.FC = () => {
               pointerEvents: 'none',
             }}
           >
-            {renderAnimatedLetters('Zynz Tehr', 'char-p1')}
+            {renderAnimatedLetters('Zynz Tehr', 'char-p1', {
+              color: '#ffffff',
+              textShadow: '0 0 20px rgba(0, 216, 255, 0.45)',
+            })}
           </h1>
 
           {/* Phrase 2: Full-Stack & Web3 Developer */}
           <h1
-            className="title text-gradient font-orbitron"
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(1.4rem, 4.8vw, 3.6rem)',
               position: 'absolute',
@@ -213,17 +217,19 @@ const Landing: React.FC = () => {
               top: '50%',
               transform: 'translateY(-50%)',
               letterSpacing: '2px',
-              color: 'var(--accent-color)',
               margin: 0,
               pointerEvents: 'none',
             }}
           >
-            {renderAnimatedLetters('Full-Stack & Web3 Developer', 'char-p2')}
+            {renderAnimatedLetters('Full-Stack & Web3 Developer', 'char-p2', {
+              color: '#00ffc8',
+              textShadow: '0 0 22px rgba(0, 255, 200, 0.65)',
+            })}
           </h1>
 
           {/* Phrase 3: Explore My World */}
           <h1
-            className="title text-gradient font-orbitron"
+            className="title font-orbitron"
             style={{
               fontSize: 'clamp(1.9rem, 6vw, 4.5rem)',
               position: 'absolute',
@@ -236,7 +242,10 @@ const Landing: React.FC = () => {
               pointerEvents: 'none',
             }}
           >
-            {renderAnimatedLetters('Explore My World', 'char-p3')}
+            {renderAnimatedLetters('Explore My World', 'char-p3', {
+              color: '#ffffff',
+              textShadow: '0 0 25px rgba(0, 216, 255, 0.55)',
+            })}
           </h1>
         </div>
 
