@@ -781,8 +781,7 @@ body {
 
 .char-letter {
   display: inline-block;
-  will-change: transform, opacity;
-  opacity: 0;
+  will-change: transform;
   transform: translateY(115%);
 }
 

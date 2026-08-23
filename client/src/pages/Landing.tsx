@@ -10,8 +10,8 @@ const Landing: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Initialize all character groups below their masks
-      gsap.set('.char-letter', { yPercent: 115, opacity: 0 });
+      // Set all character groups to full opacity and positioned below their masks
+      gsap.set('.char-letter', { yPercent: 115, opacity: 1 });
 
       const tl = gsap.timeline({
         defaults: {
@@ -22,7 +22,6 @@ const Landing: React.FC = () => {
       // 1. Initial entrance: "Zynz Tehr" letters slide up into place
       tl.to('.char-p1', {
         yPercent: 0,
-        opacity: 1,
         stagger: 0.055,
         duration: 0.85,
         delay: 0.35,
@@ -34,7 +33,6 @@ const Landing: React.FC = () => {
       // 2. Transition 1: "Zynz Tehr" slides UP out of screen
       tl.to('.char-p1', {
         yPercent: -115,
-        opacity: 0,
         stagger: 0.03,
         duration: 0.65,
         ease: 'power3.in',
@@ -45,7 +43,6 @@ const Landing: React.FC = () => {
         '.char-p2',
         {
           yPercent: 0,
-          opacity: 1,
           stagger: 0.038,
           duration: 0.85,
           ease: 'power3.out',
@@ -59,7 +56,6 @@ const Landing: React.FC = () => {
       // 3. Transition 2: "Full-Stack & Web3 Developer" slides UP out of screen
       tl.to('.char-p2', {
         yPercent: -115,
-        opacity: 0,
         stagger: 0.022,
         duration: 0.65,
         ease: 'power3.in',
@@ -70,7 +66,6 @@ const Landing: React.FC = () => {
         '.char-p3',
         {
           yPercent: 0,
-          opacity: 1,
           stagger: 0.055,
           duration: 0.9,
           ease: 'power3.out',
