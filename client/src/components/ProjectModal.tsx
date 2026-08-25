@@ -121,7 +121,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
 
         {/* Modal Footer / Action Links */}
         <div className="modal-footer d-flex justify-content-between align-items-center p-3">
-          <button className="btn-custom py-2 px-4" onClick={onClose} style={{ fontSize: '0.9rem' }}>
+          <button className="btn-custom btn-modal-close py-2 px-4" onClick={onClose} style={{ fontSize: '0.9rem' }}>
             Close
           </button>
 
