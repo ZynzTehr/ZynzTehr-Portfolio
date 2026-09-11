@@ -10,9 +10,13 @@ const EXCLUDED_REPOS = ['ZynzTehr-Portfolio', 'ZynzTehr']; // Exclude portfolio 
 
 const KNOWN_HOMEPAGES = {
   'tic-tac-toe-withAi': 'https://zynztehr.github.io/tic-tac-toe-withAi/',
+  'new-age-chess': 'https://zynztehr.github.io/new-age-chess/',
+  'countdown-timer': 'https://zynztehr.github.io/countdown-timer/',
 };
 
 const TITLE_OVERRIDES = {
+  'new-age-chess': 'New Age Chess',
+  'countdown-timer': 'Countdown Timer',
   'super-quiz': 'Super Quiz',
   'soda-diner': 'Soda Diner',
   'match-maker': 'Match Maker',
@@ -95,7 +99,7 @@ async function syncRepositories() {
         category = 'Web3 & Blockchain';
       } else if (topics.includes('fullstack') || topics.includes('full-stack') || (repo.description && repo.description.toLowerCase().includes('full-stack'))) {
         category = 'Full-Stack';
-      } else if (topics.includes('3d') || topics.includes('threejs') || topics.includes('creative')) {
+      } else if (topics.includes('3d') || topics.includes('threejs') || topics.includes('creative') || repo.description?.toLowerCase().includes('3d')) {
         category = '3D & Creative UI';
       }
 

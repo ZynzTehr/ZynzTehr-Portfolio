@@ -73,6 +73,8 @@ export function formatToTitleCase(str: string): string {
 
 // Category mappings
 const CATEGORY_MAP: Record<string, Project['category']> = {
+  'new-age-chess': '3D & Creative UI',
+  'countdown-timer': '3D & Creative UI',
   'super-quiz': '3D & Creative UI',
   'soda-diner': 'Full-Stack',
   'match-maker': 'Full-Stack',

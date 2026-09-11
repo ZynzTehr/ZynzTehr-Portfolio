@@ -16,6 +16,8 @@ import BasicRpsArt from './BasicRpsArt';
 import TestimonialArt from './TestimonialArt';
 import NextChapterArt from './NextChapterArt';
 import PythonRpsArt from './PythonRpsArt';
+import NewAgeChessArt from './NewAgeChessArt';
+import CountdownTimerArt from './CountdownTimerArt';
 
 interface ProjectArtProps {
   projectId: string;
@@ -28,6 +30,14 @@ const ProjectArt: React.FC<ProjectArtProps> = ({ projectId, projectName, preview
   const id = projectId.toLowerCase().trim();
 
   switch (id) {
+    case 'new-age-chess':
+    case 'newagechess':
+      return <NewAgeChessArt />;
+
+    case 'countdown-timer':
+    case 'countdowntimer':
+      return <CountdownTimerArt />;
+
     case 'soda-diner':
       return <MongooseArt />;
 

@@ -1,5 +1,45 @@
 [
   {
+    "id": "new-age-chess",
+    "name": "New Age Chess",
+    "rawName": "new-age-chess",
+    "description": "A futuristic chess platform and AI strategy academy built with React 19 and TypeScript. Features 5 distinct neural AI personalities (2000–2450 ELO), live tactical coaching, real-time threat radar overlays, square control influence heatmaps, ECO opening detection, and a fluid, creative cyberpunk arena.",
+    "category": "Web Application",
+    "language": "TypeScript",
+    "topics": [
+      "TypeScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/new-age-chess",
+    "liveUrl": "https://zynztehr.github.io/new-age-chess/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/new-age-chess/main/preview.gif",
+    "updatedAt": "2026-09-11T17:17:52Z"
+  },
+  {
+    "id": "countdown-timer",
+    "name": "Countdown Timer",
+    "rawName": "countdown-timer",
+    "description": "A modern, mechanical 3D split-flip countdown timer web app tracking years down to seconds. Features CSS 3D folding animations, dynamic singular/plural labels, auto-collapsing units, synthesized Web Audio tick effects, interactive canvas particles, and confetti celebrations with customizable event presets and state persistence across page refreshes.",
+    "category": "3D & Creative UI",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/countdown-timer",
+    "liveUrl": "https://zynztehr.github.io/countdown-timer/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/countdown-timer/main/preview.gif",
+    "updatedAt": "2026-09-11T16:42:52Z"
+  },
+  {
     "id": "zynztehr-profile",
     "name": "ZynzTehr Profile",
     "rawName": "ZynzTehr-Profile",
@@ -17,7 +57,47 @@
     "liveUrl": "https://zynztehr.github.io/ZynzTehr-Profile/",
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/ZynzTehr-Profile/main/preview.gif",
-    "updatedAt": "2026-08-25T01:10:07Z"
+    "updatedAt": "2026-09-11T03:08:09Z"
+  },
+  {
+    "id": "super-quiz",
+    "name": "Super Quiz",
+    "rawName": "super-quiz",
+    "description": "Super Quiz is an interactive web app featuring dynamic grid animations powered by Anime.js. It offers multiple quiz categories (Math, Coding, etc.), tracks user progress across playthroughs using session storage, and allows players to add custom questions to a local storage bank.",
+    "category": "Web Application",
+    "language": "JavaScript",
+    "topics": [
+      "JavaScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/super-quiz",
+    "liveUrl": "https://zynztehr.github.io/super-quiz/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/preview.gif",
+    "updatedAt": "2026-08-25T22:07:57Z"
+  },
+  {
+    "id": "testimonial-layout",
+    "name": "Testimonial Layout",
+    "rawName": "testimonial-layout",
+    "description": "A fully responsive social proof and testimonial section built with HTML5 and CSS3 (Flexbox/Grid). Features modern styling, custom typography, and scalable layouts for mobile and desktop.",
+    "category": "Web Application",
+    "language": "CSS",
+    "topics": [
+      "CSS",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/testimonial-layout",
+    "liveUrl": "https://zynztehr.github.io/testimonial-layout/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/testimonial-layout/main/preview.gif",
+    "updatedAt": "2026-08-25T19:51:10Z"
   },
   {
     "id": "loancalculator",
@@ -118,26 +198,6 @@
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/soda-diner/main/preview.gif",
     "updatedAt": "2026-08-20T20:06:57Z"
-  },
-  {
-    "id": "super-quiz",
-    "name": "Super Quiz",
-    "rawName": "super-quiz",
-    "description": "Super Quiz is an interactive web app featuring dynamic grid animations powered by Anime.js. It offers multiple quiz categories (Math, Coding, etc.), tracks user progress across playthroughs using session storage, and allows players to add custom questions to a local storage bank.",
-    "category": "Web Application",
-    "language": "JavaScript",
-    "topics": [
-      "JavaScript",
-      "Vite",
-      "React"
-    ],
-    "stars": 0,
-    "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/super-quiz",
-    "liveUrl": "https://zynztehr.github.io/super-quiz/",
-    "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/preview.gif",
-    "updatedAt": "2026-08-20T17:53:04Z"
   },
   {
     "id": "school-directory",
@@ -278,26 +338,6 @@
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/basic-rock-paper-scissors/main/preview.gif",
     "updatedAt": "2026-03-11T17:18:03Z"
-  },
-  {
-    "id": "testimonial-layout",
-    "name": "Testimonial Layout",
-    "rawName": "testimonial-layout",
-    "description": "A fully responsive social proof and testimonial section built with HTML5 and CSS3 (Flexbox/Grid). Features modern styling, custom typography, and scalable layouts for mobile and desktop.",
-    "category": "Web Application",
-    "language": "CSS",
-    "topics": [
-      "CSS",
-      "Vite",
-      "React"
-    ],
-    "stars": 0,
-    "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/testimonial-layout",
-    "liveUrl": "https://zynztehr.github.io/testimonial-layout/",
-    "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/testimonial-layout/main/preview.gif",
-    "updatedAt": "2026-03-11T17:17:29Z"
   },
   {
     "id": "nextchapter",
