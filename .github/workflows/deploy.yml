@@ -34,6 +34,10 @@ jobs:
         working-directory: ./client
         run: node scripts/sync-repos.js
 
+      - name: Generate SVG Art for New Projects
+        working-directory: ./client
+        run: node scripts/generate-art.js
+
       - name: Build static site
         working-directory: ./client
         run: npm run build

@@ -24,7 +24,6 @@ const TITLE_OVERRIDES: Record<string, string> = {
   'super-quiz': 'Super Quiz',
   'soda-diner': 'Soda Diner',
   'match-maker': 'Match Maker',
-  'zynztehr-profile': 'ZynzTehr Profile',
   'school-directory': 'School Directory',
   'loancalculator': 'Loan Calculator',
   'auralist-web': 'Auralist Web',
@@ -78,7 +77,6 @@ const CATEGORY_MAP: Record<string, Project['category']> = {
   'super-quiz': '3D & Creative UI',
   'soda-diner': 'Full-Stack',
   'match-maker': 'Full-Stack',
-  'zynztehr-profile': '3D & Creative UI',
   'school-directory': 'Frontend',
   'loancalculator': 'Full-Stack',
   'auralist-web': 'Frontend',
@@ -103,10 +101,15 @@ export const projects: Project[] = (rawProjects as Project[]).map((p, index) => 
     mediaType: 'image',
     featured: index < 6,
   };
+}).sort((a, b) => {
+  // Sort by updatedAt descending (most recently updated first)
+  const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+  const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+  return dateB - dateA;
 });
 
 export const categories = [
-  'All',
+  'Recent',
   'Full-Stack',
   'Frontend',
   'Web3 & Blockchain',

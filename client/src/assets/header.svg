@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff41;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#00ffc8;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#00ffc8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ff41;stop-opacity:1" />
+    </linearGradient>
+    <filter id="matrixGlow">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feFlood flood-color="#00ff41" flood-opacity="0.6" result="color" />
+      <feComposite in="color" in2="blur" operator="in" result="shadow" />
+      <feMerge>
+        <feMergeNode in="shadow" />
+        <feMergeNode in="shadow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feFlood flood-color="#00ff41" flood-opacity="0.3" result="color" />
+      <feComposite in="color" in2="blur" operator="in" result="shadow" />
+      <feMerge>
+        <feMergeNode in="shadow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <!-- Subtitle reveal -->
+    <clipPath id="subReveal">
+      <rect x="0" y="120" width="0" height="80">
+        <animate attributeName="width" from="0" to="800" dur="1.2s" fill="freeze" begin="3.2s" calcMode="spline" keySplines="0.4 0 0.2 1" />
+      </rect>
+    </clipPath>
+  </defs>
+
+  <!-- Black void background -->
+  <rect width="800" height="200" fill="#0a0a0a" rx="8" />
+
+  <!-- ═══ MATRIX RAIN COLUMNS ═══ -->
+  <g font-family="'Courier New', monospace" font-size="11" fill="#00ff41" opacity="0.4">
+    <text x="30" y="-10"><animate attributeName="y" from="-20" to="220" dur="2.8s" repeatCount="indefinite" begin="0s" />ア</text>
+    <text x="30" y="-10" opacity="0.2"><animate attributeName="y" from="-40" to="200" dur="2.8s" repeatCount="indefinite" begin="0s" />7</text>
+  </g>
+  <g font-family="monospace" font-size="12" fill="#00ff41" opacity="0.3">
+    <text x="70" y="-10"><animate attributeName="y" from="-30" to="210" dur="3.4s" repeatCount="indefinite" begin="0.4s" />カ</text>
+    <text x="70" y="-10" opacity="0.15"><animate attributeName="y" from="-60" to="180" dur="3.4s" repeatCount="indefinite" begin="0.4s" />0</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.35">
+    <text x="110" y="-10"><animate attributeName="y" from="-15" to="215" dur="2.2s" repeatCount="indefinite" begin="1.1s" />サ</text>
+    <text x="110" y="-10" opacity="0.2"><animate attributeName="y" from="-45" to="185" dur="2.2s" repeatCount="indefinite" begin="1.1s" />1</text>
+  </g>
+  <g font-family="monospace" font-size="11" fill="#00ff41" opacity="0.25">
+    <text x="150" y="-10"><animate attributeName="y" from="-20" to="220" dur="3.8s" repeatCount="indefinite" begin="0.7s" />タ</text>
+    <text x="150" y="-10" opacity="0.15"><animate attributeName="y" from="-50" to="190" dur="3.8s" repeatCount="indefinite" begin="0.7s" />3</text>
+  </g>
+  <g font-family="monospace" font-size="12" fill="#00ff41" opacity="0.3">
+    <text x="190" y="-10"><animate attributeName="y" from="-10" to="220" dur="2.5s" repeatCount="indefinite" begin="0.2s" />ナ</text>
+    <text x="190" y="-10" opacity="0.2"><animate attributeName="y" from="-40" to="190" dur="2.5s" repeatCount="indefinite" begin="0.2s" />F</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.2">
+    <text x="230" y="-10"><animate attributeName="y" from="-25" to="215" dur="4.1s" repeatCount="indefinite" begin="1.5s" />ハ</text>
+    <text x="230" y="-10" opacity="0.15"><animate attributeName="y" from="-55" to="185" dur="4.1s" repeatCount="indefinite" begin="1.5s" />9</text>
+  </g>
+  <g font-family="monospace" font-size="11" fill="#00ff41" opacity="0.35">
+    <text x="270" y="-10"><animate attributeName="y" from="-5" to="225" dur="2.9s" repeatCount="indefinite" begin="0.9s" />マ</text>
+    <text x="270" y="-10" opacity="0.2"><animate attributeName="y" from="-35" to="195" dur="2.9s" repeatCount="indefinite" begin="0.9s" />B</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.15">
+    <text x="320" y="-10"><animate attributeName="y" from="-20" to="220" dur="3.6s" repeatCount="indefinite" begin="1.3s" />ヤ</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.15">
+    <text x="480" y="-10"><animate attributeName="y" from="-15" to="220" dur="3.2s" repeatCount="indefinite" begin="0.6s" />ラ</text>
+  </g>
+  <g font-family="monospace" font-size="12" fill="#00ff41" opacity="0.3">
+    <text x="530" y="-10"><animate attributeName="y" from="-30" to="210" dur="2.6s" repeatCount="indefinite" begin="0.3s" />ワ</text>
+    <text x="530" y="-10" opacity="0.2"><animate attributeName="y" from="-60" to="180" dur="2.6s" repeatCount="indefinite" begin="0.3s" />4</text>
+  </g>
+  <g font-family="monospace" font-size="11" fill="#00ff41" opacity="0.25">
+    <text x="570" y="-10"><animate attributeName="y" from="-10" to="220" dur="3.5s" repeatCount="indefinite" begin="1.0s" />キ</text>
+    <text x="570" y="-10" opacity="0.15"><animate attributeName="y" from="-40" to="190" dur="3.5s" repeatCount="indefinite" begin="1.0s" />D</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.35">
+    <text x="610" y="-10"><animate attributeName="y" from="-20" to="220" dur="2.3s" repeatCount="indefinite" begin="1.8s" />シ</text>
+    <text x="610" y="-10" opacity="0.2"><animate attributeName="y" from="-50" to="190" dur="2.3s" repeatCount="indefinite" begin="1.8s" />2</text>
+  </g>
+  <g font-family="monospace" font-size="12" fill="#00ff41" opacity="0.3">
+    <text x="650" y="-10"><animate attributeName="y" from="-25" to="215" dur="3.1s" repeatCount="indefinite" begin="0.5s" />チ</text>
+    <text x="650" y="-10" opacity="0.15"><animate attributeName="y" from="-55" to="185" dur="3.1s" repeatCount="indefinite" begin="0.5s" />E</text>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#00ff41" opacity="0.2">
+    <text x="700" y="-10"><animate attributeName="y" from="-15" to="215" dur="3.9s" repeatCount="indefinite" begin="1.2s" />ニ</text>
+    <text x="700" y="-10" opacity="0.15"><animate attributeName="y" from="-45" to="185" dur="3.9s" repeatCount="indefinite" begin="1.2s" />8</text>
+  </g>
+  <g font-family="monospace" font-size="11" fill="#00ff41" opacity="0.3">
+    <text x="750" y="-10"><animate attributeName="y" from="-10" to="220" dur="2.7s" repeatCount="indefinite" begin="0.1s" />ヒ</text>
+    <text x="750" y="-10" opacity="0.2"><animate attributeName="y" from="-40" to="190" dur="2.7s" repeatCount="indefinite" begin="0.1s" />A</text>
+  </g>
+
+  <!-- ═══ TITLE: Each letter falls from above and locks into place ═══ -->
+  <!-- "J o r g e   B u c i o" — 10 letters, centered at y=95 -->
+  <!-- Each letter starts with a random katakana that morphs into the real letter -->
+
+  <!-- Z -->
+  <g filter="url(#matrixGlow)">
+    <text x="265" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-60" to="95" dur="0.5s" fill="freeze" begin="1.2s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.2s" />
+      Z
+    </text>
+  </g>
+  <!-- y -->
+  <g filter="url(#matrixGlow)">
+    <text x="295" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-90" to="95" dur="0.55s" fill="freeze" begin="1.4s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.4s" />
+      y
+    </text>
+  </g>
+  <!-- n -->
+  <g filter="url(#matrixGlow)">
+    <text x="325" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-40" to="95" dur="0.45s" fill="freeze" begin="1.55s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.55s" />
+      n
+    </text>
+  </g>
+  <!-- z -->
+  <g filter="url(#matrixGlow)">
+    <text x="355" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-75" to="95" dur="0.5s" fill="freeze" begin="1.7s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.7s" />
+      z
+    </text>
+  </g>
+  <!-- T -->
+  <g filter="url(#matrixGlow)">
+    <text x="415" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-80" to="95" dur="0.52s" fill="freeze" begin="2.0s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="2.0s" />
+      T
+    </text>
+  </g>
+  <!-- e -->
+  <g filter="url(#matrixGlow)">
+    <text x="445" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-55" to="95" dur="0.48s" fill="freeze" begin="2.15s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="2.15s" />
+      e
+    </text>
+  </g>
+  <!-- h -->
+  <g filter="url(#matrixGlow)">
+    <text x="475" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-45" to="95" dur="0.46s" fill="freeze" begin="2.3s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="2.3s" />
+      h
+    </text>
+  </g>
+  <!-- r -->
+  <g filter="url(#matrixGlow)">
+    <text x="505" y="-30" font-family="'Courier New', monospace" font-size="48" font-weight="700" fill="url(#titleGrad)" opacity="0" letter-spacing="4">
+      <animate attributeName="y" from="-70" to="95" dur="0.5s" fill="freeze" begin="2.45s" calcMode="spline" keySplines="0 0 0.2 1" />
+      <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="2.45s" />
+      r
+    </text>
+  </g>
+
+  <!-- ═══ SUBTITLE ═══ -->
+  <g clip-path="url(#subReveal)">
+    <text x="400" y="140" text-anchor="middle" font-family="'Courier New', monospace" font-size="12" fill="#00ff41" filter="url(#softGlow)" letter-spacing="6" opacity="0.7">
+      3D INTERACTIVE DEVELOPER PORTFOLIO
+    </text>
+  </g>
+
+  <!-- Horizontal scan lines -->
+  <line x1="0" y1="60" x2="800" y2="60" stroke="#00ff41" stroke-width="0.3" opacity="0.06" />
+  <line x1="0" y1="110" x2="800" y2="110" stroke="#00ff41" stroke-width="0.3" opacity="0.06" />
+  <line x1="0" y1="155" x2="800" y2="155" stroke="#00ff41" stroke-width="0.3" opacity="0.06" />
+
+  <!-- Glowing divider under title -->
+  <line x1="255" y1="108" x2="540" y2="108" stroke="#00ff41" stroke-width="1" opacity="0">
+    <animate attributeName="opacity" from="0" to="0.4" dur="0.5s" fill="freeze" begin="2.8s" />
+  </line>
+
+  <!-- Corner brackets -->
+  <g stroke="#00ff41" stroke-width="1" fill="none" opacity="0.2">
+    <path d="M 15,15 L 15,30 M 15,15 L 30,15" />
+    <path d="M 785,15 L 785,30 M 785,15 L 770,15" />
+    <path d="M 15,185 L 15,170 M 15,185 L 30,185" />
+    <path d="M 785,185 L 785,170 M 785,185 L 770,185" />
+  </g>
+
+  <!-- Centered status bar -->
+  <text x="400" y="185" text-anchor="middle" font-family="monospace" font-size="8" fill="#00ff41" opacity="0">
+    <animate attributeName="opacity" from="0" to="0.3" dur="0.3s" fill="freeze" begin="3.5s" />
+    SYS://PORTFOLIO.INIT &gt; STATUS: ONLINE &gt; REPOS: 20 &gt; BUILD: PASSING
+  </text>
+</svg>

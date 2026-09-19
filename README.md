@@ -1,113 +1,200 @@
-<div align="center">
-
-# <img src="./client/src/assets/react.svg" width="20" height="20" valign="middle" alt="React" /> Jorge Bucio | 3D Interactive Portfolio <img src="./client/src/assets/react.svg" width="20" height="20" valign="middle" alt="React" />
+<p align="center">
+  <img src="./client/src/assets/header.svg" alt="Jorge Bucio — 3D Interactive Developer Portfolio" width="800" />
+</p>
 
 <p align="center">
-  <b>A state-of-the-art, 3D cybernetic developer portfolio showcasing Full-Stack, Web3, Creative UI, and Software Architecture engineering.</b>
+  Cyberpunk glassmorphism · Three.js Earth · Auto-synced from GitHub · 20+ live projects
 </p>
 
 <p align="center">
   <a href="https://zynztehr.github.io/ZynzTehr-Portfolio/">
-    <img src="https://img.shields.io/badge/Live_Demo-Explore_3D_Portfolio-00ffc8?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Portfolio" />
+    <img src="https://img.shields.io/badge/Live_Demo-Explore_Portfolio-00ffc8?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Demo" />
   </a>
   <a href="https://github.com/ZynzTehr">
-    <img src="https://img.shields.io/badge/GitHub-@ZynzTehr-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Profile" />
+    <img src="https://img.shields.io/badge/GitHub-@ZynzTehr-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
   </a>
-  <a href="https://zynz-tehr-profile.vercel.app">
-    <img src="https://img.shields.io/badge/Profile_Hub-Interactive_Themes-7950f2?style=for-the-badge&logo=vercel&logoColor=white" alt="Profile Hub" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx">
+    <img src="https://img.shields.io/badge/VS_Code_FX-Extension-7b2ff7?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code FX" />
   </a>
 </p>
 
 ---
 
-</div>
+## What You Get
 
-## Key Features
+> **A cinematic developer portfolio** that auto-discovers your GitHub repos, generates themed SVG art, and presents everything in a 3D orbiting showcase — all running on React 19 + Three.js with zero backend.
 
-- **Central Three.js Atmospheric 3D Earth:** High-performance procedural globe with high-resolution planetary textures, night city lights illumination, atmospheric Fresnel shader glow, and mouse-parallax interaction.
-- **3D Orbiting Cylinder Carousel:** 3D perspective cylinder revolving carousel showcasing looping Matrix Digital Rain with instant smooth cross-fade to bespoke project vector SVG artwork on hover.
-- **Click-to-Reveal Repository Archive:** Interactive locked archive section that initializes when clicking the search bar, with GSAP stagger animations for the first three cards and dynamic viewport `ScrollTrigger.batch` transitions for remaining modules.
-- **17 Bespoke Handcrafted SVG Project Artworks:** Tailored vector architectural diagrams, interactive UI mockups, and schematic badges for every repository.
-- **Scroll-Velocity Responsive React Widget:** Physics-driven floating scroll widget utilizing `react.svg` that dynamically accelerates its rotational spin based on scroll speed and triggers a reverse card stagger upon clicking **Back to Top**.
-- **Floating Notched Search Bar:** Cybernetic outlined input with animated floating label that dynamically breaks the top border line on focus/typing.
-- **Automated GitHub Repo Sync:** Integrated Node.js engine and GitHub Actions workflow (`sync-repos.js`) that automatically queries GitHub's API at build time to discover and generate cards for newly published repositories.
-- **Project Inspector Modals:** In-depth project modals featuring bespoke SVG art, technical architecture descriptions, topic tags, and direct links to live demos and GitHub repositories.
-- **Cyberpunk Glassmorphism Aesthetics:** Neon cyan (`#00ffc8`), electric violet (`#7950f2`), and emerald (`#00ff88`) glowing accents paired with `Orbitron`, `Space Grotesk`, and `Outfit` typography.
-- **100% Static & Serverless:** Zero backend overhead, optimized for ultra-fast, permanent hosting on **GitHub Pages**.
+<table>
+<tr>
+<td width="50%">
+
+### 3D Earth Globe
+High-res procedural planet with night city lights, atmospheric Fresnel glow, and mouse-parallax interaction
+
+### Orbiting Cylinder Carousel
+3D perspective carousel with Matrix Digital Rain → bespoke SVG artwork cross-fade on hover
+
+### Click-to-Reveal Archive
+Locked archive that initializes on search focus with GSAP stagger + ScrollTrigger batch animations
+
+### 20 Bespoke SVG Artworks
+18 hand-crafted + 2 auto-generated vector artworks — one for every project
+
+### Automated SVG Art Generator
+Template-based procedural generator that analyzes repo descriptions to create themed artwork for new projects
+
+</td>
+<td width="50%">
+
+### Auto GitHub Sync
+Node.js + GitHub Actions pipeline that discovers new repos, generates art, and deploys — weekly cron or on push
+
+### Floating Notched Search
+Cybernetic outlined input with animated floating label that breaks the top border line on focus
+
+### DevHud + Hex Avatar
+Persistent top bar with hexagonal profile badge, live project count, and status indicators
+
+### Project Inspector Modals
+Full-detail modals with SVG art, architecture descriptions, tech tags, and direct links
+
+### Mobile-First Responsive
+Horizontal snap-scroll carousel on mobile, touch swipe, and compact archive grid
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## Tech Stack
 
-<p align="left">
+<p align="center">
   <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript_5-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js" />
   <img src="https://img.shields.io/badge/GSAP_3-88CE02?style=for-the-badge&logo=greensock&logoColor=white" alt="GSAP 3" />
   <img src="https://img.shields.io/badge/Vite_7-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
-  <img src="https://img.shields.io/badge/Anime.js-232121?style=for-the-badge&logo=anime.js&logoColor=white" alt="Anime.js" />
   <img src="https://img.shields.io/badge/Bootstrap_5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap" />
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
+  <img src="https://img.shields.io/badge/GitHub_Pages-222222?style=for-the-badge&logo=githubpages&logoColor=white" alt="GitHub Pages" />
 </p>
 
 ---
 
-## Getting Started (Local Development)
+## Architecture
 
-### 1. Clone the Repository
+```
+ZynzTehr-Portfolio/
+├── .github/workflows/
+│   └── deploy.yml              # CI/CD: sync → generate art → build → deploy
+├── client/
+│   ├── scripts/
+│   │   ├── sync-repos.js       # Auto-fetch repos from GitHub API
+│   │   └── generate-art.js     # Procedural SVG art generator
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Earth3D.tsx     # Three.js globe with textures + shaders
+│   │   │   ├── ProjectCarousel.tsx  # 3D orbiting cylinder showcase
+│   │   │   ├── DevHud.tsx      # Top HUD bar with hex avatar
+│   │   │   ├── HexAvatar.tsx   # Hexagonal profile badge
+│   │   │   ├── ScrollWidget.tsx # Physics-driven scroll indicator
+│   │   │   ├── ProjectModal.tsx # Full project detail modals
+│   │   │   ├── MatrixRain.tsx  # Matrix digital rain canvas
+│   │   │   └── project-arts/   # 18 hand-crafted + auto-generated SVGs
+│   │   ├── data/
+│   │   │   ├── projects.json   # Source of truth (auto-synced)
+│   │   │   └── projects.ts     # Category mapping, sorting, types
+│   │   ├── pages/
+│   │   │   ├── Landing.tsx     # Cinematic intro with letter animation
+│   │   │   └── Home.tsx        # Main portfolio page
+│   │   └── styles/
+│   │       ├── global.css      # Full design system (glassmorphism, animations)
+│   │       ├── global.scss     # Particle orbit animations
+│   │       └── Modal.css       # Project inspector styles
+│   └── package.json
+└── README.md
+```
+
+---
+
+## Automation Pipeline
+
+```mermaid
+graph LR
+    A[Push to main<br/>or Weekly Cron] --> B[sync-repos.js]
+    B -->|Fetches GitHub API| C[projects.json updated]
+    C --> D[generate-art.js]
+    D -->|Analyzes descriptions<br/>Picks template + colors| E[SVG components created]
+    E --> F[Vite Build]
+    F --> G[Deploy to GitHub Pages]
+    
+    style A fill:#7b2ff7,stroke:#7b2ff7,color:#fff
+    style G fill:#00ffc8,stroke:#00ffc8,color:#000
+```
+
+**Existing hand-crafted SVGs are never overwritten.** The generator only creates art for new projects that don't have one yet.
+
+---
+
+## Getting Started
+
 ```bash
+# Clone
 git clone https://github.com/ZynzTehr/ZynzTehr-Portfolio.git
 cd ZynzTehr-Portfolio/client
-```
 
-### 2. Install Dependencies
-```bash
+# Install
 npm install
-```
 
-### 3. Sync Repositories & Start Dev Server
-```bash
+# Dev server
 npm run dev
 ```
 
-Visit `http://localhost:5173/` in your browser.
+Visit `http://localhost:5173/ZynzTehr-Portfolio/` in your browser.
 
----
-
-## Building for Production
-
-To run the automated GitHub repository sync and compile the optimized production bundle:
+### Production Build
 
 ```bash
-cd client
 npm run build
+# Output: client/dist/
 ```
 
-The compiled static assets will be output to `client/dist/`.
+---
+
+## Design System
+
+| Token | Value | Usage |
+|---|---|---|
+| `--accent-color` | `#00ffc8` | Primary neon cyan — CTAs, highlights, glow |
+| `--purple-glow` | `#7950f2` | Electric violet — secondary accents |
+| `--correct` | `#00ff88` | Emerald — success states |
+| `--glass-bg` | `rgba(15,15,30,0.85)` | Card backgrounds |
+| `--glass-blur` | `blur(14px)` | Glassmorphism backdrop |
+| Font: Display | `Orbitron` | Headings, HUD elements |
+| Font: Body | `Outfit` | Body text, descriptions |
+| Font: Code | `JetBrains Mono` | Tech tags, monospace |
 
 ---
 
-## Automated Deployment to GitHub Pages
+## Author
 
-This project includes a continuous deployment workflow in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+<table>
+<tr>
+<td>
 
-Whenever you push to the `main` branch (or on a weekly automated cron trigger), GitHub Actions will:
-1. Execute `client/scripts/sync-repos.js` to fetch and format all newly published repositories.
-2. Build the optimized Vite production bundle.
-3. Deploy the static application directly to **GitHub Pages** at:
-   **`https://[your-username].github.io/[repository-name]/`**
+**Jorge Alberto Bucio** · Full-Stack & Web3 Developer
 
----
+- [GitHub @ZynzTehr](https://github.com/ZynzTehr)
+- [Live Portfolio](https://zynztehr.github.io/ZynzTehr-Portfolio/)
+- [VS Code FX Extension](https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx)
 
-## 👤 Author
-
-**Jorge Alberto Bucio**
-- **GitHub:** [@ZynzTehr](https://github.com/ZynzTehr)
-- **Profile Hub:** [ZynzTehr Profile](https://zynz-tehr-profile.vercel.app)
-- **Live Portfolio:** [3D Interactive Showcase](https://zynztehr.github.io/ZynzTehr-Portfolio/)
+</td>
+</tr>
+</table>
 
 ---
 
 <p align="center">
-  <i>Designed and developed with 💜 & ⚡ by Jorge Bucio.</i>
+  <i>Designed and engineered with 💜 & ⚡ by Jorge Bucio</i>
 </p>

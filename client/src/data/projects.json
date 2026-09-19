@@ -1,5 +1,45 @@
 [
   {
+    "id": "vscode-fx",
+    "name": "Vscode Fx",
+    "rawName": "vscode-fx",
+    "description": "Modern responsive software application engineered with clean code architecture.",
+    "category": "Web Application",
+    "language": "TypeScript",
+    "topics": [
+      "TypeScript",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/vscode-fx",
+    "liveUrl": null,
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/vscode-fx/main/preview.gif",
+    "updatedAt": "2026-09-19T19:32:51Z"
+  },
+  {
+    "id": "next-chapter-week-one",
+    "name": "Next Chapter Week One",
+    "rawName": "next-chapter-week-one",
+    "description": "Rest Easy Cleaning Co. is an accessible, zero-dependency web platform for residential and commercial cleaning. Built under strict scope constraints with vanilla HTML, CSS, and JavaScript, it features WCAG 2.1 AA accessibility controls, an interactive dual-track price estimator, and a single, focused conversion pathway.",
+    "category": "Web Application",
+    "language": "HTML",
+    "topics": [
+      "HTML",
+      "Vite",
+      "React"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/next-chapter-week-one",
+    "liveUrl": "https://zynztehr.github.io/next-chapter-week-one/",
+    "mediaType": "image",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/next-chapter-week-one/main/preview.gif",
+    "updatedAt": "2026-09-18T20:11:01Z"
+  },
+  {
     "id": "new-age-chess",
     "name": "New Age Chess",
     "rawName": "new-age-chess",
@@ -38,26 +78,6 @@
     "mediaType": "image",
     "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/countdown-timer/main/preview.gif",
     "updatedAt": "2026-09-11T16:42:52Z"
-  },
-  {
-    "id": "zynztehr-profile",
-    "name": "ZynzTehr Profile",
-    "rawName": "ZynzTehr-Profile",
-    "description": "Profile of ZynzTehr",
-    "category": "Web Application",
-    "language": "JavaScript",
-    "topics": [
-      "JavaScript",
-      "Vite",
-      "React"
-    ],
-    "stars": 0,
-    "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/ZynzTehr-Profile",
-    "liveUrl": "https://zynztehr.github.io/ZynzTehr-Profile/",
-    "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/ZynzTehr-Profile/main/preview.gif",
-    "updatedAt": "2026-09-11T03:08:09Z"
   },
   {
     "id": "super-quiz",

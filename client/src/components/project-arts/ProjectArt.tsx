@@ -1,7 +1,7 @@
 import React from 'react';
+import GeneratedArt, { generatedArtMap } from './generated';
 import MongooseArt from './MongooseArt';
 import CapstoneArt from './CapstoneArt';
-import ProfileArt from './ProfileArt';
 import MinimaxAiArt from './MinimaxAiArt';
 import MatchMakerArt from './MatchMakerArt';
 import SuperQuizArt from './SuperQuizArt';
@@ -44,8 +44,7 @@ const ProjectArt: React.FC<ProjectArtProps> = ({ projectId, projectName, preview
     case 'capstone-project':
       return <CapstoneArt />;
 
-    case 'zynztehr-profile':
-      return <ProfileArt />;
+    // zynztehr-profile removed — now in DevHud HexAvatar
 
     case 'tic-tac-toe-withai':
     case 'tic-tac-toe-with-ai':
@@ -94,6 +93,10 @@ const ProjectArt: React.FC<ProjectArtProps> = ({ projectId, projectName, preview
       return <PythonRpsArt />;
 
     default:
+      // Try auto-generated art first, then fall back to image
+      if (generatedArtMap[id]) {
+        return <GeneratedArt projectId={id} />;
+      }
       return (
         <img
           src={previewImage || mediaUrl}

@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const GITHUB_USERNAME = 'ZynzTehr';
-const EXCLUDED_REPOS = ['ZynzTehr-Portfolio', 'ZynzTehr']; // Exclude portfolio itself & profile README repo
+const EXCLUDED_REPOS = ['ZynzTehr-Portfolio', 'ZynzTehr', 'ZynzTehr-Profile']; // Exclude portfolio itself, profile README, and profile switcher
 
 const KNOWN_HOMEPAGES = {
   'tic-tac-toe-withAi': 'https://zynztehr.github.io/tic-tac-toe-withAi/',

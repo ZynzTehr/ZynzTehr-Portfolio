@@ -15,17 +15,20 @@ import { GithubIcon } from '../components/Icon';
 gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('Recent');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isGridRevealed, setIsGridRevealed] = useState<boolean>(false);
   const gridContainerRef = useRef<HTMLDivElement>(null);
+  const archiveTitleRef = useRef<HTMLDivElement>(null);
+  const archiveSearchRef = useRef<HTMLDivElement>(null);
+  const archivePromptRef = useRef<HTMLDivElement>(null);
 
   // Filter projects by active category and search query
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
       const matchesCategory =
-        activeCategory === 'All' || p.category === activeCategory;
+        activeCategory === 'Recent' || p.category === activeCategory;
       const matchesSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,6 +36,63 @@ const Home: React.FC = () => {
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery]);
+
+  // Archive Section Scroll-Triggered Entrance Animations
+  useEffect(() => {
+    const section = document.querySelector('.portfolio-catalog-section');
+    if (!section) return;
+
+    // Immediately hide the elements before paint
+    if (archiveTitleRef.current) {
+      archiveTitleRef.current.style.opacity = '0';
+      archiveTitleRef.current.style.transform = 'translateX(-80px)';
+    }
+    if (archiveSearchRef.current) {
+      archiveSearchRef.current.style.opacity = '0';
+      archiveSearchRef.current.style.transform = 'translateX(80px)';
+    }
+    if (archivePromptRef.current) {
+      archivePromptRef.current.style.opacity = '0';
+      archivePromptRef.current.style.transform = 'translateY(50px)';
+    }
+
+    // Use IntersectionObserver for reliable viewport detection
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+
+            // Title: slide in from left
+            if (archiveTitleRef.current) {
+              gsap.to(archiveTitleRef.current, {
+                x: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+              });
+            }
+
+            // Search bar: slide in from right (staggered)
+            if (archiveSearchRef.current) {
+              gsap.to(archiveSearchRef.current, {
+                x: 0, opacity: 1, duration: 0.9, delay: 0.15, ease: 'power3.out',
+              });
+            }
+
+            // Locked prompt: fade up from bottom (staggered)
+            if (archivePromptRef.current) {
+              gsap.to(archivePromptRef.current, {
+                y: 0, opacity: 1, duration: 0.8, delay: 0.35, ease: 'power3.out',
+              });
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
 
   // GSAP Stagger Animation Effect on Click-to-Reveal
   useEffect(() => {
@@ -157,7 +217,7 @@ const Home: React.FC = () => {
       {/* Complete Project Grid Showcase */}
       <div className="portfolio-catalog-section w-100 mt-5 pt-4">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
-          <div>
+          <div ref={archiveTitleRef}>
             <h2 className="h4 text-gradient font-orbitron m-0 d-flex align-items-center gap-2">
               <Terminal size={20} className="text-accent" />
               Repository Archive
@@ -167,7 +227,7 @@ const Home: React.FC = () => {
             </p>
           </div>
 
-          <div className="search-bar-wrapper" onClick={() => setIsGridRevealed(true)}>
+          <div ref={archiveSearchRef} className="search-bar-wrapper" onClick={() => setIsGridRevealed(true)}>
             <div className={`floating-search-field ${searchQuery ? 'has-value' : ''}`}>
               <input
                 type="text"
@@ -194,6 +254,7 @@ const Home: React.FC = () => {
         {/* Conditional Archive Cards View */}
         {!isGridRevealed ? (
           <div
+            ref={archivePromptRef}
             className="archive-locked-prompt text-center py-5 my-3 d-flex flex-column align-items-center justify-content-center"
             onClick={() => {
               setIsGridRevealed(true);

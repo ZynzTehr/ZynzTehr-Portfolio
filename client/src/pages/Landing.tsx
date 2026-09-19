@@ -176,7 +176,7 @@ const Landing: React.FC = () => {
         >
           <Terminal size={14} className="text-accent" />
           <span className="small text-accent font-monospace" style={{ letterSpacing: '1px' }}>
-            PORTFOLIO // ZYNZ TEHR
+            PORTFOLIO // JORGE BUCIO
           </span>
         </div>
 

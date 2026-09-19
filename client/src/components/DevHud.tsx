@@ -1,6 +1,7 @@
 import React from 'react';
 import { Globe, Code2 } from 'lucide-react';
 import { GithubIcon } from './Icon';
+import HexAvatar from './HexAvatar';
 
 interface DevHudProps {
   projectCount: number;
@@ -14,22 +15,25 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
           
           {/* Identity & Status */}
-          <div className="text-center text-md-start">
-            <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-              <h1 className="h3 m-0 text-gradient font-orbitron">
-                ZynzTehr
-              </h1>
-              <span className="badge-status-pulse">
-                <span className="status-dot"></span>
-                Available
-              </span>
+          <div className="d-flex align-items-center gap-3">
+            <HexAvatar />
+            <div className="text-center text-md-start">
+              <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                <h1 className="h3 m-0 text-gradient font-orbitron">
+                  Jorge Bucio
+                </h1>
+                <span className="badge-status-pulse">
+                  <span className="status-dot"></span>
+                  Available
+                </span>
+              </div>
+              <p className="m-0 text-secondary small d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                <Code2 size={15} className="text-accent" />
+                <span>Full-Stack & Web3 Developer</span>
+                <span>•</span>
+                <span className="text-accent font-orbitron">{projectCount} Projects</span>
+              </p>
             </div>
-            <p className="m-0 text-secondary small d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-              <Code2 size={15} className="text-accent" />
-              <span>Full-Stack & Web3 Developer</span>
-              <span>•</span>
-              <span className="text-accent font-orbitron">{projectCount} Projects</span>
-            </p>
           </div>
 
           {/* Quick External Links */}
