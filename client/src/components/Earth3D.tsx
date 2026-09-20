@@ -24,6 +24,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
 
   useEffect(() => {
     if (!mountRef.current || !webGlSupported) return;
+    const mountNode = mountRef.current;
 
     // Helper: Compute real-time solar positioning and color grading
     const getTimeSettings = () => {
@@ -111,8 +112,8 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
     renderer.setSize(size, size);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    mountRef.current.innerHTML = '';
-    mountRef.current.appendChild(renderer.domElement);
+    mountNode.innerHTML = '';
+    mountNode.appendChild(renderer.domElement);
 
     // Texture loaders
     const textureLoader = new THREE.TextureLoader();
@@ -383,8 +384,8 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       window.removeEventListener('mousemove', handleMouseMove);
       clearInterval(timeInterval);
       cancelAnimationFrame(animationFrameId);
-      if (mountRef.current && renderer.domElement && mountRef.current.contains(renderer.domElement)) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (mountNode && renderer.domElement && mountNode.contains(renderer.domElement)) {
+        mountNode.removeChild(renderer.domElement);
       }
       geometry.dispose();
       earthShaderMaterial.dispose();
@@ -397,7 +398,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       nightTexture.dispose();
       renderer.dispose();
     };
-  }, [reverse, size, interactive]);
+  }, [reverse, size, interactive, webGlSupported]);
 
   if (!webGlSupported) {
     return (
