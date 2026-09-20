@@ -22,6 +22,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [isStepping, setIsStepping] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
@@ -35,8 +36,17 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const displayProjects = projects.slice(0, 10); // Optimal quantity for the 3D cylinder
   const quantity = displayProjects.length || 1;
 
+  // Track mobile breakpoint on resize
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Continuous 60fps auto-orbit loop (active on larger screens)
   useEffect(() => {
+    if (isMobile) return; // Skip orbit animation on mobile
+
     let lastTimestamp = performance.now();
 
     const orbitLoop = (timestamp: number) => {
@@ -62,7 +72,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         clearTimeout(stepTimeoutRef.current);
       }
     };
-  }, [isRotating, isHovered, isStepping]);
+  }, [isRotating, isHovered, isStepping, isMobile]);
 
   // Reset horizontal slider scroll position and active index when category changes on mobile
   useEffect(() => {
@@ -184,8 +194,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{
-            transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
-            transition: isStepping ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+            ...(isMobile ? {} : {
+              transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
+              transition: isStepping ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+            }),
           }}
         >
           {displayProjects.map((project, index) => (
@@ -256,15 +268,17 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           <ChevronLeft size={18} />
         </button>
 
-        <button
-          className="btn-carousel-ctrl btn-play-pause"
-          onClick={togglePlayPause}
-          title={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
-          aria-label={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
-        >
-          {isRotating ? <Pause size={16} /> : <Play size={16} />}
-          <span className="ms-1 small">{isRotating ? 'Pause Orbit' : 'Auto Orbit'}</span>
-        </button>
+        {!isMobile && (
+          <button
+            className="btn-carousel-ctrl btn-play-pause"
+            onClick={togglePlayPause}
+            title={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
+            aria-label={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
+          >
+            {isRotating ? <Pause size={16} /> : <Play size={16} />}
+            <span className="ms-1 small">{isRotating ? 'Pause Orbit' : 'Auto Orbit'}</span>
+          </button>
+        )}
 
         <button
           className="btn-carousel-ctrl"

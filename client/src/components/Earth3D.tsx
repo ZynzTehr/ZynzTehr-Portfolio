@@ -432,8 +432,6 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       className="earth-container"
       title={`Real-Time Earth: ${timePeriod} Mode`}
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
