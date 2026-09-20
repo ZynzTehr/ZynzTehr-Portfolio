@@ -11,24 +11,19 @@ interface Earth3DProps {
 
 const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interactive = true }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [webGlSupported, setWebGlSupported] = useState(true);
-  const [timePeriod, setTimePeriod] = useState<string>('Day');
-
-  useEffect(() => {
-    if (!mountRef.current) return;
-
-    // Check WebGL availability safely
+  const [webGlSupported] = useState(() => {
     try {
       const testCanvas = document.createElement('canvas');
       const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
-      if (!gl) {
-        setWebGlSupported(false);
-        return;
-      }
+      return !!gl;
     } catch {
-      setWebGlSupported(false);
-      return;
+      return false;
     }
+  });
+  const [timePeriod, setTimePeriod] = useState<string>('Day');
+
+  useEffect(() => {
+    if (!mountRef.current || !webGlSupported) return;
 
     // Helper: Compute real-time solar positioning and color grading
     const getTimeSettings = () => {
