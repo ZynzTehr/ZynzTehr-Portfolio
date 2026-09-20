@@ -250,7 +250,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
             className={`btn-category-pill ${activeCategory === cat ? 'active' : ''}`}
             onClick={() => onSelectCategory(cat)}
           >
-            {cat === 'All' && <Layers size={14} className="me-1" />}
+            {cat === 'Recent' && <Layers size={14} className="me-1" />}
             {cat === '3D & Creative UI' && <Sparkles size={14} className="me-1" />}
             {cat}
           </button>

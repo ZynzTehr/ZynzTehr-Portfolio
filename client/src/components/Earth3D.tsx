@@ -105,7 +105,6 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
         powerPreference: 'high-performance',
       });
     } catch {
-      setWebGlSupported(false);
       return;
     }
 

@@ -91,7 +91,7 @@ const CATEGORY_MAP: Record<string, Project['category']> = {
   'python-rock-paper-scissors': 'Full-Stack',
 };
 
-export const projects: Project[] = (rawProjects as Project[]).map((p, index) => {
+export const projects: Project[] = (rawProjects as Record<string, unknown>[]).map((p: any, index: number) => {
   const titleCasedName = TITLE_OVERRIDES[p.id] || formatToTitleCase(p.name || p.rawName);
 
   return {
