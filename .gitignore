@@ -20,12 +20,28 @@ lerna-debug.log*
 node_modules/
 client/node_modules/
 server/node_modules/
-package-lock.json
 dist/
 client/dist/
 build/
 .vite/
 .cache/
+.vp/
+*.tsbuildinfo
+coverage/
+
+# Vercel
+.vercel/
+.vercel
+
+# Local Untracked Workspaces & Agent Telemetry
+MyNewAgent/
+prompt-log.md
+.prompt-log.lock
+.prompt-log.flock
+.agent-usage.jsonl
+.agent-usage.lock
+.agent-evidence.jsonl
+.agent-evidence.lock
 
 # Environment variables & secrets
 .env
@@ -33,6 +49,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 *.env
 
 # IDE and Editor Files
