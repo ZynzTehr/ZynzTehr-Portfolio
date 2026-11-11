@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://zynztehr.github.io/ZynzTehr-Portfolio/">
+  <a href="https://work.jorgebucio.com/">
     <img src="https://img.shields.io/badge/Live_Demo-Explore_Portfolio-00ffc8?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Demo" />
   </a>
   <a href="https://github.com/ZynzTehr">
@@ -151,7 +151,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/ZynzTehr-Portfolio/` in your browser.
+Visit `http://localhost:5173/` in your browser.
 
 ### Production Build
 
@@ -186,7 +186,8 @@ npm run build
 **Jorge Alberto Bucio** · Full-Stack & Web3 Developer
 
 - [GitHub @ZynzTehr](https://github.com/ZynzTehr)
-- [Live Portfolio](https://zynztehr.github.io/ZynzTehr-Portfolio/)
+- [Live Portfolio](https://work.jorgebucio.com/)
+- [Web Profile](https://jorgebucio.com/)
 - [VS Code FX Extension](https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx)
 
 </td>

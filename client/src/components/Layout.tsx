@@ -41,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </a>
             <span className="text-muted">•</span>
             <a
-              href="https://zynztehr.github.io/ZynzTehr-Profile/"
+              href="https://jorgebucio.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-secondary link-hover small d-flex align-items-center gap-1"

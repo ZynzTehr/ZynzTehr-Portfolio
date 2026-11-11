@@ -3,7 +3,7 @@ import React from 'react';
 const HexAvatar: React.FC = () => {
   return (
     <a
-      href="https://zynztehr.github.io/ZynzTehr-Profile/"
+      href="https://jorgebucio.com/"
       target="_blank"
       rel="noopener noreferrer"
       className="hex-avatar-link"

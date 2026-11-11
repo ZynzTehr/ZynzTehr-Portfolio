@@ -49,7 +49,7 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
               <span>@ZynzTehr</span>
             </a>
             <a
-              href="https://zynz-tehr-profile.vercel.app"
+              href="https://jorgebucio.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-hud-action"
