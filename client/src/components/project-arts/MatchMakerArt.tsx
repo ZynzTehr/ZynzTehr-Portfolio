@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const MatchMakerArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -85,7 +85,6 @@ const MatchMakerArt: React.FC = () => {
 
         {/* Dual Interconnecting Heart Constellation */}
         <g className="heartbeat">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#matchFillClip)">
             {/* Left Node Profile Card */}
@@ -124,7 +123,7 @@ const MatchMakerArt: React.FC = () => {
 
             {/* Left Node Outline */}
             <circle cx="190" cy="150" r="55" fill="none" stroke="#00ffc8" strokeWidth="3" />
-            
+
             {/* Right Node Outline */}
             <circle cx="450" cy="150" r="55" fill="none" stroke="#ec4899" strokeWidth="3" />
 
@@ -144,8 +143,26 @@ const MatchMakerArt: React.FC = () => {
 
         {/* Compatibility Match Tag */}
         <g transform="translate(255, 240)">
-          <rect width="130" height="30" rx="15" fill="rgba(236, 72, 153, 0.15)" stroke="#ec4899" strokeWidth="1.2" />
-          <text x="65" y="15" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="11" fontFamily="monospace" fontWeight="bold">98% // MATCH</text>
+          <rect
+            width="130"
+            height="30"
+            rx="15"
+            fill="rgba(236, 72, 153, 0.15)"
+            stroke="#ec4899"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="15"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="11"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            98% // MATCH
+          </text>
         </g>
       </svg>
     </div>

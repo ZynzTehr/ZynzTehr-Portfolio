@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const MongooseArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -172,7 +172,6 @@ const MongooseArt: React.FC = () => {
 
         {/* 2. THE MONGOOSE (Vigilant, Sleek Silhouette & Outline) */}
         <g className="mongoose-group" transform="translate(40, -10)">
-          
           {/* A. BOTTOM-TO-TOP ANIMATED FILL LAYER */}
           <g clipPath="url(#bottomToTopClip)">
             {/* Main Mongoose Body Fill */}
@@ -287,9 +286,33 @@ const MongooseArt: React.FC = () => {
           />
 
           {/* Sleek Whiskers / Tech Detail Accent */}
-          <line x1="500" y1="138" x2="535" y2="134" stroke="#00ffc8" strokeWidth="1.5" opacity="0.8" />
-          <line x1="500" y1="142" x2="538" y2="144" stroke="#00ffc8" strokeWidth="1.5" opacity="0.8" />
-          <line x1="498" y1="146" x2="530" y2="152" stroke="#00ffc8" strokeWidth="1.5" opacity="0.8" />
+          <line
+            x1="500"
+            y1="138"
+            x2="535"
+            y2="134"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
+          <line
+            x1="500"
+            y1="142"
+            x2="538"
+            y2="144"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
+          <line
+            x1="498"
+            y1="146"
+            x2="530"
+            y2="152"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
         </g>
       </svg>
     </div>

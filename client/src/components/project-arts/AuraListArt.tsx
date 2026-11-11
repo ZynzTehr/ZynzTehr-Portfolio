@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const AuraListArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -84,33 +84,113 @@ const AuraListArt: React.FC = () => {
 
         {/* Mobile Device Frame & Audio Waves */}
         <g transform="translate(190, 20)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#auraFillClip)">
             {/* iOS Device Silhouette */}
-            <rect x="60" y="10" width="140" height="260" rx="28" fill="url(#auraGrad)" opacity="0.85" />
-            
+            <rect
+              x="60"
+              y="10"
+              width="140"
+              height="260"
+              rx="28"
+              fill="url(#auraGrad)"
+              opacity="0.85"
+            />
+
             {/* Screen Notch & Inner Display */}
             <rect x="70" y="20" width="120" height="240" rx="20" fill="#0a0614" />
-            
+
             {/* Audio Wave Equalizer Bars */}
-            <rect x="85" y="150" width="8" height="40" rx="4" fill="url(#auraGrad)" className="eq-1" />
-            <rect x="100" y="130" width="8" height="60" rx="4" fill="url(#auraGrad)" className="eq-2" />
-            <rect x="115" y="115" width="8" height="75" rx="4" fill="url(#auraGrad)" className="eq-3" />
-            <rect x="130" y="135" width="8" height="55" rx="4" fill="url(#auraGrad)" className="eq-4" />
-            <rect x="145" y="145" width="8" height="45" rx="4" fill="url(#auraGrad)" className="eq-5" />
-            <rect x="160" y="155" width="8" height="35" rx="4" fill="url(#auraGrad)" className="eq-1" />
+            <rect
+              x="85"
+              y="150"
+              width="8"
+              height="40"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-1"
+            />
+            <rect
+              x="100"
+              y="130"
+              width="8"
+              height="60"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-2"
+            />
+            <rect
+              x="115"
+              y="115"
+              width="8"
+              height="75"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-3"
+            />
+            <rect
+              x="130"
+              y="135"
+              width="8"
+              height="55"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-4"
+            />
+            <rect
+              x="145"
+              y="145"
+              width="8"
+              height="45"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-5"
+            />
+            <rect
+              x="160"
+              y="155"
+              width="8"
+              height="35"
+              rx="4"
+              fill="url(#auraGrad)"
+              className="eq-1"
+            />
 
             {/* Aura Ripple Circles */}
-            <circle cx="130" cy="80" r="22" fill="none" stroke="#00ffc8" strokeWidth="2" opacity="0.8" />
-            <circle cx="130" cy="80" r="32" fill="none" stroke="#8b5cf6" strokeWidth="1.5" opacity="0.6" />
+            <circle
+              cx="130"
+              cy="80"
+              r="22"
+              fill="none"
+              stroke="#00ffc8"
+              strokeWidth="2"
+              opacity="0.8"
+            />
+            <circle
+              cx="130"
+              cy="80"
+              r="32"
+              fill="none"
+              stroke="#8b5cf6"
+              strokeWidth="1.5"
+              opacity="0.6"
+            />
           </g>
 
           {/* OUTLINE LAYER */}
           <g className="aura-outline" filter="url(#auraGlow)">
             {/* Device Outline */}
-            <rect x="60" y="10" width="140" height="260" rx="28" fill="none" stroke="url(#auraStroke)" strokeWidth="3" />
-            
+            <rect
+              x="60"
+              y="10"
+              width="140"
+              height="260"
+              rx="28"
+              fill="none"
+              stroke="url(#auraStroke)"
+              strokeWidth="3"
+            />
+
             {/* Dynamic Island Notch */}
             <rect x="110" y="26" width="40" height="10" rx="5" fill="#00ffc8" />
           </g>

@@ -1,23 +1,23 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { projects, type Project } from '../data/projects';
-import DevHud from '../components/DevHud';
-import ProjectCarousel from '../components/ProjectCarousel';
-import ProjectModal from '../components/ProjectModal';
-import MatrixRain from '../components/MatrixRain';
-import ProjectArt from '../components/project-arts/ProjectArt';
-import ScrollWidget from '../components/ScrollWidget';
-import { ExternalLink, Terminal, ArrowUpRight, Search } from 'lucide-react';
-import { GithubIcon } from '../components/Icon';
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { projects, type Project } from "../data/projects";
+import DevHud from "../components/DevHud";
+import ProjectCarousel from "../components/ProjectCarousel";
+import ProjectModal from "../components/ProjectModal";
+import MatrixRain from "../components/MatrixRain";
+import ProjectArt from "../components/project-arts/ProjectArt";
+import ScrollWidget from "../components/ScrollWidget";
+import { ExternalLink, Terminal, ArrowUpRight, Search } from "lucide-react";
+import { GithubIcon } from "../components/Icon";
 
 // Register GSAP ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<string>('Recent');
+  const [activeCategory, setActiveCategory] = useState<string>("Recent");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isGridRevealed, setIsGridRevealed] = useState<boolean>(false);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const archiveTitleRef = useRef<HTMLDivElement>(null);
@@ -27,8 +27,7 @@ const Home: React.FC = () => {
   // Filter projects by active category and search query
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
-      const matchesCategory =
-        activeCategory === 'Recent' || p.category === activeCategory;
+      const matchesCategory = activeCategory === "Recent" || p.category === activeCategory;
       const matchesSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,21 +38,21 @@ const Home: React.FC = () => {
 
   // Archive Section Scroll-Triggered Entrance Animations
   useEffect(() => {
-    const section = document.querySelector('.portfolio-catalog-section');
+    const section = document.querySelector(".portfolio-catalog-section");
     if (!section) return;
 
     // Immediately hide the elements before paint
     if (archiveTitleRef.current) {
-      archiveTitleRef.current.style.opacity = '0';
-      archiveTitleRef.current.style.transform = 'translateX(-80px)';
+      archiveTitleRef.current.style.opacity = "0";
+      archiveTitleRef.current.style.transform = "translateX(-80px)";
     }
     if (archiveSearchRef.current) {
-      archiveSearchRef.current.style.opacity = '0';
-      archiveSearchRef.current.style.transform = 'translateX(80px)';
+      archiveSearchRef.current.style.opacity = "0";
+      archiveSearchRef.current.style.transform = "translateX(80px)";
     }
     if (archivePromptRef.current) {
-      archivePromptRef.current.style.opacity = '0';
-      archivePromptRef.current.style.transform = 'translateY(50px)';
+      archivePromptRef.current.style.opacity = "0";
+      archivePromptRef.current.style.transform = "translateY(50px)";
     }
 
     // Use IntersectionObserver for reliable viewport detection
@@ -66,27 +65,38 @@ const Home: React.FC = () => {
             // Title: slide in from left
             if (archiveTitleRef.current) {
               gsap.to(archiveTitleRef.current, {
-                x: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+                x: 0,
+                opacity: 1,
+                duration: 0.9,
+                ease: "power3.out",
               });
             }
 
             // Search bar: slide in from right (staggered)
             if (archiveSearchRef.current) {
               gsap.to(archiveSearchRef.current, {
-                x: 0, opacity: 1, duration: 0.9, delay: 0.15, ease: 'power3.out',
+                x: 0,
+                opacity: 1,
+                duration: 0.9,
+                delay: 0.15,
+                ease: "power3.out",
               });
             }
 
             // Locked prompt: fade up from bottom (staggered)
             if (archivePromptRef.current) {
               gsap.to(archivePromptRef.current, {
-                y: 0, opacity: 1, duration: 0.8, delay: 0.35, ease: 'power3.out',
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                delay: 0.35,
+                ease: "power3.out",
               });
             }
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(section);
@@ -102,7 +112,8 @@ const Home: React.FC = () => {
     ScrollTrigger.getAll().forEach((st) => st.kill());
 
     const ctx = gsap.context(() => {
-      const cardElements = gridContainerRef.current?.querySelectorAll<HTMLElement>('.project-card-col');
+      const cardElements =
+        gridContainerRef.current?.querySelectorAll<HTMLElement>(".project-card-col");
       if (!cardElements || cardElements.length === 0) return;
 
       const cardsArray = Array.from(cardElements);
@@ -124,8 +135,8 @@ const Home: React.FC = () => {
           scale: 1,
           duration: 0.7,
           stagger: 0.15,
-          ease: 'power3.out',
-        }
+          ease: "power3.out",
+        },
       );
 
       // Stagger remaining cards seamlessly as they scroll into viewport
@@ -138,11 +149,11 @@ const Home: React.FC = () => {
               scale: 1,
               duration: 0.7,
               stagger: 0.15,
-              ease: 'power3.out',
-              overwrite: 'auto',
+              ease: "power3.out",
+              overwrite: "auto",
             });
           },
-          start: 'top 90%',
+          start: "top 90%",
           once: true,
         });
       }
@@ -158,12 +169,13 @@ const Home: React.FC = () => {
     // Smoothly scroll window to top
     window.scrollTo({
       top: 0,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
 
     if (isGridRevealed && gridContainerRef.current) {
-      const cardElements = gridContainerRef.current.querySelectorAll<HTMLElement>('.project-card-col');
-      
+      const cardElements =
+        gridContainerRef.current.querySelectorAll<HTMLElement>(".project-card-col");
+
       if (cardElements && cardElements.length > 0) {
         // Stagger away in reverse order (bottom to top / end to start)
         gsap.to(cardElements, {
@@ -173,17 +185,17 @@ const Home: React.FC = () => {
           duration: 0.35,
           stagger: {
             each: 0.03,
-            from: 'end',
+            from: "end",
           },
-          ease: 'power2.in',
+          ease: "power2.in",
           onComplete: () => {
             setIsGridRevealed(false);
-            setSearchQuery('');
+            setSearchQuery("");
           },
         });
       } else {
         setIsGridRevealed(false);
-        setSearchQuery('');
+        setSearchQuery("");
       }
     }
   };
@@ -191,13 +203,17 @@ const Home: React.FC = () => {
   const handleScrollDown = () => {
     window.scrollTo({
       top: 480,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   };
 
+  const unlockArchive = () => {
+    setIsGridRevealed(true);
+    document.getElementById("archive-search-input")?.focus();
+  };
+
   return (
-    <section className="portfolio-home-container w-100 d-flex flex-column align-items-center">
-      
+    <section className="portfolio-home-container w-full flex flex-col items-center">
       {/* Top Profile HUD */}
       <DevHud projectCount={projects.length} />
 
@@ -205,7 +221,7 @@ const Home: React.FC = () => {
       <ScrollWidget onBackToTop={handleBackToTop} onScrollDown={handleScrollDown} />
 
       {/* 3D Orbiting Earth & Interactive Carousel Showcase */}
-      <div className="w-100 my-2">
+      <div className="w-full my-2">
         <ProjectCarousel
           projects={filteredProjects}
           onSelectProject={setSelectedProject}
@@ -215,20 +231,24 @@ const Home: React.FC = () => {
       </div>
 
       {/* Complete Project Grid Showcase */}
-      <div className="portfolio-catalog-section w-100 mt-5 pt-4">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+      <div className="portfolio-catalog-section w-full mt-12 pt-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div ref={archiveTitleRef}>
-            <h2 className="h4 text-gradient font-orbitron m-0 d-flex align-items-center gap-2">
+            <h2 className="text-xl md:text-2xl font-semibold leading-tight text-gradient font-orbitron m-0 flex items-center gap-2">
               <Terminal size={20} className="text-accent" />
               Repository Archive
             </h2>
-            <p className="text-gradient small m-0 mt-1" style={{ opacity: 0.8 }}>
+            <p className="text-gradient text-sm m-0 mt-1 opacity-80">
               Explore {filteredProjects.length} open-source repositories & live builds
             </p>
           </div>
 
-          <div ref={archiveSearchRef} className="search-bar-wrapper" onClick={() => setIsGridRevealed(true)}>
-            <div className={`floating-search-field ${searchQuery ? 'has-value' : ''}`}>
+          <div
+            ref={archiveSearchRef}
+            className="search-bar-wrapper"
+            onClick={() => setIsGridRevealed(true)}
+          >
+            <div className={`floating-search-field ${searchQuery ? "has-value" : ""}`}>
               <input
                 type="text"
                 id="archive-search-input"
@@ -255,32 +275,49 @@ const Home: React.FC = () => {
         {!isGridRevealed ? (
           <div
             ref={archivePromptRef}
-            className="archive-locked-prompt text-center py-5 my-3 d-flex flex-column align-items-center justify-content-center"
-            onClick={() => {
-              setIsGridRevealed(true);
-              document.getElementById('archive-search-input')?.focus();
+            role="button"
+            tabIndex={0}
+            className="archive-locked-prompt text-center py-12 my-4 flex flex-col items-center justify-center"
+            onClick={unlockArchive}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                unlockArchive();
+              }
             }}
           >
-            <div className="pulse-search-badge mb-3">
+            <div className="pulse-search-badge mb-4">
               <Search size={22} className="text-accent" />
             </div>
-            <h3 className="h6 text-white font-orbitron mb-2">
+            <h3 className="text-base font-semibold text-white font-orbitron mb-2">
               Click Searchbar to Unlock Repository Archive
             </h3>
-            <p className="text-secondary small m-0" style={{ maxWidth: '420px', lineHeight: '1.6' }}>
-              Select the searchbar above to initialize the matrix archive and reveal all {projects.length} repositories.
+            <p className="text-slate-400 text-sm m-0 max-w-[420px] leading-relaxed">
+              Select the searchbar above to initialize the matrix archive and reveal all{" "}
+              {projects.length} repositories.
             </p>
           </div>
         ) : (
-          <div ref={gridContainerRef} className="row g-3 g-md-4 archive-cards-grid">
+          <div
+            ref={gridContainerRef}
+            className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6 archive-cards-grid"
+          >
             {filteredProjects.map((project) => (
-              <div key={project.id} className="col-6 col-md-6 col-lg-4 project-card-col">
+              <div key={project.id} className="project-card-col min-w-0">
                 <div
-                  className="project-grid-card h-100"
+                  role="button"
+                  tabIndex={0}
+                  className="project-grid-card h-full"
                   onClick={() => setSelectedProject(project)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedProject(project);
+                    }
+                  }}
                 >
                   {/* Media Thumbnail with Default Matrix Digital Rain & Hover SVG Transition */}
-                  <div className="grid-card-media position-relative">
+                  <div className="grid-card-media relative">
                     <div className="grid-card-default-media">
                       <MatrixRain color="#00ff41" fontSize={11} speed={30} />
                     </div>
@@ -291,32 +328,23 @@ const Home: React.FC = () => {
                   </div>
 
                   {/* Card Body */}
-                  <div className="grid-card-body p-3 p-md-4 d-flex flex-column justify-content-between flex-grow-1">
+                  <div className="grid-card-body p-2.5 md:p-6 flex flex-col justify-between grow">
                     <div>
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <h3 className="h5 text-white font-orbitron m-0 text-truncate">
+                      <div className="flex justify-between items-start mb-1.5 md:mb-2">
+                        <h3 className="text-xs md:text-xl font-semibold leading-snug text-white font-orbitron m-0 truncate">
                           {project.name}
                         </h3>
-                        <ArrowUpRight size={18} className="text-accent flex-shrink-0 ms-2" />
+                        <ArrowUpRight size={18} className="text-accent shrink-0 ml-2" />
                       </div>
 
-                      <p
-                        className="text-secondary small mb-3 project-card-desc"
-                        style={{
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          lineHeight: '1.6',
-                        }}
-                      >
+                      <p className="hidden md:line-clamp-3 text-slate-400 text-sm mb-4 leading-relaxed project-card-desc">
                         {project.description}
                       </p>
                     </div>
 
                     {/* Tech Tags */}
                     <div>
-                      <div className="d-flex flex-wrap gap-1 mb-3">
+                      <div className="flex flex-wrap gap-1 mb-2 md:mb-4">
                         {project.topics.slice(0, 3).map((topic, idx) => (
                           <span key={idx} className="tech-pill-small">
                             {topic}
@@ -325,9 +353,11 @@ const Home: React.FC = () => {
                       </div>
 
                       {/* Quick Direct Links */}
-                      <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
-                        <span className="text-gradient font-monospace" style={{ opacity: 0.8 }}>{project.language}</span>
-                        <div className="d-flex gap-2">
+                      <div className="card-footer-meta flex justify-between items-center pt-1.5 md:pt-2 border-t border-white/15 text-[0.62rem] md:text-sm">
+                        <span className="text-gradient font-mono opacity-80">
+                          {project.language}
+                        </span>
+                        <div className="flex gap-2">
                           {project.liveUrl && (
                             <a
                               href={project.liveUrl}
@@ -336,6 +366,7 @@ const Home: React.FC = () => {
                               className="text-accent link-hover p-1"
                               onClick={(e) => e.stopPropagation()}
                               title="Live Demo"
+                              aria-label={`${project.name} live demo`}
                             >
                               <ExternalLink size={16} />
                             </a>
@@ -347,6 +378,7 @@ const Home: React.FC = () => {
                             className="text-white link-hover p-1"
                             onClick={(e) => e.stopPropagation()}
                             title="GitHub Source"
+                            aria-label={`${project.name} source code`}
                           >
                             <GithubIcon size={16} />
                           </a>
@@ -354,7 +386,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             ))}
@@ -368,7 +399,6 @@ const Home: React.FC = () => {
         isOpen={!!selectedProject}
         onClose={() => setSelectedProject(null)}
       />
-
     </section>
   );
 };

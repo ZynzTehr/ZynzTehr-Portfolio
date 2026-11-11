@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const TlmRedesignArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -82,12 +82,19 @@ const TlmRedesignArt: React.FC = () => {
 
         {/* Browser Wireframe & Layout Symmetry */}
         <g transform="translate(100, 30)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#tlmFillClip)">
             {/* Main Browser Window */}
-            <rect x="20" y="15" width="400" height="210" rx="14" fill="url(#tlmGrad)" opacity="0.85" />
-            
+            <rect
+              x="20"
+              y="15"
+              width="400"
+              height="210"
+              rx="14"
+              fill="url(#tlmGrad)"
+              opacity="0.85"
+            />
+
             {/* Header Hero Section */}
             <rect x="35" y="45" width="370" height="65" rx="8" fill="#0b060d" opacity="0.9" />
             <rect x="50" y="60" width="130" height="10" rx="5" fill="#00ffc8" />
@@ -102,17 +109,53 @@ const TlmRedesignArt: React.FC = () => {
           {/* OUTLINE LAYER */}
           <g className="tlm-outline" filter="url(#tlmGlow)">
             {/* Browser Outer Shell */}
-            <rect x="20" y="15" width="400" height="210" rx="14" fill="none" stroke="url(#tlmStroke)" strokeWidth="3" />
-            
+            <rect
+              x="20"
+              y="15"
+              width="400"
+              height="210"
+              rx="14"
+              fill="none"
+              stroke="url(#tlmStroke)"
+              strokeWidth="3"
+            />
+
             {/* Header Window Dots */}
             <circle cx="40" cy="30" r="4" fill="#f43f5e" />
             <circle cx="54" cy="30" r="4" fill="#fb923c" />
             <circle cx="68" cy="30" r="4" fill="#00ffc8" />
 
             {/* Column Outlines */}
-            <rect x="35" y="122" width="115" height="90" rx="6" fill="none" stroke="#00ffc8" strokeWidth="1.5" />
-            <rect x="162" y="122" width="115" height="90" rx="6" fill="none" stroke="#fb923c" strokeWidth="1.5" />
-            <rect x="290" y="122" width="115" height="90" rx="6" fill="none" stroke="#00ffc8" strokeWidth="1.5" />
+            <rect
+              x="35"
+              y="122"
+              width="115"
+              height="90"
+              rx="6"
+              fill="none"
+              stroke="#00ffc8"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="162"
+              y="122"
+              width="115"
+              height="90"
+              rx="6"
+              fill="none"
+              stroke="#fb923c"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="290"
+              y="122"
+              width="115"
+              height="90"
+              rx="6"
+              fill="none"
+              stroke="#00ffc8"
+              strokeWidth="1.5"
+            />
           </g>
 
           {/* Interactive Custom Resizing Cursor Easter Egg */}
@@ -129,8 +172,26 @@ const TlmRedesignArt: React.FC = () => {
 
         {/* TLM Redesign Tag */}
         <g transform="translate(255, 275)">
-          <rect width="130" height="28" rx="6" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" strokeWidth="1.2" />
-          <text x="65" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">TLM // REDESIGN</text>
+          <rect
+            width="130"
+            height="28"
+            rx="6"
+            fill="rgba(244, 63, 94, 0.15)"
+            stroke="#f43f5e"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            TLM // REDESIGN
+          </text>
         </g>
       </svg>
     </div>

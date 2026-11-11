@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { ExternalLink, X, Calendar, Star, GitFork, Sparkles, Tag } from 'lucide-react';
-import { GithubIcon } from './Icon';
-import ProjectArt from './project-arts/ProjectArt';
-import type { Project } from '../data/projects';
-import '../styles/Modal.css';
+import React, { useEffect } from "react";
+import { ExternalLink, X, Calendar, Star, GitFork, Sparkles, Tag } from "lucide-react";
+import { GithubIcon } from "./Icon";
+import ProjectArt from "./project-arts/ProjectArt";
+import type { Project } from "../data/projects";
+import "../styles/Modal.css";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -14,15 +14,15 @@ interface ProjectModalProps {
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose }) => {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
+      window.addEventListener("keydown", handleEsc);
+      document.body.style.overflow = "hidden";
     }
     return () => {
-      window.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'auto';
+      window.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
 
@@ -30,13 +30,21 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content project-inspector-modal" onClick={(e) => e.stopPropagation()}>
-        
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+        className="modal-content project-inspector-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="modal-header d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center gap-2">
+        <div className="modal-header flex justify-between items-center">
+          <div className="flex items-center gap-2">
             <Sparkles size={20} className="text-accent" />
-            <h2 className="modal-title m-0 text-gradient" style={{ fontSize: '1.4rem' }}>
+            <h2
+              id="project-modal-title"
+              className="modal-title m-0 text-gradient font-orbitron text-[1.4rem] font-semibold leading-tight"
+            >
               {project.name}
             </h2>
           </div>
@@ -46,21 +54,9 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
         </div>
 
         {/* Modal Body */}
-        <div className="modal-body p-4">
-          
+        <div className="modal-body p-4 md:p-6">
           {/* Media Preview Container */}
-          <div
-            className="project-modal-media mb-4 position-relative overflow-hidden rounded-3"
-            style={{
-              border: '1px solid var(--glass-border)',
-              background: '#070714',
-              width: '100%',
-              height: '320px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <div className="project-modal-media mb-6 relative overflow-hidden rounded-xl w-full h-[220px] md:h-[320px] flex items-center justify-center">
             <ProjectArt
               projectId={project.id}
               projectName={project.name}
@@ -71,45 +67,46 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           </div>
 
           {/* Badges & Meta Info */}
-          <div className="d-flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-4">
             <span className="badge-neon category-badge">
-              <Tag size={14} className="me-1" />
+              <Tag size={14} className="mr-1" />
               {project.category}
             </span>
-            <span className="badge-neon language-badge">
-              {project.language}
-            </span>
+            <span className="badge-neon language-badge">{project.language}</span>
             {project.stars > 0 && (
               <span className="badge-meta">
-                <Star size={14} className="text-warning me-1" />
+                <Star size={14} className="text-amber-400 mr-1" />
                 {project.stars}
               </span>
             )}
             {project.forks > 0 && (
               <span className="badge-meta">
-                <GitFork size={14} className="me-1" />
+                <GitFork size={14} className="mr-1" />
                 {project.forks}
               </span>
             )}
             {project.updatedAt && (
               <span className="badge-meta">
-                <Calendar size={14} className="me-1" />
-                {new Date(project.updatedAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                <Calendar size={14} className="mr-1" />
+                {new Date(project.updatedAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  year: "numeric",
+                })}
               </span>
             )}
           </div>
 
           {/* Description */}
-          <p className="project-modal-description mb-4" style={{ lineHeight: '1.7', color: 'var(--font-secondary)' }}>
+          <p className="project-modal-description mb-6 leading-relaxed text-[var(--font-secondary)]">
             {project.description}
           </p>
 
           {/* Topics / Tech Stack Tags */}
-          <div className="mb-4">
-            <h4 className="small text-uppercase text-gradient mb-2" style={{ letterSpacing: '1px', opacity: 0.8 }}>
+          <div className="mb-6">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-gradient mb-2 opacity-80">
               Tech Stack & Topics
             </h4>
-            <div className="d-flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {project.topics.map((topic, i) => (
                 <span key={i} className="tech-pill">
                   {topic}
@@ -120,19 +117,21 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
         </div>
 
         {/* Modal Footer / Action Links */}
-        <div className="modal-footer d-flex justify-content-between align-items-center p-3">
-          <button className="btn-custom btn-modal-close py-2 px-4" onClick={onClose} style={{ fontSize: '0.9rem' }}>
+        <div className="modal-footer flex flex-col-reverse md:flex-row justify-between items-center gap-3 p-5 pb-9 md:p-4 md:px-6 border-t border-white/10">
+          <button
+            className="btn-custom btn-modal-close w-full md:w-auto py-2 px-6 text-[0.9rem]"
+            onClick={onClose}
+          >
             Close
           </button>
 
-          <div className="d-flex gap-3">
+          <div className="flex flex-col md:flex-row w-full md:w-auto gap-2.5 md:gap-4">
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-custom btn-live-demo d-inline-flex align-items-center gap-2 py-2 px-4"
-                style={{ fontSize: '0.9rem', textDecoration: 'none' }}
+                className="btn-custom btn-live-demo w-full md:w-auto inline-flex items-center justify-center gap-2 py-2 px-6 text-[0.9rem] no-underline"
               >
                 <ExternalLink size={16} />
                 View Site
@@ -143,15 +142,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-custom btn-github d-inline-flex align-items-center gap-2 py-2 px-4"
-              style={{ fontSize: '0.9rem', textDecoration: 'none' }}
+              className="btn-custom btn-github w-full md:w-auto inline-flex items-center justify-center gap-2 py-2 px-6 text-[0.9rem] no-underline"
             >
               <GithubIcon size={16} />
               View Source
             </a>
           </div>
         </div>
-
       </div>
     </div>
   );

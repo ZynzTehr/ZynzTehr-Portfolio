@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const TestimonialArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -79,12 +79,19 @@ const TestimonialArt: React.FC = () => {
 
         {/* Testimonial Card Constellation */}
         <g transform="translate(100, 30)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#testFillClip)">
             {/* Primary Large Card Left */}
-            <rect x="20" y="20" width="220" height="190" rx="16" fill="url(#testGrad)" opacity="0.85" />
-            
+            <rect
+              x="20"
+              y="20"
+              width="220"
+              height="190"
+              rx="16"
+              fill="url(#testGrad)"
+              opacity="0.85"
+            />
+
             {/* Avatar & Lines inside Left Card */}
             <circle cx="55" cy="55" r="18" fill="#0a0512" />
             <rect x="85" y="45" width="80" height="8" rx="4" fill="#00ffc8" />
@@ -92,28 +99,58 @@ const TestimonialArt: React.FC = () => {
             <rect x="40" y="90" width="180" height="6" rx="3" fill="#0a0512" opacity="0.8" />
             <rect x="40" y="105" width="150" height="6" rx="3" fill="#0a0512" opacity="0.8" />
             <rect x="40" y="120" width="170" height="6" rx="3" fill="#0a0512" opacity="0.8" />
-            <text x="40" y="180" fill="#facc15" fontSize="18">★★★★★</text>
+            <text x="40" y="180" fill="#facc15" fontSize="18">
+              ★★★★★
+            </text>
 
             {/* Secondary Card Right (Floating) */}
             <g className="card-float">
-              <rect x="260" y="45" width="170" height="140" rx="14" fill="url(#testGrad)" opacity="0.7" />
+              <rect
+                x="260"
+                y="45"
+                width="170"
+                height="140"
+                rx="14"
+                fill="url(#testGrad)"
+                opacity="0.7"
+              />
               <circle cx="290" cy="75" r="16" fill="#0a0512" />
               <rect x="315" y="68" width="60" height="7" rx="3.5" fill="#00ffc8" />
               <rect x="280" y="105" width="130" height="6" rx="3" fill="#0a0512" />
               <rect x="280" y="120" width="100" height="6" rx="3" fill="#0a0512" />
-              <text x="280" y="160" fill="#facc15" fontSize="14">★★★★★</text>
+              <text x="280" y="160" fill="#facc15" fontSize="14">
+                ★★★★★
+              </text>
             </g>
           </g>
 
           {/* OUTLINE LAYER */}
           <g className="test-outline" filter="url(#testGlow)">
             {/* Primary Card Outline */}
-            <rect x="20" y="20" width="220" height="190" rx="16" fill="none" stroke="url(#testStroke)" strokeWidth="3" />
+            <rect
+              x="20"
+              y="20"
+              width="220"
+              height="190"
+              rx="16"
+              fill="none"
+              stroke="url(#testStroke)"
+              strokeWidth="3"
+            />
             <circle cx="55" cy="55" r="18" fill="none" stroke="#00ffc8" strokeWidth="2" />
 
             {/* Secondary Card Outline */}
             <g className="card-float">
-              <rect x="260" y="45" width="170" height="140" rx="14" fill="none" stroke="#7950f2" strokeWidth="2.5" />
+              <rect
+                x="260"
+                y="45"
+                width="170"
+                height="140"
+                rx="14"
+                fill="none"
+                stroke="#7950f2"
+                strokeWidth="2.5"
+              />
               <circle cx="290" cy="75" r="16" fill="none" stroke="#a855f7" strokeWidth="2" />
             </g>
           </g>
@@ -121,8 +158,26 @@ const TestimonialArt: React.FC = () => {
 
         {/* Testimonial Tag */}
         <g transform="translate(250, 275)">
-          <rect width="140" height="28" rx="6" fill="rgba(124, 58, 237, 0.15)" stroke="#7c3aed" strokeWidth="1.2" />
-          <text x="70" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">CSS GRID // SOCIAL</text>
+          <rect
+            width="140"
+            height="28"
+            rx="6"
+            fill="rgba(124, 58, 237, 0.15)"
+            stroke="#7c3aed"
+            strokeWidth="1.2"
+          />
+          <text
+            x="70"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            CSS GRID // SOCIAL
+          </text>
         </g>
       </svg>
     </div>

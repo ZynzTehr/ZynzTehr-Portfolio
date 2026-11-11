@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const TicTacToeArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -73,7 +73,6 @@ const TicTacToeArt: React.FC = () => {
 
         {/* Arcade Grid Elements */}
         <g transform="translate(195, 25)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#tttFillClip)">
             {/* 3x3 Tile Blocks */}
@@ -87,42 +86,139 @@ const TicTacToeArt: React.FC = () => {
 
             <rect x="15" y="170" width="65" height="65" rx="8" fill="url(#tttGrad)" opacity="0.8" />
             <rect x="92" y="170" width="65" height="65" rx="8" fill="url(#tttGrad)" opacity="0.8" />
-            <rect x="170" y="170" width="65" height="65" rx="8" fill="url(#tttGrad)" opacity="0.8" />
+            <rect
+              x="170"
+              y="170"
+              width="65"
+              height="65"
+              rx="8"
+              fill="url(#tttGrad)"
+              opacity="0.8"
+            />
 
             {/* Inner Pieces */}
-            <path d="M 33,33 L 62,62 M 62,33 L 33,62" stroke="#070918" strokeWidth="8" strokeLinecap="round" />
+            <path
+              d="M 33,33 L 62,62 M 62,33 L 33,62"
+              stroke="#070918"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
             <circle cx="124" cy="47" r="18" fill="none" stroke="#070918" strokeWidth="7" />
-            <path d="M 188,110 L 217,139 M 217,110 L 188,139" stroke="#070918" strokeWidth="8" strokeLinecap="round" />
+            <path
+              d="M 188,110 L 217,139 M 217,110 L 188,139"
+              stroke="#070918"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
             <circle cx="47" cy="124" r="18" fill="none" stroke="#070918" strokeWidth="7" />
-            <path d="M 33,188 L 62,217 M 62,188 L 33,217" stroke="#070918" strokeWidth="8" strokeLinecap="round" />
+            <path
+              d="M 33,188 L 62,217 M 62,188 L 33,217"
+              stroke="#070918"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
             <circle cx="124" cy="202" r="18" fill="none" stroke="#070918" strokeWidth="7" />
           </g>
 
           {/* OUTLINE LAYER */}
           <g className="ttt-outline" filter="url(#tttGlow)">
             {/* Grid Dividers */}
-            <line x1="85" y1="10" x2="85" y2="240" stroke="url(#tttStroke)" strokeWidth="3" strokeLinecap="round" />
-            <line x1="162" y1="10" x2="162" y2="240" stroke="url(#tttStroke)" strokeWidth="3" strokeLinecap="round" />
-            <line x1="10" y1="85" x2="240" y2="85" stroke="url(#tttStroke)" strokeWidth="3" strokeLinecap="round" />
-            <line x1="10" y1="162" x2="240" y2="162" stroke="url(#tttStroke)" strokeWidth="3" strokeLinecap="round" />
+            <line
+              x1="85"
+              y1="10"
+              x2="85"
+              y2="240"
+              stroke="url(#tttStroke)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="162"
+              y1="10"
+              x2="162"
+              y2="240"
+              stroke="url(#tttStroke)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="10"
+              y1="85"
+              x2="240"
+              y2="85"
+              stroke="url(#tttStroke)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="10"
+              y1="162"
+              x2="240"
+              y2="162"
+              stroke="url(#tttStroke)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
 
             {/* Glowing Outlines */}
-            <path d="M 33,33 L 62,62 M 62,33 L 33,62" stroke="#00ffc8" strokeWidth="4" strokeLinecap="round" />
+            <path
+              d="M 33,33 L 62,62 M 62,33 L 33,62"
+              stroke="#00ffc8"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
             <circle cx="124" cy="47" r="18" fill="none" stroke="#ec4899" strokeWidth="4" />
-            <path d="M 188,110 L 217,139 M 217,110 L 188,139" stroke="#00ffc8" strokeWidth="4" strokeLinecap="round" />
+            <path
+              d="M 188,110 L 217,139 M 217,110 L 188,139"
+              stroke="#00ffc8"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
             <circle cx="47" cy="124" r="18" fill="none" stroke="#ec4899" strokeWidth="4" />
-            <path d="M 33,188 L 62,217 M 62,188 L 33,217" stroke="#00ffc8" strokeWidth="4" strokeLinecap="round" />
+            <path
+              d="M 33,188 L 62,217 M 62,188 L 33,217"
+              stroke="#00ffc8"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
             <circle cx="124" cy="202" r="18" fill="none" stroke="#ec4899" strokeWidth="4" />
 
             {/* Diagonal Win Strike */}
-            <line x1="20" y1="20" x2="230" y2="230" stroke="#00ffc8" strokeWidth="4" strokeLinecap="round" className="win-strike" />
+            <line
+              x1="20"
+              y1="20"
+              x2="230"
+              y2="230"
+              stroke="#00ffc8"
+              strokeWidth="4"
+              strokeLinecap="round"
+              className="win-strike"
+            />
           </g>
         </g>
 
         {/* React Arcade Tag */}
         <g transform="translate(255, 275)">
-          <rect width="130" height="28" rx="6" fill="rgba(0, 255, 200, 0.15)" stroke="#00ffc8" strokeWidth="1.2" />
-          <text x="65" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">REACT // ARCADE</text>
+          <rect
+            width="130"
+            height="28"
+            rx="6"
+            fill="rgba(0, 255, 200, 0.15)"
+            stroke="#00ffc8"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            REACT // ARCADE
+          </text>
         </g>
       </svg>
     </div>

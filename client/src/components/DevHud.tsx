@@ -1,7 +1,7 @@
-import React from 'react';
-import { Globe, Code2 } from 'lucide-react';
-import { GithubIcon } from './Icon';
-import HexAvatar from './HexAvatar';
+import React from "react";
+import { Globe, Code2 } from "lucide-react";
+import { GithubIcon } from "./Icon";
+import HexAvatar from "./HexAvatar";
 
 interface DevHudProps {
   projectCount: number;
@@ -9,17 +9,16 @@ interface DevHudProps {
 
 const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
   return (
-    <header className="dev-hud w-100 mb-4">
+    <header className="dev-hud w-full mb-6">
       {/* Top Profile Strip */}
-      <div className="glass-card mb-3 p-3 p-md-4 w-100">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-          
+      <div className="glass-card mb-4 p-4 md:p-6 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           {/* Identity & Status */}
-          <div className="d-flex align-items-center gap-3">
+          <div className="flex items-center gap-4">
             <HexAvatar />
-            <div className="text-center text-md-start">
-              <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                <h1 className="h3 m-0 text-gradient font-orbitron">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                <h1 className="text-2xl md:text-[1.75rem] font-semibold leading-tight m-0 text-gradient font-orbitron">
                   Jorge Bucio
                 </h1>
                 <span className="badge-status-pulse">
@@ -27,7 +26,7 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
                   Available
                 </span>
               </div>
-              <p className="m-0 text-secondary small d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+              <p className="m-0 text-slate-400 text-sm flex items-center justify-center md:justify-start gap-2">
                 <Code2 size={15} className="text-accent" />
                 <span>Full-Stack & Web3 Developer</span>
                 <span>•</span>
@@ -37,7 +36,7 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
           </div>
 
           {/* Quick External Links */}
-          <div className="d-flex gap-2">
+          <div className="flex gap-2">
             <a
               href="https://github.com/ZynzTehr"
               target="_blank"

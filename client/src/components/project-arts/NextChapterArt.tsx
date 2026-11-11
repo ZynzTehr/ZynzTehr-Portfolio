@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const NextChapterArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -74,13 +74,28 @@ const NextChapterArt: React.FC = () => {
         {/* Upward Futuristic Light Beams */}
         <g className="light-beam" opacity="0.4">
           <polygon points="320,240 220,20 420,20" fill="url(#ncGrad)" opacity="0.15" />
-          <line x1="320" y1="240" x2="260" y2="20" stroke="#00ffc8" strokeWidth="1" strokeDasharray="6 6" />
-          <line x1="320" y1="240" x2="380" y2="20" stroke="#00ffc8" strokeWidth="1" strokeDasharray="6 6" />
+          <line
+            x1="320"
+            y1="240"
+            x2="260"
+            y2="20"
+            stroke="#00ffc8"
+            strokeWidth="1"
+            strokeDasharray="6 6"
+          />
+          <line
+            x1="320"
+            y1="240"
+            x2="380"
+            y2="20"
+            stroke="#00ffc8"
+            strokeWidth="1"
+            strokeDasharray="6 6"
+          />
         </g>
 
         {/* Luminous Open Book / Portal to the Next Chapter */}
         <g transform="translate(140, 30)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#ncFillClip)">
             {/* Open Book Left Wing */}
@@ -104,14 +119,62 @@ const NextChapterArt: React.FC = () => {
             />
 
             {/* Page Circuit Lines Inside Left */}
-            <line x1="45" y1="105" x2="155" y2="115" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
-            <line x1="45" y1="135" x2="155" y2="145" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
-            <line x1="45" y1="165" x2="125" y2="175" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
+            <line
+              x1="45"
+              y1="105"
+              x2="155"
+              y2="115"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="45"
+              y1="135"
+              x2="155"
+              y2="145"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="45"
+              y1="165"
+              x2="125"
+              y2="175"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
 
             {/* Page Circuit Lines Inside Right */}
-            <line x1="205" y1="115" x2="315" y2="105" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
-            <line x1="205" y1="145" x2="315" y2="135" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
-            <line x1="205" y1="175" x2="285" y2="165" stroke="#050a14" strokeWidth="5" strokeLinecap="round" />
+            <line
+              x1="205"
+              y1="115"
+              x2="315"
+              y2="105"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="205"
+              y1="145"
+              x2="315"
+              y2="135"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            <line
+              x1="205"
+              y1="175"
+              x2="285"
+              y2="165"
+              stroke="#050a14"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
 
             {/* Radiant Chapter Sun Core */}
             <circle cx="180" cy="65" r="24" fill="#00ffc8" opacity="0.9" />
@@ -132,7 +195,7 @@ const NextChapterArt: React.FC = () => {
               strokeWidth="3.5"
             />
             <line x1="180" y1="85" x2="180" y2="210" stroke="#00ffc8" strokeWidth="3" />
-            
+
             {/* Sun Core Outline */}
             <circle cx="180" cy="65" r="24" fill="none" stroke="#ffffff" strokeWidth="2" />
           </g>

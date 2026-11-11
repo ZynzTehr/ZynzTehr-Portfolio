@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const CapstoneArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -90,12 +90,19 @@ const CapstoneArt: React.FC = () => {
 
         {/* Central Terminal Window & Interactive Word Elements */}
         <g transform="translate(70, 30)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#capFillClip)">
             {/* Terminal Main Card */}
-            <rect x="50" y="20" width="400" height="220" rx="16" fill="url(#capGrad)" opacity="0.85" />
-            
+            <rect
+              x="50"
+              y="20"
+              width="400"
+              height="220"
+              rx="16"
+              fill="url(#capGrad)"
+              opacity="0.85"
+            />
+
             {/* User Profile Avatar Silhouette */}
             <circle cx="120" cy="90" r="32" fill="#070919" opacity="0.9" />
             <path d="M 95,150 C 95,125 145,125 145,150 Z" fill="#070919" opacity="0.9" />
@@ -137,17 +144,69 @@ const CapstoneArt: React.FC = () => {
 
           {/* Avatar Outline */}
           <circle cx="120" cy="90" r="32" fill="none" stroke="#00ffc8" strokeWidth="2" />
-          <path d="M 95,150 C 95,125 145,125 145,150" fill="none" stroke="#00ffc8" strokeWidth="2" />
+          <path
+            d="M 95,150 C 95,125 145,125 145,150"
+            fill="none"
+            stroke="#00ffc8"
+            strokeWidth="2"
+          />
 
           {/* Chat Bubble Outlines */}
-          <rect x="180" y="65" width="230" height="42" rx="10" fill="none" stroke="#00ffc8" strokeWidth="1.5" className="msg-1" />
-          <rect x="180" y="125" width="200" height="42" rx="10" fill="none" stroke="#7950f2" strokeWidth="1.5" className="msg-2" />
-          <rect x="180" y="185" width="150" height="35" rx="8" fill="none" stroke="#00ffc8" strokeWidth="1.5" />
+          <rect
+            x="180"
+            y="65"
+            width="230"
+            height="42"
+            rx="10"
+            fill="none"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+            className="msg-1"
+          />
+          <rect
+            x="180"
+            y="125"
+            width="200"
+            height="42"
+            rx="10"
+            fill="none"
+            stroke="#7950f2"
+            strokeWidth="1.5"
+            className="msg-2"
+          />
+          <rect
+            x="180"
+            y="185"
+            width="150"
+            height="35"
+            rx="8"
+            fill="none"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+          />
 
           {/* Floating Mad Libs Tags */}
           <g transform="translate(360, 175)">
-            <rect width="80" height="26" rx="13" fill="rgba(0, 255, 200, 0.15)" stroke="#00ffc8" strokeWidth="1.2" />
-            <text x="40" y="13" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">&lt;PLAY/&gt;</text>
+            <rect
+              width="80"
+              height="26"
+              rx="13"
+              fill="rgba(0, 255, 200, 0.15)"
+              stroke="#00ffc8"
+              strokeWidth="1.2"
+            />
+            <text
+              x="40"
+              y="13"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#00ffc8"
+              fontSize="10"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              &lt;PLAY/&gt;
+            </text>
           </g>
         </g>
       </svg>

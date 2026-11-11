@@ -1,18 +1,23 @@
-import rawProjects from './projects.json';
+import rawProjects from "./projects.json";
 
 export interface Project {
   id: string;
   name: string;
   rawName: string;
   description: string;
-  category: 'Full-Stack' | 'Frontend' | 'Web3 & Blockchain' | '3D & Creative UI' | 'Web Application';
+  category:
+    | "Full-Stack"
+    | "Frontend"
+    | "Web3 & Blockchain"
+    | "3D & Creative UI"
+    | "Web Application";
   language: string;
   topics: string[];
   stars: number;
   forks: number;
   githubUrl: string;
   liveUrl?: string | null;
-  mediaType: 'video' | 'gif' | 'image';
+  mediaType: "video" | "gif" | "image";
   mediaUrl: string;
   previewImage?: string;
   updatedAt?: string;
@@ -21,38 +26,55 @@ export interface Project {
 
 // Explicit curated title casing dictionary
 const TITLE_OVERRIDES: Record<string, string> = {
-  'super-quiz': 'Super Quiz',
-  'soda-diner': 'Soda Diner',
-  'match-maker': 'Match Maker',
-  'school-directory': 'School Directory',
-  'loancalculator': 'Loan Calculator',
-  'auralist-web': 'Auralist Web',
-  'tic-tac-toe-withai': 'Tic Tac Toe with AI',
-  'tic-tac-toe': 'Tic Tac Toe',
-  'tlm-website-redesign': 'TLM Website Redesign',
-  'rock-paper-scissors-spock': 'Rock Paper Scissors Spock',
-  'advanced-rock-paper-scissors': 'Advanced Rock Paper Scissors',
-  'basic-rock-paper-scissors': 'Basic Rock Paper Scissors',
-  'testimonial-layout': 'Testimonial Layout',
-  'nextchapter': 'Next Chapter',
-  'python-rock-paper-scissors': 'Python Rock Paper Scissors',
+  "super-quiz": "Super Quiz",
+  "soda-diner": "Soda Diner",
+  "match-maker": "Match Maker",
+  "school-directory": "School Directory",
+  loancalculator: "Loan Calculator",
+  "auralist-web": "Auralist Web",
+  "tic-tac-toe-withai": "Tic Tac Toe with AI",
+  "tic-tac-toe": "Tic Tac Toe",
+  "tlm-website-redesign": "TLM Website Redesign",
+  "rock-paper-scissors-spock": "Rock Paper Scissors Spock",
+  "advanced-rock-paper-scissors": "Advanced Rock Paper Scissors",
+  "basic-rock-paper-scissors": "Basic Rock Paper Scissors",
+  "testimonial-layout": "Testimonial Layout",
+  nextchapter: "Next Chapter",
+  "python-rock-paper-scissors": "Python Rock Paper Scissors",
 };
 
 // Generic Title Case converter fallback
 export function formatToTitleCase(str: string): string {
-  const smallWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'or', 'the', 'to', 'with']);
+  const smallWords = new Set([
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "but",
+    "by",
+    "for",
+    "in",
+    "nor",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "with",
+  ]);
   const acronyms: Record<string, string> = {
-    ai: 'AI',
-    ui: 'UI',
-    tlm: 'TLM',
-    web3: 'Web3',
-    icp: 'ICP',
-    api: 'API',
+    ai: "AI",
+    ui: "UI",
+    tlm: "TLM",
+    web3: "Web3",
+    icp: "ICP",
+    api: "API",
   };
 
   const words = str
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/[-_]/g, ' ')
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
     .trim()
     .split(/\s+/);
 
@@ -67,51 +89,53 @@ export function formatToTitleCase(str: string): string {
       }
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     })
-    .join(' ');
+    .join(" ");
 }
 
 // Category mappings
-const CATEGORY_MAP: Record<string, Project['category']> = {
-  'new-age-chess': '3D & Creative UI',
-  'countdown-timer': '3D & Creative UI',
-  'super-quiz': '3D & Creative UI',
-  'soda-diner': 'Full-Stack',
-  'match-maker': 'Full-Stack',
-  'school-directory': 'Frontend',
-  'loancalculator': 'Full-Stack',
-  'auralist-web': 'Frontend',
-  'tic-tac-toe-withai': 'Frontend',
-  'tic-tac-toe': 'Frontend',
-  'tlm-website-redesign': 'Frontend',
-  'rock-paper-scissors-spock': 'Frontend',
-  'advanced-rock-paper-scissors': 'Frontend',
-  'basic-rock-paper-scissors': 'Frontend',
-  'testimonial-layout': 'Frontend',
-  'nextchapter': 'Frontend',
-  'python-rock-paper-scissors': 'Full-Stack',
+const CATEGORY_MAP: Record<string, Project["category"]> = {
+  "new-age-chess": "3D & Creative UI",
+  "countdown-timer": "3D & Creative UI",
+  "super-quiz": "3D & Creative UI",
+  "soda-diner": "Full-Stack",
+  "match-maker": "Full-Stack",
+  "school-directory": "Frontend",
+  loancalculator: "Full-Stack",
+  "auralist-web": "Frontend",
+  "tic-tac-toe-withai": "Frontend",
+  "tic-tac-toe": "Frontend",
+  "tlm-website-redesign": "Frontend",
+  "rock-paper-scissors-spock": "Frontend",
+  "advanced-rock-paper-scissors": "Frontend",
+  "basic-rock-paper-scissors": "Frontend",
+  "testimonial-layout": "Frontend",
+  nextchapter: "Frontend",
+  "python-rock-paper-scissors": "Full-Stack",
 };
 
-export const projects: Project[] = (rawProjects as Project[]).map((p, index) => {
-  const titleCasedName = TITLE_OVERRIDES[p.id] || formatToTitleCase(p.name || p.rawName);
+export const projects: Project[] = (rawProjects as Project[])
+  .map((p, index) => {
+    const titleCasedName = TITLE_OVERRIDES[p.id] || formatToTitleCase(p.name || p.rawName);
 
-  return {
-    ...p,
-    name: titleCasedName,
-    category: CATEGORY_MAP[p.id] || (p.category as Project['category']) || 'Web Application',
-    mediaType: 'image' as const,
-    featured: index < 6,
-  };
-}).sort((a, b) => {
-  // Sort by updatedAt descending (most recently updated first)
-  const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-  const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-  return dateB - dateA;
-});
+    return {
+      ...p,
+      name: titleCasedName,
+      category: CATEGORY_MAP[p.id] || (p.category as Project["category"]) || "Web Application",
+      mediaType: "image" as const,
+      featured: index < 6,
+    };
+  })
+  .sort((a, b) => {
+    // Sort by updatedAt descending (most recently updated first)
+    const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+    const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+    return dateB - dateA;
+  });
 
 export const categories = [
-  'Recent',
-  'Full-Stack',
-  'Frontend',
-  'Web3 & Blockchain',
-  '3D & Creative UI',
+  "Recent",
+  "Full-Stack",
+  "Frontend",
+  "Web3 & Blockchain",
+  "3D & Creative UI",
 ] as const;

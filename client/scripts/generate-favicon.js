@@ -1,7 +1,7 @@
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -116,25 +116,25 @@ const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" w
 </svg>`;
 
 async function generateFavicons() {
-  const publicDir = path.resolve(__dirname, '../public');
-  const assetsDir = path.resolve(publicDir, 'assets');
+  const publicDir = path.resolve(__dirname, "../public");
+  const assetsDir = path.resolve(publicDir, "assets");
 
   if (!fs.existsSync(assetsDir)) {
     fs.mkdirSync(assetsDir, { recursive: true });
   }
 
   // 1. Write the modern vector SVG favicon
-  fs.writeFileSync(path.resolve(assetsDir, 'favicon.svg'), svgIcon.trim());
-  console.log('✅ Generated favicon.svg in public/assets/');
+  fs.writeFileSync(path.resolve(assetsDir, "favicon.svg"), svgIcon.trim());
+  console.log("✅ Generated favicon.svg in public/assets/");
 
   // 2. Launch Puppeteer to render crisp high-DPI PNGs
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const page = await browser.newPage();
-  
+
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -162,11 +162,11 @@ async function generateFavicons() {
 </body>
 </html>`;
 
-  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
   const sizes = [
-    { name: 'favicon.png', dir: assetsDir, width: 192, height: 192, scale: 2 },
-    { name: 'apple-touch-icon.png', dir: assetsDir, width: 180, height: 180, scale: 2 },
+    { name: "favicon.png", dir: assetsDir, width: 192, height: 192, scale: 2 },
+    { name: "apple-touch-icon.png", dir: assetsDir, width: 180, height: 180, scale: 2 },
   ];
 
   for (const s of sizes) {
@@ -180,10 +180,10 @@ async function generateFavicons() {
   }
 
   await browser.close();
-  console.log('🎉 3 essential favicon assets generated in public/assets/!');
+  console.log("🎉 3 essential favicon assets generated in public/assets/!");
 }
 
-generateFavicons().catch(err => {
-  console.error('❌ Failed to generate favicons:', err);
+generateFavicons().catch((err) => {
+  console.error("❌ Failed to generate favicons:", err);
   process.exit(1);
 });

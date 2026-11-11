@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ArrowUp } from 'lucide-react';
-import reactSvg from '../assets/react.svg';
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, ArrowUp } from "lucide-react";
+import reactSvg from "../assets/react.svg";
 
 interface ScrollWidgetProps {
   onBackToTop: () => void;
@@ -8,7 +8,7 @@ interface ScrollWidgetProps {
 }
 
 const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }) => {
-  const [scrollState, setScrollState] = useState<'top' | 'scrolling' | 'bottom'>('top');
+  const [scrollState, setScrollState] = useState<"top" | "scrolling" | "bottom">("top");
   const widgetRef = useRef<HTMLElement>(null);
   const atomImgRef = useRef<HTMLImageElement>(null);
 
@@ -39,15 +39,15 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
       progressRef.current = progress;
 
       // Determine state based on scroll progress & bottom proximity
-      const isBottom = progress >= 0.88 || (winHeight + currentScrollY >= docHeight - 80);
+      const isBottom = progress >= 0.88 || winHeight + currentScrollY >= docHeight - 80;
       const isTop = progress <= 0.05 && currentScrollY < 120;
 
       if (isBottom) {
-        setScrollState('bottom');
+        setScrollState("bottom");
       } else if (isTop) {
-        setScrollState('top');
+        setScrollState("top");
       } else {
-        setScrollState('scrolling');
+        setScrollState("scrolling");
       }
 
       // Calculate instantaneous scroll speed (px/ms)
@@ -80,15 +80,15 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
 
       // Calculate vertical screen travel from top to bottom
       const winHeight = window.innerHeight;
-      const hudEl = document.querySelector('.dev-hud') as HTMLElement | null;
+      const hudEl = document.querySelector(".dev-hud") as HTMLElement | null;
       let startTopOffset = isMobile ? 220 : 160;
       if (hudEl) {
         startTopOffset = hudEl.offsetTop + hudEl.offsetHeight + 10;
       }
-      
+
       const bottomMargin = isMobile ? 65 : 75;
       startTopOffset = Math.min(startTopOffset, winHeight - bottomMargin - 40);
-      const travelRange = Math.max(0, (winHeight - bottomMargin) - startTopOffset);
+      const travelRange = Math.max(0, winHeight - bottomMargin - startTopOffset);
       targetYRef.current = startTopOffset + progressRef.current * travelRange;
 
       // Smooth vertical lerp interpolation
@@ -101,13 +101,13 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
       rafIdRef.current = requestAnimationFrame(updatePhysics);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
     rafIdRef.current = requestAnimationFrame(updatePhysics);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
@@ -115,13 +115,13 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
   }, []);
 
   const handleClick = () => {
-    if (scrollState === 'bottom' || scrollState === 'scrolling') {
+    if (scrollState === "bottom" || scrollState === "scrolling") {
       onBackToTop();
     } else {
       if (onScrollDown) {
         onScrollDown();
       } else {
-        window.scrollTo({ top: 480, behavior: 'smooth' });
+        window.scrollTo({ top: 480, behavior: "smooth" });
       }
     }
   };
@@ -133,30 +133,27 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop, onScrollDown }
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      title={scrollState === 'bottom' || scrollState === 'scrolling' ? 'Back to Top' : 'Scroll Down'}
+      title={
+        scrollState === "bottom" || scrollState === "scrolling" ? "Back to Top" : "Scroll Down"
+      }
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleClick();
         }
       }}
     >
       <div className="scroll-widget-atom-wrap">
-        <img
-          ref={atomImgRef}
-          src={reactSvg}
-          alt="React Atom"
-          className="scroll-widget-react-svg"
-        />
+        <img ref={atomImgRef} src={reactSvg} alt="React Atom" className="scroll-widget-react-svg" />
         <div className="atom-core-glow" />
       </div>
 
       <div className="scroll-widget-label-group">
         <span className="scroll-widget-text font-orbitron">
-          {scrollState === 'bottom' ? 'BACK TO TOP' : 'SCROLL DOWN'}
+          {scrollState === "bottom" ? "BACK TO TOP" : "SCROLL DOWN"}
         </span>
         <div className="scroll-widget-icon-sub">
-          {scrollState === 'bottom' ? (
+          {scrollState === "bottom" ? (
             <ArrowUp size={13} className="widget-arrow-icon text-accent" />
           ) : (
             <ChevronDown size={13} className="widget-arrow-icon text-accent bounce-subtle" />

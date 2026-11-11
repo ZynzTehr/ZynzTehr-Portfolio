@@ -1,23 +1,23 @@
-import React from 'react';
-import GeneratedArt, { generatedArtMap } from './generated';
-import MongooseArt from './MongooseArt';
-import CapstoneArt from './CapstoneArt';
-import MinimaxAiArt from './MinimaxAiArt';
-import MatchMakerArt from './MatchMakerArt';
-import SuperQuizArt from './SuperQuizArt';
-import SchoolDirectoryArt from './SchoolDirectoryArt';
-import LoanCalcArt from './LoanCalcArt';
-import AuraListArt from './AuraListArt';
-import TicTacToeArt from './TicTacToeArt';
-import TlmRedesignArt from './TlmRedesignArt';
-import RpsSpockArt from './RpsSpockArt';
-import AdvancedRpsArt from './AdvancedRpsArt';
-import BasicRpsArt from './BasicRpsArt';
-import TestimonialArt from './TestimonialArt';
-import NextChapterArt from './NextChapterArt';
-import PythonRpsArt from './PythonRpsArt';
-import NewAgeChessArt from './NewAgeChessArt';
-import CountdownTimerArt from './CountdownTimerArt';
+import React from "react";
+import GeneratedArt from "./generated";
+import MongooseArt from "./MongooseArt";
+import CapstoneArt from "./CapstoneArt";
+import MinimaxAiArt from "./MinimaxAiArt";
+import MatchMakerArt from "./MatchMakerArt";
+import SuperQuizArt from "./SuperQuizArt";
+import SchoolDirectoryArt from "./SchoolDirectoryArt";
+import LoanCalcArt from "./LoanCalcArt";
+import AuraListArt from "./AuraListArt";
+import TicTacToeArt from "./TicTacToeArt";
+import TlmRedesignArt from "./TlmRedesignArt";
+import RpsSpockArt from "./RpsSpockArt";
+import AdvancedRpsArt from "./AdvancedRpsArt";
+import BasicRpsArt from "./BasicRpsArt";
+import TestimonialArt from "./TestimonialArt";
+import NextChapterArt from "./NextChapterArt";
+import PythonRpsArt from "./PythonRpsArt";
+import NewAgeChessArt from "./NewAgeChessArt";
+import CountdownTimerArt from "./CountdownTimerArt";
 
 interface ProjectArtProps {
   projectId: string;
@@ -26,93 +26,93 @@ interface ProjectArtProps {
   mediaUrl?: string;
 }
 
-const ProjectArt: React.FC<ProjectArtProps> = ({ projectId, projectName, previewImage, mediaUrl }) => {
+const ProjectArt: React.FC<ProjectArtProps> = ({
+  projectId,
+  projectName,
+  previewImage,
+  mediaUrl,
+}) => {
   const id = projectId.toLowerCase().trim();
 
   switch (id) {
-    case 'new-age-chess':
-    case 'newagechess':
+    case "new-age-chess":
+    case "newagechess":
       return <NewAgeChessArt />;
 
-    case 'countdown-timer':
-    case 'countdowntimer':
+    case "countdown-timer":
+    case "countdowntimer":
       return <CountdownTimerArt />;
 
-    case 'soda-diner':
+    case "soda-diner":
       return <MongooseArt />;
 
-    case 'capstone-project':
+    case "capstone-project":
       return <CapstoneArt />;
 
     // zynztehr-profile removed — now in DevHud HexAvatar
 
-    case 'tic-tac-toe-withai':
-    case 'tic-tac-toe-with-ai':
+    case "tic-tac-toe-withai":
+    case "tic-tac-toe-with-ai":
       return <MinimaxAiArt />;
 
-    case 'match-maker':
+    case "match-maker":
       return <MatchMakerArt />;
 
-    case 'super-quiz':
+    case "super-quiz":
       return <SuperQuizArt />;
 
-    case 'school-directory':
+    case "school-directory":
       return <SchoolDirectoryArt />;
 
-    case 'loancalculator':
-    case 'loan-calculator':
+    case "loancalculator":
+    case "loan-calculator":
       return <LoanCalcArt />;
 
-    case 'auralist-web':
-    case 'auralist':
+    case "auralist-web":
+    case "auralist":
       return <AuraListArt />;
 
-    case 'tic-tac-toe':
+    case "tic-tac-toe":
       return <TicTacToeArt />;
 
-    case 'tlm-website-redesign':
+    case "tlm-website-redesign":
       return <TlmRedesignArt />;
 
-    case 'rock-paper-scissors-spock':
+    case "rock-paper-scissors-spock":
       return <RpsSpockArt />;
 
-    case 'advanced-rock-paper-scissors':
+    case "advanced-rock-paper-scissors":
       return <AdvancedRpsArt />;
 
-    case 'basic-rock-paper-scissors':
+    case "basic-rock-paper-scissors":
       return <BasicRpsArt />;
 
-    case 'testimonial-layout':
+    case "testimonial-layout":
       return <TestimonialArt />;
 
-    case 'nextchapter':
-    case 'next-chapter':
+    case "nextchapter":
+    case "next-chapter":
       return <NextChapterArt />;
 
-    case 'python-rock-paper-scissors':
+    case "python-rock-paper-scissors":
       return <PythonRpsArt />;
 
     default:
       // Try auto-generated art first, then fall back to image
-      if (generatedArtMap[id]) {
-        return <GeneratedArt projectId={id} />;
-      }
       return (
-        <img
-          src={previewImage || mediaUrl}
-          alt={projectName}
-          className="w-100 h-100 rounded-3"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'top center',
-            display: 'block',
-          }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80';
-          }}
+        <GeneratedArt
+          projectId={id}
+          fallback={
+            <img
+              src={previewImage || mediaUrl}
+              alt={projectName}
+              className="w-full h-full rounded-xl block object-cover object-top"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80";
+              }}
+            />
+          }
         />
       );
   }

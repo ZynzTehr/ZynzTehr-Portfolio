@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Sparkles } from 'lucide-react';
-import { categories, type Project } from '../data/projects';
-import Earth3D from './Earth3D';
-import MatrixRain from './MatrixRain';
-import ProjectArt from './project-arts/ProjectArt';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Sparkles } from "lucide-react";
+import { categories, type Project } from "../data/projects";
+import Earth3D from "./Earth3D";
+import MatrixRain from "./MatrixRain";
+import ProjectArt from "./project-arts/ProjectArt";
 
 interface ProjectCarouselProps {
   projects: Project[];
@@ -35,12 +35,13 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   const displayProjects = projects.slice(0, 10); // Optimal quantity for the 3D cylinder
   const quantity = displayProjects.length || 1;
+  const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
   // Track mobile breakpoint on resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Continuous 60fps auto-orbit loop (active on larger screens)
@@ -74,11 +75,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     };
   }, [isRotating, isHovered, isStepping, isMobile]);
 
-  // Reset horizontal slider scroll position and active index when category changes on mobile
+  // Reset horizontal slider scroll position when category changes on mobile
   useEffect(() => {
-    setActiveMobileIndex(0);
     if (sliderRef.current && window.innerWidth <= 768) {
-      sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
     }
   }, [activeCategory]);
 
@@ -103,19 +103,20 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   // Handle manual rotation stepping (or horizontal scroll on mobile)
   const handleRotate = useCallback(
-    (direction: 'left' | 'right') => {
+    (direction: "left" | "right") => {
       if (sliderRef.current && window.innerWidth <= 768) {
         setActiveMobileIndex((prev) => {
+          const clampedPrev = Math.min(prev, Math.max(0, displayProjects.length - 1));
           const nextIndex =
-            direction === 'left'
-              ? Math.max(0, prev - 1)
-              : Math.min(displayProjects.length - 1, prev + 1);
+            direction === "left"
+              ? Math.max(0, clampedPrev - 1)
+              : Math.min(displayProjects.length - 1, clampedPrev + 1);
 
-          const targetItem = sliderRef.current?.children[nextIndex] as HTMLElement;
+          const targetItem = sliderRef.current?.children[nextIndex] as HTMLElement | undefined;
           if (targetItem && sliderRef.current) {
             const targetLeft =
               targetItem.offsetLeft - (sliderRef.current.clientWidth - targetItem.clientWidth) / 2;
-            sliderRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
+            sliderRef.current.scrollTo({ left: targetLeft, behavior: "smooth" });
           }
           return nextIndex;
         });
@@ -126,7 +127,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       setIsStepping(true);
 
       const step = 360 / quantity;
-      const targetAngle = direction === 'left' ? angleRef.current - step : angleRef.current + step;
+      const targetAngle = direction === "left" ? angleRef.current - step : angleRef.current + step;
       angleRef.current = targetAngle;
       setRotationAngle(targetAngle);
 
@@ -135,7 +136,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         setIsStepping(false);
       }, 550);
     },
-    [displayProjects.length, quantity]
+    [displayProjects.length, quantity],
   );
 
   const togglePlayPause = () => {
@@ -175,13 +176,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   };
 
   return (
-    <div className="project-showcase-wrapper w-100 d-flex flex-column align-items-center">
-      
+    <div className="project-showcase-wrapper w-full flex flex-col items-center">
       {/* 3D Carousel Section */}
-      <div
-        className="banner"
-        style={{ '--quantity': quantity } as React.CSSProperties}
-      >
+      <div className="banner" style={{ "--quantity": quantity } as React.CSSProperties}>
         {/* Three.js 3D Earth in the Center */}
         <Earth3D reverse={true} size={650} />
 
@@ -193,32 +190,29 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          style={{
-            ...(isMobile ? {} : {
-              transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
-              transition: isStepping ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
-            }),
-          }}
+          style={
+            isMobile
+              ? undefined
+              : {
+                  transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
+                  transition: isStepping ? "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+                }
+          }
         >
           {displayProjects.map((project, index) => (
             <div
               key={project.id}
-              className={`item ${index === activeMobileIndex ? 'active-tile' : ''}`}
-              style={{ '--position': index + 1 } as React.CSSProperties}
+              className={`item ${index === safeMobileIndex ? "active-tile" : ""}`}
+              style={{ "--position": index + 1 } as React.CSSProperties}
               onClick={() => handleCardClick(project, index)}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className="carousel-card project-tile-3d">
-                
                 {/* Media Container: Default Matrix Code Rain with Hover SVG Cross-fade */}
                 <div className="tile-media-wrapper">
                   <div className="tile-default-media">
-                    <MatrixRain
-                      color="#00ff41"
-                      fontSize={11}
-                      speed={30}
-                    />
+                    <MatrixRain color="#00ff41" fontSize={11} speed={30} />
                   </div>
                   <div className="tile-hover-art">
                     <ProjectArt projectId={project.id} projectName={project.name} />
@@ -229,13 +223,12 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 {/* Info Bar */}
                 <div className="tile-info">
                   <span className="tile-category-tag">{project.category}</span>
-                  <h3 className="tile-title text-truncate">{project.name}</h3>
+                  <h3 className="tile-title truncate">{project.name}</h3>
                   <div className="tile-inspect-hint">
-                    <Eye size={12} className="me-1" />
+                    <Eye size={12} className="mr-1" />
                     <span>Inspect</span>
                   </div>
                 </div>
-
               </div>
             </div>
           ))}
@@ -243,25 +236,28 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       </div>
 
       {/* Category Filter Pills Directly Above Carousel Stage Controls */}
-      <div className="category-filter-container d-flex justify-content-center flex-wrap gap-2 mt-4">
+      <div className="category-filter-container flex justify-center flex-wrap gap-2 mt-6">
         {categories.map((cat) => (
           <button
             key={cat}
-            className={`btn-category-pill ${activeCategory === cat ? 'active' : ''}`}
-            onClick={() => onSelectCategory(cat)}
+            className={`btn-category-pill ${activeCategory === cat ? "active" : ""}`}
+            onClick={() => {
+              setActiveMobileIndex(0);
+              onSelectCategory(cat);
+            }}
           >
-            {cat === 'Recent' && <Layers size={14} className="me-1" />}
-            {cat === '3D & Creative UI' && <Sparkles size={14} className="me-1" />}
+            {cat === "Recent" && <Layers size={14} className="mr-1" />}
+            {cat === "3D & Creative UI" && <Sparkles size={14} className="mr-1" />}
             {cat}
           </button>
         ))}
       </div>
 
       {/* 3D Stage Controls */}
-      <div className="carousel-controls d-flex align-items-center justify-content-center gap-3 mt-3 mb-4">
+      <div className="carousel-controls flex items-center justify-center gap-4 mt-4 mb-6">
         <button
           className="btn-carousel-ctrl"
-          onClick={() => handleRotate('left')}
+          onClick={() => handleRotate("left")}
           title="Rotate Left"
           aria-label="Rotate Left"
         >
@@ -272,24 +268,23 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           <button
             className="btn-carousel-ctrl btn-play-pause"
             onClick={togglePlayPause}
-            title={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
-            aria-label={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
+            title={isRotating ? "Pause Rotation" : "Resume Rotation"}
+            aria-label={isRotating ? "Pause Rotation" : "Resume Rotation"}
           >
             {isRotating ? <Pause size={16} /> : <Play size={16} />}
-            <span className="ms-1 small">{isRotating ? 'Pause Orbit' : 'Auto Orbit'}</span>
+            <span className="ml-1 text-sm">{isRotating ? "Pause Orbit" : "Auto Orbit"}</span>
           </button>
         )}
 
         <button
           className="btn-carousel-ctrl"
-          onClick={() => handleRotate('right')}
+          onClick={() => handleRotate("right")}
           title="Rotate Right"
           aria-label="Rotate Right"
         >
           <ChevronRight size={18} />
         </button>
       </div>
-
     </div>
   );
 };

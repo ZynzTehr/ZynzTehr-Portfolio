@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const PythonRpsArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -75,7 +75,6 @@ const PythonRpsArt: React.FC = () => {
 
         {/* Python Serpent & CLI Terminal */}
         <g transform="translate(140, 20)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#pyFillClip)">
             {/* Terminal Window Card */}
@@ -126,14 +125,32 @@ const PythonRpsArt: React.FC = () => {
             <circle cx="210" cy="155" r="4" fill="#080e17" />
 
             {/* CLI Prompt >> */}
-            <text x="40" y="205" fill="#00ffc8" fontSize="16" fontFamily="monospace" fontWeight="bold">&gt;&gt;&gt; def play_rps():</text>
+            <text
+              x="40"
+              y="205"
+              fill="#00ffc8"
+              fontSize="16"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              &gt;&gt;&gt; def play_rps():
+            </text>
           </g>
 
           {/* OUTLINE LAYER */}
           <g className="py-outline" filter="url(#pyGlow)">
             {/* Terminal Outline */}
-            <rect x="20" y="20" width="320" height="210" rx="14" fill="none" stroke="url(#pyStroke)" strokeWidth="3" />
-            
+            <rect
+              x="20"
+              y="20"
+              width="320"
+              height="210"
+              rx="14"
+              fill="none"
+              stroke="url(#pyStroke)"
+              strokeWidth="3"
+            />
+
             {/* Terminal Header Dots */}
             <circle cx="42" cy="38" r="4" fill="#ff5f56" />
             <circle cx="56" cy="38" r="4" fill="#ffd43b" />
@@ -159,8 +176,26 @@ const PythonRpsArt: React.FC = () => {
 
         {/* Python CLI Game Tag */}
         <g transform="translate(250, 275)">
-          <rect width="140" height="28" rx="6" fill="rgba(59, 130, 246, 0.15)" stroke="#3b82f6" strokeWidth="1.2" />
-          <text x="70" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">PYTHON // CLI GAME</text>
+          <rect
+            width="140"
+            height="28"
+            rx="6"
+            fill="rgba(59, 130, 246, 0.15)"
+            stroke="#3b82f6"
+            strokeWidth="1.2"
+          />
+          <text
+            x="70"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            PYTHON // CLI GAME
+          </text>
         </g>
       </svg>
     </div>

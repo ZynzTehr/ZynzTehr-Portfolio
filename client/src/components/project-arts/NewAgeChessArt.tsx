@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const NewAgeChessArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -111,24 +111,28 @@ const NewAgeChessArt: React.FC = () => {
 
         {/* Tactical Radar Sweep Cone */}
         <g className="radar-sweeper">
-          <path
-            d="M 320,160 L 440,100 A 130 130 0 0 1 450,160 Z"
-            fill="url(#radarScanGrad)"
-          />
+          <path d="M 320,160 L 440,100 A 130 130 0 0 1 450,160 Z" fill="url(#radarScanGrad)" />
         </g>
 
         {/* Isometric Cyber Chessboard & Knight Composition */}
         <g transform="translate(320, 160)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#chessFillClip)">
             {/* Isometric Chess Grid Base Plate */}
             {/* Row 1 (Top) */}
             <path d="M 0,-85 L 35,-68 L 0,-50 L -35,-68 Z" fill="url(#chessGrad)" opacity="0.2" />
             <path d="M 35,-68 L 70,-50 L 35,-33 L 0,-50 Z" fill="url(#chessGrad)" opacity="0.6" />
-            <path d="M -35,-68 L 0,-50 L -35,-33 L -70,-50 Z" fill="url(#chessGrad)" opacity="0.6" />
+            <path
+              d="M -35,-68 L 0,-50 L -35,-33 L -70,-50 Z"
+              fill="url(#chessGrad)"
+              opacity="0.6"
+            />
             <path d="M 70,-50 L 105,-33 L 70,-15 L 35,-33 Z" fill="url(#chessGrad)" opacity="0.2" />
-            <path d="M -70,-50 L -35,-33 L -70,-15 L -105,-33 Z" fill="url(#chessGrad)" opacity="0.2" />
+            <path
+              d="M -70,-50 L -35,-33 L -70,-15 L -105,-33 Z"
+              fill="url(#chessGrad)"
+              opacity="0.2"
+            />
 
             {/* Row 2 */}
             <path d="M 0,-50 L 35,-33 L 0,-15 L -35,-33 Z" fill="url(#chessGrad)" opacity="0.75" />
@@ -159,9 +163,14 @@ const NewAgeChessArt: React.FC = () => {
             {/* Cyber Knight Piece Silhouette & Facets */}
             <g transform="translate(0, -25)" className="knight-gleam">
               {/* Base Pedestal */}
-              <path d="M -30,45 L 30,45 L 20,35 L -20,35 Z" fill="#040817" stroke="#00f5ff" strokeWidth="1.5" />
+              <path
+                d="M -30,45 L 30,45 L 20,35 L -20,35 Z"
+                fill="#040817"
+                stroke="#00f5ff"
+                strokeWidth="1.5"
+              />
               <path d="M -22,35 L 22,35 L 18,22 L -18,22 Z" fill="url(#chessGrad)" opacity="0.8" />
-              
+
               {/* Knight Torso & Mane Silhouette */}
               <path
                 d="M -18,22
@@ -181,11 +190,7 @@ const NewAgeChessArt: React.FC = () => {
                 fill="url(#chessGrad)"
                 opacity="0.9"
               />
-              <path
-                d="M 8,-20 L 18,-14 L 12,12 L -2,8 Z"
-                fill="url(#chessGrad)"
-                opacity="0.65"
-              />
+              <path d="M 8,-20 L 18,-14 L 12,12 L -2,8 Z" fill="url(#chessGrad)" opacity="0.65" />
               <circle cx="2" cy="-36" r="3" fill="#00f5ff" />
 
               {/* Holographic Crown / Neural Nodes floating above */}
@@ -204,8 +209,24 @@ const NewAgeChessArt: React.FC = () => {
               strokeWidth="2.5"
             />
             {/* Main Center Coordinate Cross */}
-            <line x1="0" y1="-85" x2="0" y2="90" stroke="#00f5ff" strokeWidth="1.5" strokeDasharray="3 3" />
-            <line x1="-105" y1="-33" x2="105" y2="38" stroke="#00f5ff" strokeWidth="1.5" strokeDasharray="3 3" />
+            <line
+              x1="0"
+              y1="-85"
+              x2="0"
+              y2="90"
+              stroke="#00f5ff"
+              strokeWidth="1.5"
+              strokeDasharray="3 3"
+            />
+            <line
+              x1="-105"
+              y1="-33"
+              x2="105"
+              y2="38"
+              stroke="#00f5ff"
+              strokeWidth="1.5"
+              strokeDasharray="3 3"
+            />
 
             {/* Glowing Knight Contour */}
             <path
@@ -226,7 +247,15 @@ const NewAgeChessArt: React.FC = () => {
 
         {/* Top Left AI Telemetry */}
         <g transform="translate(30, 30)">
-          <text x="0" y="0" fill="#00f5ff" fontSize="10" fontFamily="monospace" fontWeight="bold" opacity="0.9">
+          <text
+            x="0"
+            y="0"
+            fill="#00f5ff"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+            opacity="0.9"
+          >
             RADAR // THREAT MATRIX
           </text>
           <text x="0" y="16" fill="#a855f7" fontSize="9" fontFamily="monospace" opacity="0.75">
@@ -236,8 +265,25 @@ const NewAgeChessArt: React.FC = () => {
 
         {/* Badge Bottom Center */}
         <g transform="translate(235, 275)">
-          <rect width="170" height="28" rx="6" fill="rgba(0, 245, 255, 0.12)" stroke="#00f5ff" strokeWidth="1.2" />
-          <text x="85" y="14" textAnchor="middle" dominantBaseline="central" fill="#00f5ff" fontSize="10" fontFamily="monospace" fontWeight="bold" letterSpacing="1">
+          <rect
+            width="170"
+            height="28"
+            rx="6"
+            fill="rgba(0, 245, 255, 0.12)"
+            stroke="#00f5ff"
+            strokeWidth="1.2"
+          />
+          <text
+            x="85"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00f5ff"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+            letterSpacing="1"
+          >
             NEURAL // CHESS ARENA
           </text>
         </g>

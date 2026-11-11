@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const CountdownTimerArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -116,27 +116,49 @@ const CountdownTimerArt: React.FC = () => {
 
         {/* Mechanical Split-Flip Cards Group */}
         <g transform="translate(0, 0)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#timerFillClip)">
-            
             {/* CARD 1: DAYS (Left: x=80) */}
             <g transform="translate(80, 75)">
               {/* Top Half */}
-              <path d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z" fill="url(#cardGradTop)" />
+              <path
+                d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z"
+                fill="url(#cardGradTop)"
+              />
               {/* Bottom Half */}
-              <path d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z" fill="url(#cardGradBottom)" />
+              <path
+                d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z"
+                fill="url(#cardGradBottom)"
+              />
               {/* Center Divider Hinge */}
               <rect x="0" y="68" width="120" height="4" fill="#05070d" />
               <rect x="-4" y="67" width="6" height="6" rx="2" fill="#f59e0b" opacity="0.8" />
               <rect x="118" y="67" width="6" height="6" rx="2" fill="#f59e0b" opacity="0.8" />
 
               {/* Digits 08 */}
-              <text x="60" y="98" fill="url(#timerGrad)" fontSize="68" fontFamily="'JetBrains Mono', monospace" fontWeight="900" textAnchor="middle" letterSpacing="4">
+              <text
+                x="60"
+                y="98"
+                fill="url(#timerGrad)"
+                fontSize="68"
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight="900"
+                textAnchor="middle"
+                letterSpacing="4"
+              >
                 08
               </text>
               {/* Sub-label */}
-              <text x="60" y="160" fill="#f59e0b" fontSize="10" fontFamily="monospace" fontWeight="bold" textAnchor="middle" letterSpacing="3">
+              <text
+                x="60"
+                y="160"
+                fill="#f59e0b"
+                fontSize="10"
+                fontFamily="monospace"
+                fontWeight="bold"
+                textAnchor="middle"
+                letterSpacing="3"
+              >
                 DAYS
               </text>
             </g>
@@ -150,20 +172,44 @@ const CountdownTimerArt: React.FC = () => {
             {/* CARD 2: HOURS (Center: x=250) */}
             <g transform="translate(250, 75)">
               {/* Top Half */}
-              <path d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z" fill="url(#cardGradTop)" />
+              <path
+                d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z"
+                fill="url(#cardGradTop)"
+              />
               {/* Bottom Half */}
-              <path d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z" fill="url(#cardGradBottom)" />
+              <path
+                d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z"
+                fill="url(#cardGradBottom)"
+              />
               {/* Center Divider Hinge */}
               <rect x="0" y="68" width="120" height="4" fill="#05070d" />
               <rect x="-4" y="67" width="6" height="6" rx="2" fill="#ef4444" opacity="0.8" />
               <rect x="118" y="67" width="6" height="6" rx="2" fill="#ef4444" opacity="0.8" />
 
               {/* Digits 24 */}
-              <text x="60" y="98" fill="url(#timerGrad)" fontSize="68" fontFamily="'JetBrains Mono', monospace" fontWeight="900" textAnchor="middle" letterSpacing="4">
+              <text
+                x="60"
+                y="98"
+                fill="url(#timerGrad)"
+                fontSize="68"
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight="900"
+                textAnchor="middle"
+                letterSpacing="4"
+              >
                 24
               </text>
               {/* Sub-label */}
-              <text x="60" y="160" fill="#ef4444" fontSize="10" fontFamily="monospace" fontWeight="bold" textAnchor="middle" letterSpacing="3">
+              <text
+                x="60"
+                y="160"
+                fill="#ef4444"
+                fontSize="10"
+                fontFamily="monospace"
+                fontWeight="bold"
+                textAnchor="middle"
+                letterSpacing="3"
+              >
                 HOURS
               </text>
             </g>
@@ -177,17 +223,32 @@ const CountdownTimerArt: React.FC = () => {
             {/* CARD 3: SECONDS (Right: x=420) */}
             <g transform="translate(420, 75)">
               {/* Top Half */}
-              <path d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z" fill="url(#cardGradTop)" />
+              <path
+                d="M 0,10 Q 0,0 10,0 L 110,0 Q 120,0 120,10 L 120,68 L 0,68 Z"
+                fill="url(#cardGradTop)"
+              />
               {/* Bottom Half */}
-              <path d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z" fill="url(#cardGradBottom)" />
-              
+              <path
+                d="M 0,72 L 120,72 L 120,130 Q 120,140 110,140 L 10,140 Q 0,140 0,130 Z"
+                fill="url(#cardGradBottom)"
+              />
+
               {/* Center Divider Hinge */}
               <rect x="0" y="68" width="120" height="4" fill="#05070d" />
               <rect x="-4" y="67" width="6" height="6" rx="2" fill="#ec4899" opacity="0.8" />
               <rect x="118" y="67" width="6" height="6" rx="2" fill="#ec4899" opacity="0.8" />
 
               {/* Digits 59 */}
-              <text x="60" y="98" fill="url(#timerGrad)" fontSize="68" fontFamily="'JetBrains Mono', monospace" fontWeight="900" textAnchor="middle" letterSpacing="4">
+              <text
+                x="60"
+                y="98"
+                fill="url(#timerGrad)"
+                fontSize="68"
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight="900"
+                textAnchor="middle"
+                letterSpacing="4"
+              >
                 59
               </text>
 
@@ -200,32 +261,75 @@ const CountdownTimerArt: React.FC = () => {
               />
 
               {/* Sub-label */}
-              <text x="60" y="160" fill="#ec4899" fontSize="10" fontFamily="monospace" fontWeight="bold" textAnchor="middle" letterSpacing="3">
+              <text
+                x="60"
+                y="160"
+                fill="#ec4899"
+                fontSize="10"
+                fontFamily="monospace"
+                fontWeight="bold"
+                textAnchor="middle"
+                letterSpacing="3"
+              >
                 SECS
               </text>
             </g>
-
           </g>
 
           {/* OUTLINE LAYER */}
           <g className="timer-outline" filter="url(#timerGlow)">
             {/* Card 1 Bezel Outline */}
-            <rect x="80" y="75" width="120" height="140" rx="10" fill="none" stroke="url(#timerStroke)" strokeWidth="2.5" />
+            <rect
+              x="80"
+              y="75"
+              width="120"
+              height="140"
+              rx="10"
+              fill="none"
+              stroke="url(#timerStroke)"
+              strokeWidth="2.5"
+            />
             <line x1="80" y1="145" x2="200" y2="145" stroke="#fbbf24" strokeWidth="2" />
 
             {/* Card 2 Bezel Outline */}
-            <rect x="250" y="75" width="120" height="140" rx="10" fill="none" stroke="url(#timerStroke)" strokeWidth="2.5" />
+            <rect
+              x="250"
+              y="75"
+              width="120"
+              height="140"
+              rx="10"
+              fill="none"
+              stroke="url(#timerStroke)"
+              strokeWidth="2.5"
+            />
             <line x1="250" y1="145" x2="370" y2="145" stroke="#ef4444" strokeWidth="2" />
 
             {/* Card 3 Bezel Outline */}
-            <rect x="420" y="75" width="120" height="140" rx="10" fill="none" stroke="url(#timerStroke)" strokeWidth="2.5" />
+            <rect
+              x="420"
+              y="75"
+              width="120"
+              height="140"
+              rx="10"
+              fill="none"
+              stroke="url(#timerStroke)"
+              strokeWidth="2.5"
+            />
             <line x1="420" y1="145" x2="540" y2="145" stroke="#ec4899" strokeWidth="2" />
           </g>
         </g>
 
         {/* Top Left Precision Spec */}
         <g transform="translate(30, 30)">
-          <text x="0" y="0" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold" opacity="0.9">
+          <text
+            x="0"
+            y="0"
+            fill="#fbbf24"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+            opacity="0.9"
+          >
             MECHANICAL // 3D SPLIT-FLIP
           </text>
           <text x="0" y="16" fill="#ef4444" fontSize="9" fontFamily="monospace" opacity="0.75">
@@ -235,8 +339,25 @@ const CountdownTimerArt: React.FC = () => {
 
         {/* Badge Bottom Center */}
         <g transform="translate(230, 275)">
-          <rect width="180" height="28" rx="6" fill="rgba(251, 191, 36, 0.12)" stroke="#fbbf24" strokeWidth="1.2" />
-          <text x="90" y="14" textAnchor="middle" dominantBaseline="central" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold" letterSpacing="1">
+          <rect
+            width="180"
+            height="28"
+            rx="6"
+            fill="rgba(251, 191, 36, 0.12)"
+            stroke="#fbbf24"
+            strokeWidth="1.2"
+          />
+          <text
+            x="90"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fbbf24"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+            letterSpacing="1"
+          >
             CHRONO // COUNTDOWN TIMER
           </text>
         </g>

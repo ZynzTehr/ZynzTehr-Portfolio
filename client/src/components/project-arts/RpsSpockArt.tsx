@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const RpsSpockArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -73,7 +73,6 @@ const RpsSpockArt: React.FC = () => {
 
         {/* 5-Point Sacred Pentagon Orbital Network */}
         <g className="pentagon-group">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#spockFillClip)">
             {/* Center Pentagon Hub */}
@@ -104,7 +103,9 @@ const RpsSpockArt: React.FC = () => {
             <circle cx="225" cy="119" r="22" fill="#0a0510" />
 
             {/* Vulcan Spock Salute in Center */}
-            <text x="306" y="158" fill="#00ffc8" fontSize="30">🖖</text>
+            <text x="306" y="158" fill="#00ffc8" fontSize="30">
+              🖖
+            </text>
           </g>
 
           {/* OUTLINE LAYER */}
@@ -137,8 +138,26 @@ const RpsSpockArt: React.FC = () => {
 
         {/* 5-Way Game Tag */}
         <g transform="translate(255, 275)">
-          <rect width="130" height="28" rx="6" fill="rgba(139, 92, 246, 0.15)" stroke="#8b5cf6" strokeWidth="1.2" />
-          <text x="65" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">5-WAY // RPS</text>
+          <rect
+            width="130"
+            height="28"
+            rx="6"
+            fill="rgba(139, 92, 246, 0.15)"
+            stroke="#8b5cf6"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            5-WAY // RPS
+          </text>
         </g>
       </svg>
     </div>

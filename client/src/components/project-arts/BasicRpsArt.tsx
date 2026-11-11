@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const BasicRpsArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -123,8 +123,24 @@ const BasicRpsArt: React.FC = () => {
         <g clipPath="url(#basicFillClip)">
           {/* Top Versus / Score HUD */}
           <g transform="translate(250, 28)">
-            <rect width="140" height="32" rx="16" fill="#080c18" stroke="rgba(0, 255, 200, 0.4)" strokeWidth="1.5" />
-            <text x="70" y="16" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="12" fontFamily="monospace" fontWeight="bold">
+            <rect
+              width="140"
+              height="32"
+              rx="16"
+              fill="#080c18"
+              stroke="rgba(0, 255, 200, 0.4)"
+              strokeWidth="1.5"
+            />
+            <text
+              x="70"
+              y="16"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#00ffc8"
+              fontSize="12"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
               PLAYER VS CPU
             </text>
           </g>
@@ -137,8 +153,26 @@ const BasicRpsArt: React.FC = () => {
             <text x="180" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
               ✊
             </text>
-            <rect x="145" y="200" width="70" height="22" rx="11" fill="rgba(0, 216, 255, 0.15)" stroke="#00d8ff" strokeWidth="1" />
-            <text x="180" y="211" textAnchor="middle" dominantBaseline="central" fill="#00d8ff" fontSize="11" fontFamily="monospace" fontWeight="bold">
+            <rect
+              x="145"
+              y="200"
+              width="70"
+              height="22"
+              rx="11"
+              fill="rgba(0, 216, 255, 0.15)"
+              stroke="#00d8ff"
+              strokeWidth="1"
+            />
+            <text
+              x="180"
+              y="211"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#00d8ff"
+              fontSize="11"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
               ROCK
             </text>
           </g>
@@ -151,8 +185,26 @@ const BasicRpsArt: React.FC = () => {
             <text x="320" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
               ✋
             </text>
-            <rect x="285" y="200" width="70" height="22" rx="11" fill="rgba(0, 255, 200, 0.15)" stroke="#00ffc8" strokeWidth="1" />
-            <text x="320" y="211" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="11" fontFamily="monospace" fontWeight="bold">
+            <rect
+              x="285"
+              y="200"
+              width="70"
+              height="22"
+              rx="11"
+              fill="rgba(0, 255, 200, 0.15)"
+              stroke="#00ffc8"
+              strokeWidth="1"
+            />
+            <text
+              x="320"
+              y="211"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#00ffc8"
+              fontSize="11"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
               PAPER
             </text>
           </g>
@@ -165,8 +217,26 @@ const BasicRpsArt: React.FC = () => {
             <text x="460" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
               ✌️
             </text>
-            <rect x="420" y="200" width="80" height="22" rx="11" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" strokeWidth="1" />
-            <text x="460" y="211" textAnchor="middle" dominantBaseline="central" fill="#ef4444" fontSize="11" fontFamily="monospace" fontWeight="bold">
+            <rect
+              x="420"
+              y="200"
+              width="80"
+              height="22"
+              rx="11"
+              fill="rgba(239, 68, 68, 0.15)"
+              stroke="#ef4444"
+              strokeWidth="1"
+            />
+            <text
+              x="460"
+              y="211"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#ef4444"
+              fontSize="11"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
               SCISSORS
             </text>
           </g>
@@ -184,13 +254,38 @@ const BasicRpsArt: React.FC = () => {
           <circle cx="460" cy="145" r="46" fill="none" stroke="#ef4444" strokeWidth="3" />
 
           {/* Top Score Ring */}
-          <rect x="250" y="28" width="140" height="32" rx="16" fill="none" stroke="#00ffc8" strokeWidth="1.5" />
+          <rect
+            x="250"
+            y="28"
+            width="140"
+            height="32"
+            rx="16"
+            fill="none"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+          />
         </g>
 
         {/* Bottom Tag */}
         <g transform="translate(240, 275)">
-          <rect width="160" height="28" rx="6" fill="rgba(0, 255, 200, 0.12)" stroke="#00ffc8" strokeWidth="1.2" />
-          <text x="80" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">
+          <rect
+            width="160"
+            height="28"
+            rx="6"
+            fill="rgba(0, 255, 200, 0.12)"
+            stroke="#00ffc8"
+            strokeWidth="1.2"
+          />
+          <text
+            x="80"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
             VANILLA JS // RPS
           </text>
         </g>

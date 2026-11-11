@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const SchoolDirectoryArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -75,28 +75,122 @@ const SchoolDirectoryArt: React.FC = () => {
 
         {/* OOP Inheritance Tree Hierarchy Graph */}
         <g transform="translate(60, 20)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#schoolFillClip)">
             {/* Root Node: Person Class */}
-            <rect x="200" y="20" width="120" height="45" rx="10" fill="url(#schoolGrad)" opacity="0.9" />
-            <text x="260" y="42.5" textAnchor="middle" dominantBaseline="central" fill="#060d16" fontSize="13" fontFamily="monospace" fontWeight="bold">class Person</text>
+            <rect
+              x="200"
+              y="20"
+              width="120"
+              height="45"
+              rx="10"
+              fill="url(#schoolGrad)"
+              opacity="0.9"
+            />
+            <text
+              x="260"
+              y="42.5"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#060d16"
+              fontSize="13"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              class Person
+            </text>
 
             {/* Child Node 1: Student */}
-            <rect x="10" y="140" width="105" height="42" rx="8" fill="url(#schoolGrad)" opacity="0.85" />
-            <text x="62.5" y="161" textAnchor="middle" dominantBaseline="central" fill="#060d16" fontSize="12" fontFamily="monospace" fontWeight="bold">Student</text>
+            <rect
+              x="10"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="url(#schoolGrad)"
+              opacity="0.85"
+            />
+            <text
+              x="62.5"
+              y="161"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#060d16"
+              fontSize="12"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              Student
+            </text>
 
             {/* Child Node 2: Teacher */}
-            <rect x="140" y="140" width="105" height="42" rx="8" fill="url(#schoolGrad)" opacity="0.85" />
-            <text x="192.5" y="161" textAnchor="middle" dominantBaseline="central" fill="#060d16" fontSize="12" fontFamily="monospace" fontWeight="bold">Teacher</text>
+            <rect
+              x="140"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="url(#schoolGrad)"
+              opacity="0.85"
+            />
+            <text
+              x="192.5"
+              y="161"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#060d16"
+              fontSize="12"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              Teacher
+            </text>
 
             {/* Child Node 3: Admin */}
-            <rect x="270" y="140" width="105" height="42" rx="8" fill="url(#schoolGrad)" opacity="0.85" />
-            <text x="322.5" y="161" textAnchor="middle" dominantBaseline="central" fill="#060d16" fontSize="12" fontFamily="monospace" fontWeight="bold">Admin</text>
+            <rect
+              x="270"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="url(#schoolGrad)"
+              opacity="0.85"
+            />
+            <text
+              x="322.5"
+              y="161"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#060d16"
+              fontSize="12"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              Admin
+            </text>
 
             {/* Child Node 4: Custodian */}
-            <rect x="400" y="140" width="115" height="42" rx="8" fill="url(#schoolGrad)" opacity="0.85" />
-            <text x="457.5" y="161" textAnchor="middle" dominantBaseline="central" fill="#060d16" fontSize="12" fontFamily="monospace" fontWeight="bold">Custodian</text>
+            <rect
+              x="400"
+              y="140"
+              width="115"
+              height="42"
+              rx="8"
+              fill="url(#schoolGrad)"
+              opacity="0.85"
+            />
+            <text
+              x="457.5"
+              y="161"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#060d16"
+              fontSize="12"
+              fontFamily="monospace"
+              fontWeight="bold"
+            >
+              Custodian
+            </text>
 
             {/* Academy Mortarboard Icon on top */}
             <path d="M 260,2 L 210,18 L 260,32 L 310,18 Z" fill="#00ffc8" opacity="0.7" />
@@ -117,18 +211,81 @@ const SchoolDirectoryArt: React.FC = () => {
             />
 
             {/* Node Outlines */}
-            <rect x="200" y="20" width="120" height="45" rx="10" fill="none" stroke="#00ffc8" strokeWidth="2.5" />
-            <rect x="10" y="140" width="105" height="42" rx="8" fill="none" stroke="#3178c6" strokeWidth="2" />
-            <rect x="140" y="140" width="105" height="42" rx="8" fill="none" stroke="#3178c6" strokeWidth="2" />
-            <rect x="270" y="140" width="105" height="42" rx="8" fill="none" stroke="#3178c6" strokeWidth="2" />
-            <rect x="400" y="140" width="115" height="42" rx="8" fill="none" stroke="#3178c6" strokeWidth="2" />
+            <rect
+              x="200"
+              y="20"
+              width="120"
+              height="45"
+              rx="10"
+              fill="none"
+              stroke="#00ffc8"
+              strokeWidth="2.5"
+            />
+            <rect
+              x="10"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="none"
+              stroke="#3178c6"
+              strokeWidth="2"
+            />
+            <rect
+              x="140"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="none"
+              stroke="#3178c6"
+              strokeWidth="2"
+            />
+            <rect
+              x="270"
+              y="140"
+              width="105"
+              height="42"
+              rx="8"
+              fill="none"
+              stroke="#3178c6"
+              strokeWidth="2"
+            />
+            <rect
+              x="400"
+              y="140"
+              width="115"
+              height="42"
+              rx="8"
+              fill="none"
+              stroke="#3178c6"
+              strokeWidth="2"
+            />
           </g>
         </g>
 
         {/* TypeScript OOP Architecture Tag */}
         <g transform="translate(255, 255)">
-          <rect width="130" height="30" rx="6" fill="rgba(49, 120, 198, 0.15)" stroke="#3178c6" strokeWidth="1.2" />
-          <text x="65" y="15" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">TYPESCRIPT // OOP</text>
+          <rect
+            width="130"
+            height="30"
+            rx="6"
+            fill="rgba(49, 120, 198, 0.15)"
+            stroke="#3178c6"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="15"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            TYPESCRIPT // OOP
+          </text>
         </g>
       </svg>
     </div>

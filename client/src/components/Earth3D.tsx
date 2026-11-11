@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
-import * as THREE from 'three';
-import earthTextureUrl from '../assets/earth_texture.jpg';
-import earthLightsUrl from '../assets/earth_lights.png';
+import React, { useRef, useEffect, useState } from "react";
+import * as THREE from "three";
+import earthTextureUrl from "../assets/earth_texture.jpg";
+import earthLightsUrl from "../assets/earth_lights.png";
 
 interface Earth3DProps {
   reverse?: boolean;
@@ -13,14 +13,14 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
   const mountRef = useRef<HTMLDivElement>(null);
   const [webGlSupported] = useState(() => {
     try {
-      const testCanvas = document.createElement('canvas');
-      const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+      const testCanvas = document.createElement("canvas");
+      const gl = testCanvas.getContext("webgl") || testCanvas.getContext("experimental-webgl");
       return !!gl;
     } catch {
       return false;
     }
   });
-  const [timePeriod, setTimePeriod] = useState<string>('Day');
+  const [timePeriod, setTimePeriod] = useState<string>("Day");
 
   useEffect(() => {
     if (!mountRef.current || !webGlSupported) return;
@@ -30,20 +30,20 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
     const getTimeSettings = () => {
       // Check for URL query override (e.g. ?time=day, ?time=night, ?time=sunset, ?time=sunrise)
       const urlParams = new URLSearchParams(window.location.search);
-      const timeParam = urlParams.get('time')?.toLowerCase();
+      const timeParam = urlParams.get("time")?.toLowerCase();
 
       // Default to live local clock time
       const now = new Date();
       let hours = now.getHours() + now.getMinutes() / 60;
 
       // Optional manual URL parameter override for demos (?time=night, ?time=sunset, etc.)
-      if (timeParam === 'sunrise' || timeParam === 'dawn') {
+      if (timeParam === "sunrise" || timeParam === "dawn") {
         hours = 6.5;
-      } else if (timeParam === 'day' || timeParam === 'noon') {
+      } else if (timeParam === "day" || timeParam === "noon") {
         hours = 12;
-      } else if (timeParam === 'sunset' || timeParam === 'dusk') {
+      } else if (timeParam === "sunset" || timeParam === "dusk") {
         hours = 18.5;
-      } else if (timeParam === 'night' || timeParam === 'midnight') {
+      } else if (timeParam === "night" || timeParam === "midnight") {
         hours = 23;
       }
 
@@ -52,37 +52,37 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       const sunDir = new THREE.Vector3(
         -Math.sin(sunAngle),
         0.3 * Math.sin(sunAngle),
-        Math.cos(sunAngle)
+        Math.cos(sunAngle),
       ).normalize();
 
       let atmosphereColor = new THREE.Color(0x00ffc8); // Default cyan
       let sunColor = new THREE.Color(1.0, 1.0, 0.95);
       let ambientIntensity = 0.15;
-      let label = 'Day';
+      let label = "Day";
 
       if (hours >= 5.5 && hours < 8.0) {
         // Sunrise: Warm golden / orange-pink glow
         atmosphereColor = new THREE.Color(0xff8c42);
         sunColor = new THREE.Color(1.0, 0.65, 0.35);
         ambientIntensity = 0.18;
-        label = 'Sunrise';
+        label = "Sunrise";
       } else if (hours >= 8.0 && hours < 17.0) {
         // Day: Crisp cyan & electric blue
         atmosphereColor = new THREE.Color(0x00ffc8);
         sunColor = new THREE.Color(1.0, 1.0, 0.98);
         ambientIntensity = 0.22;
-        label = 'Day';
+        label = "Day";
       } else if (hours >= 17.0 && hours < 20.0) {
         // Sunset: Fiery amber & violet twilight
         atmosphereColor = new THREE.Color(0xff5533);
         sunColor = new THREE.Color(1.0, 0.45, 0.2);
         ambientIntensity = 0.16;
-        label = 'Sunset';
+        label = "Sunset";
       } else {
         // Night: Deep electric indigo with brilliant city lights
         atmosphereColor = new THREE.Color(0x3a7bd5);
         sunColor = new THREE.Color(0.2, 0.25, 0.45);
-        label = 'Night';
+        label = "Night";
         ambientIntensity = 0.12;
       }
 
@@ -103,7 +103,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       renderer = new THREE.WebGLRenderer({
         alpha: true,
         antialias: true,
-        powerPreference: 'high-performance',
+        powerPreference: "high-performance",
       });
     } catch {
       return;
@@ -112,7 +112,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
     renderer.setSize(size, size);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    mountNode.innerHTML = '';
+    mountNode.innerHTML = "";
     mountNode.appendChild(renderer.domElement);
 
     // Texture loaders
@@ -211,10 +211,10 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
 
     // Helper: Generate procedural 8-point sparkling celestial star texture in memory
     const createStarTexture = () => {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 128;
       canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
       const cx = 64;
       const cy = 64;
 
@@ -222,17 +222,17 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
 
       // 1. Soft atmospheric halo
       const radialGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 58);
-      radialGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      radialGlow.addColorStop(0.25, 'rgba(255, 255, 255, 0.75)');
-      radialGlow.addColorStop(0.6, 'rgba(255, 255, 255, 0.15)');
-      radialGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      radialGlow.addColorStop(0, "rgba(255, 255, 255, 1)");
+      radialGlow.addColorStop(0.25, "rgba(255, 255, 255, 0.75)");
+      radialGlow.addColorStop(0.6, "rgba(255, 255, 255, 0.15)");
+      radialGlow.addColorStop(1, "rgba(255, 255, 255, 0)");
       ctx.fillStyle = radialGlow;
       ctx.beginPath();
       ctx.arc(cx, cy, 58, 0, Math.PI * 2);
       ctx.fill();
 
       // 2. Primary 4-pointed star spikes (Vertical & Horizontal flares)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
 
       // Vertical spike
       ctx.beginPath();
@@ -256,7 +256,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
 
       ctx.beginPath();
       ctx.moveTo(0, -38);
@@ -277,9 +277,9 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
 
       // 4. Bright white diamond core
       const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 10);
-      core.addColorStop(0, '#ffffff');
-      core.addColorStop(0.6, 'rgba(255, 255, 255, 0.9)');
-      core.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      core.addColorStop(0, "#ffffff");
+      core.addColorStop(0.6, "rgba(255, 255, 255, 0.9)");
+      core.addColorStop(1, "rgba(255, 255, 255, 0)");
       ctx.fillStyle = core;
       ctx.beginPath();
       ctx.arc(cx, cy, 10, 0, Math.PI * 2);
@@ -305,7 +305,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       starPositions[i + 2] = radius * Math.cos(phi);
     }
 
-    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
 
     const starTexture = createStarTexture();
     const starMaterial = new THREE.PointsMaterial({
@@ -335,7 +335,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       targetRotationX = mouseY * 0.15;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
 
     // Periodic time check interval (every 30s to update lighting seamlessly)
     const timeInterval = setInterval(() => {
@@ -381,7 +381,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
 
     // Cleanup
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(timeInterval);
       cancelAnimationFrame(animationFrameId);
       if (mountNode && renderer.domElement && mountNode.contains(renderer.domElement)) {
@@ -407,16 +407,16 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
         style={{
           width: `${size}px`,
           height: `${size}px`,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #1a365d 0%, #0f172a 100%)',
-          border: '2px solid var(--accent-color)',
-          boxShadow: '0 0 30px var(--accent-color)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #1a365d 0%, #0f172a 100%)",
+          border: "2px solid var(--accent-color)",
+          boxShadow: "0 0 30px var(--accent-color)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <span style={{ fontSize: '3rem' }}>🌍</span>
+        <span style={{ fontSize: "3rem" }}>🌍</span>
       </div>
     );
   }
@@ -427,9 +427,9 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       className="earth-container"
       title={`Real-Time Earth: ${timePeriod} Mode`}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     />
   );

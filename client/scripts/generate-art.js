@@ -1,28 +1,28 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ARTS_DIR = path.resolve(__dirname, '../src/components/project-arts');
-const GENERATED_DIR = path.resolve(ARTS_DIR, 'generated');
-const PROJECT_ART_PATH = path.resolve(ARTS_DIR, 'ProjectArt.tsx');
-const PROJECTS_JSON_PATH = path.resolve(__dirname, '../src/data/projects.json');
+const ARTS_DIR = path.resolve(__dirname, "../src/components/project-arts");
+const GENERATED_DIR = path.resolve(ARTS_DIR, "generated");
+const PROJECT_ART_PATH = path.resolve(ARTS_DIR, "ProjectArt.tsx");
+const PROJECTS_JSON_PATH = path.resolve(__dirname, "../src/data/projects.json");
 
 // ─── Language → Color Palette Mapping ───
 const LANGUAGE_COLORS = {
-  typescript: { primary: '#3178c6', secondary: '#00d4ff', accent: '#61dafb' },
-  javascript: { primary: '#f7df1e', secondary: '#ff9800', accent: '#ffb74d' },
-  python:     { primary: '#3572A5', secondary: '#4caf50', accent: '#81c784' },
-  css:        { primary: '#e91e97', secondary: '#9c27b0', accent: '#ce93d8' },
-  html:       { primary: '#e44d26', secondary: '#f06529', accent: '#ff8a65' },
-  ejs:        { primary: '#a12b55', secondary: '#bf4080', accent: '#e57399' },
-  default:    { primary: '#00ffc8', secondary: '#38bdf8', accent: '#7950f2' },
+  typescript: { primary: "#3178c6", secondary: "#00d4ff", accent: "#61dafb" },
+  javascript: { primary: "#f7df1e", secondary: "#ff9800", accent: "#ffb74d" },
+  python: { primary: "#3572A5", secondary: "#4caf50", accent: "#81c784" },
+  css: { primary: "#e91e97", secondary: "#9c27b0", accent: "#ce93d8" },
+  html: { primary: "#e44d26", secondary: "#f06529", accent: "#ff8a65" },
+  ejs: { primary: "#a12b55", secondary: "#bf4080", accent: "#e57399" },
+  default: { primary: "#00ffc8", secondary: "#38bdf8", accent: "#7950f2" },
 };
 
 function getColors(language) {
-  const key = (language || '').toLowerCase();
+  const key = (language || "").toLowerCase();
   return LANGUAGE_COLORS[key] || LANGUAGE_COLORS.default;
 }
 
@@ -32,7 +32,7 @@ function seededRandom(seed) {
   for (let i = 0; i < seed.length; i++) {
     h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
   }
-  return function() {
+  return function () {
     h = (h * 16807 + 0) % 2147483647;
     return (h & 0x7fffffff) / 0x7fffffff;
   };
@@ -41,23 +41,23 @@ function seededRandom(seed) {
 // ─── Convert project ID to PascalCase component name ───
 function toPascalCase(str) {
   return str
-    .replace(/[^a-zA-Z0-9]/g, ' ')
+    .replace(/[^a-zA-Z0-9]/g, " ")
     .split(/\s+/)
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join('');
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join("");
 }
 
 // ─── Template: Full-Stack (server + database + connections) ───
 function templateFullStack(id, name, colors, rand) {
-  const uid = id.replace(/[^a-z0-9]/g, '');
+  const uid = id.replace(/[^a-z0-9]/g, "");
   const r1 = Math.floor(rand() * 30) + 10;
   const r2 = Math.floor(rand() * 20) + 5;
   return `import React from 'react';
 
 const Generated${toPascalCase(id)}Art: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
-      <svg viewBox="0 0 640 320" className="w-100 h-100" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 640 320" className="w-full h-full" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${uid}Grad" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="${colors.primary}" />
@@ -120,14 +120,14 @@ export default Generated${toPascalCase(id)}Art;
 
 // ─── Template: Frontend (browser + UI wireframe) ───
 function templateFrontend(id, name, colors, rand) {
-  const uid = id.replace(/[^a-z0-9]/g, '');
+  const uid = id.replace(/[^a-z0-9]/g, "");
   const barW = 40 + Math.floor(rand() * 60);
   return `import React from 'react';
 
 const Generated${toPascalCase(id)}Art: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
-      <svg viewBox="0 0 640 320" className="w-100 h-100" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 640 320" className="w-full h-full" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${uid}Grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="${colors.primary}" />
@@ -192,21 +192,21 @@ export default Generated${toPascalCase(id)}Art;
 
 // ─── Template: 3D & Creative UI (geometric polyhedron + particles) ───
 function templateCreative(id, name, colors, rand) {
-  const uid = id.replace(/[^a-z0-9]/g, '');
+  const uid = id.replace(/[^a-z0-9]/g, "");
   const pts = [];
   for (let i = 0; i < 6; i++) {
     const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
     const r = 80 + rand() * 20;
     pts.push(`${320 + Math.cos(angle) * r},${160 + Math.sin(angle) * r}`);
   }
-  const hexPoints = pts.join(' ');
+  const hexPoints = pts.join(" ");
 
   return `import React from 'react';
 
 const Generated${toPascalCase(id)}Art: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
-      <svg viewBox="0 0 640 320" className="w-100 h-100" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 640 320" className="w-full h-full" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${uid}Grad" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="${colors.primary}" />
@@ -244,9 +244,9 @@ const Generated${toPascalCase(id)}Art: React.FC = () => {
           <polygon points="${hexPoints}" fill="none" stroke="url(#${uid}Grad)" strokeWidth="2.5" filter="url(#${uid}Glow)" />
 
           {/* Inner Triangulation Lines */}
-          <line x1="${pts[0].split(',')[0]}" y1="${pts[0].split(',')[1]}" x2="${pts[3].split(',')[0]}" y2="${pts[3].split(',')[1]}" stroke="${colors.accent}" strokeWidth="0.8" opacity="0.3" />
-          <line x1="${pts[1].split(',')[0]}" y1="${pts[1].split(',')[1]}" x2="${pts[4].split(',')[0]}" y2="${pts[4].split(',')[1]}" stroke="${colors.primary}" strokeWidth="0.8" opacity="0.3" />
-          <line x1="${pts[2].split(',')[0]}" y1="${pts[2].split(',')[1]}" x2="${pts[5].split(',')[0]}" y2="${pts[5].split(',')[1]}" stroke="${colors.secondary}" strokeWidth="0.8" opacity="0.3" />
+          <line x1="${pts[0].split(",")[0]}" y1="${pts[0].split(",")[1]}" x2="${pts[3].split(",")[0]}" y2="${pts[3].split(",")[1]}" stroke="${colors.accent}" strokeWidth="0.8" opacity="0.3" />
+          <line x1="${pts[1].split(",")[0]}" y1="${pts[1].split(",")[1]}" x2="${pts[4].split(",")[0]}" y2="${pts[4].split(",")[1]}" stroke="${colors.primary}" strokeWidth="0.8" opacity="0.3" />
+          <line x1="${pts[2].split(",")[0]}" y1="${pts[2].split(",")[1]}" x2="${pts[5].split(",")[0]}" y2="${pts[5].split(",")[1]}" stroke="${colors.secondary}" strokeWidth="0.8" opacity="0.3" />
 
           {/* Center Core */}
           <circle cx="320" cy="160" r="12" fill="${colors.accent}" opacity="0.4" filter="url(#${uid}Glow)" />
@@ -254,10 +254,10 @@ const Generated${toPascalCase(id)}Art: React.FC = () => {
         </g>
 
         {/* Floating Particles */}
-        <circle cx="${180 + Math.floor(rand()*40)}" cy="${80 + Math.floor(rand()*30)}" r="3" fill="${colors.accent}" opacity="0.5" />
-        <circle cx="${440 + Math.floor(rand()*40)}" cy="${90 + Math.floor(rand()*30)}" r="2" fill="${colors.primary}" opacity="0.6" />
-        <circle cx="${150 + Math.floor(rand()*30)}" cy="${220 + Math.floor(rand()*30)}" r="2.5" fill="${colors.secondary}" opacity="0.4" />
-        <circle cx="${460 + Math.floor(rand()*40)}" cy="${210 + Math.floor(rand()*30)}" r="3" fill="${colors.accent}" opacity="0.5" />
+        <circle cx="${180 + Math.floor(rand() * 40)}" cy="${80 + Math.floor(rand() * 30)}" r="3" fill="${colors.accent}" opacity="0.5" />
+        <circle cx="${440 + Math.floor(rand() * 40)}" cy="${90 + Math.floor(rand() * 30)}" r="2" fill="${colors.primary}" opacity="0.6" />
+        <circle cx="${150 + Math.floor(rand() * 30)}" cy="${220 + Math.floor(rand() * 30)}" r="2.5" fill="${colors.secondary}" opacity="0.4" />
+        <circle cx="${460 + Math.floor(rand() * 40)}" cy="${210 + Math.floor(rand() * 30)}" r="3" fill="${colors.accent}" opacity="0.5" />
 
         {/* Title */}
         <text x="320" y="295" textAnchor="middle" fill="${colors.accent}" fontSize="13" fontFamily="monospace" opacity="0.7">${name.toUpperCase()}</text>
@@ -271,14 +271,14 @@ export default Generated${toPascalCase(id)}Art;
 }
 
 // ─── Template: Web3 & Blockchain (chain links + hexagonal nodes) ───
-function templateWeb3(id, name, colors, rand) {
-  const uid = id.replace(/[^a-z0-9]/g, '');
+function templateWeb3(id, name, colors, _rand) {
+  const uid = id.replace(/[^a-z0-9]/g, "");
   return `import React from 'react';
 
 const Generated${toPascalCase(id)}Art: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
-      <svg viewBox="0 0 640 320" className="w-100 h-100" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 640 320" className="w-full h-full" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${uid}Grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="${colors.primary}" />
@@ -333,13 +333,13 @@ export default Generated${toPascalCase(id)}Art;
 
 // ─── Template: General / Web Application (terminal + circuit) ───
 function templateGeneral(id, name, colors, rand) {
-  const uid = id.replace(/[^a-z0-9]/g, '');
+  const uid = id.replace(/[^a-z0-9]/g, "");
   return `import React from 'react';
 
 const Generated${toPascalCase(id)}Art: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
-      <svg viewBox="0 0 640 320" className="w-100 h-100" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 640 320" className="w-full h-full" style={{ width: '100%', height: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${uid}Grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="${colors.primary}" />
@@ -385,8 +385,8 @@ const Generated${toPascalCase(id)}Art: React.FC = () => {
         <circle cx="580" cy="280" r="4" fill="${colors.secondary}" opacity="0.4" />
 
         {/* Decorative Dots */}
-        <circle cx="${80 + Math.floor(rand()*30)}" cy="${60 + Math.floor(rand()*40)}" r="2" fill="${colors.accent}" opacity="0.3" />
-        <circle cx="${530 + Math.floor(rand()*30)}" cy="${70 + Math.floor(rand()*40)}" r="2.5" fill="${colors.primary}" opacity="0.3" />
+        <circle cx="${80 + Math.floor(rand() * 30)}" cy="${60 + Math.floor(rand() * 40)}" r="2" fill="${colors.accent}" opacity="0.3" />
+        <circle cx="${530 + Math.floor(rand() * 30)}" cy="${70 + Math.floor(rand() * 40)}" r="2.5" fill="${colors.primary}" opacity="0.3" />
 
         {/* Title */}
         <text x="320" y="305" textAnchor="middle" fill="${colors.accent}" fontSize="13" fontFamily="monospace" opacity="0.7">${name.toUpperCase()}</text>
@@ -401,16 +401,72 @@ export default Generated${toPascalCase(id)}Art;
 
 // ─── Smart Template Router (category + description analysis) ───
 function getTemplate(category, description) {
-  const cat = (category || '').toLowerCase();
-  const desc = (description || '').toLowerCase();
+  const cat = (category || "").toLowerCase();
+  const desc = (description || "").toLowerCase();
 
   // First: check description keywords for more accurate matching
-  const fullStackSignals = ['server', 'database', 'mongodb', 'express', 'node.js', 'api', 'crud', 'backend', 'rest', 'full-stack', 'fullstack', 'sql', 'postgres'];
-  const frontendSignals = ['responsive', 'layout', 'css', 'html', 'flexbox', 'grid', 'ui', 'typography', 'bootstrap', 'tailwind', 'accessible', 'wcag', 'landing page', 'website', 'redesign', 'cleaning', 'business'];
-  const creativeSignals = ['3d', 'three.js', 'animation', 'canvas', 'webgl', 'particle', 'game', 'chess', 'timer', 'countdown', 'quiz', 'interactive'];
-  const web3Signals = ['web3', 'blockchain', 'smart contract', 'motoko', 'icp', 'ethereum', 'solidity', 'token', 'nft', 'dapp'];
+  const fullStackSignals = [
+    "server",
+    "database",
+    "mongodb",
+    "express",
+    "node.js",
+    "api",
+    "crud",
+    "backend",
+    "rest",
+    "full-stack",
+    "fullstack",
+    "sql",
+    "postgres",
+  ];
+  const frontendSignals = [
+    "responsive",
+    "layout",
+    "css",
+    "html",
+    "flexbox",
+    "grid",
+    "ui",
+    "typography",
+    "bootstrap",
+    "tailwind",
+    "accessible",
+    "wcag",
+    "landing page",
+    "website",
+    "redesign",
+    "cleaning",
+    "business",
+  ];
+  const creativeSignals = [
+    "3d",
+    "three.js",
+    "animation",
+    "canvas",
+    "webgl",
+    "particle",
+    "game",
+    "chess",
+    "timer",
+    "countdown",
+    "quiz",
+    "interactive",
+  ];
+  const web3Signals = [
+    "web3",
+    "blockchain",
+    "smart contract",
+    "motoko",
+    "icp",
+    "ethereum",
+    "solidity",
+    "token",
+    "nft",
+    "dapp",
+  ];
 
-  const matchCount = (signals) => signals.filter(s => desc.includes(s)).length;
+  const matchCount = (signals) => signals.filter((s) => desc.includes(s)).length;
 
   const scores = {
     fullStack: matchCount(fullStackSignals),
@@ -421,7 +477,7 @@ function getTemplate(category, description) {
 
   // Pick template with highest description match
   const maxScore = Math.max(scores.fullStack, scores.frontend, scores.creative, scores.web3);
-  
+
   if (maxScore > 0) {
     if (scores.web3 === maxScore) return templateWeb3;
     if (scores.creative === maxScore) return templateCreative;
@@ -430,17 +486,17 @@ function getTemplate(category, description) {
   }
 
   // Fallback: use category
-  if (cat.includes('full-stack')) return templateFullStack;
-  if (cat.includes('frontend')) return templateFrontend;
-  if (cat.includes('3d') || cat.includes('creative')) return templateCreative;
-  if (cat.includes('web3') || cat.includes('blockchain')) return templateWeb3;
+  if (cat.includes("full-stack")) return templateFullStack;
+  if (cat.includes("frontend")) return templateFrontend;
+  if (cat.includes("3d") || cat.includes("creative")) return templateCreative;
+  if (cat.includes("web3") || cat.includes("blockchain")) return templateWeb3;
   return templateGeneral;
 }
 
 // ─── Read existing hand-crafted art IDs from ProjectArt.tsx ───
 function getExistingArtIds() {
-  const content = fs.readFileSync(PROJECT_ART_PATH, 'utf8');
-  const caseRegex = /case\s+'([^']+)'/g;
+  const content = fs.readFileSync(PROJECT_ART_PATH, "utf8");
+  const caseRegex = /case\s+['"]([^'"]+)['"]/g;
   const ids = new Set();
   let match;
   while ((match = caseRegex.exec(content)) !== null) {
@@ -451,7 +507,7 @@ function getExistingArtIds() {
 
 // ─── Main Generator ───
 function generateArt() {
-  console.log('🎨 Starting SVG art generation...');
+  console.log("🎨 Starting SVG art generation...");
 
   // Ensure generated directory exists
   if (!fs.existsSync(GENERATED_DIR)) {
@@ -459,25 +515,18 @@ function generateArt() {
   }
 
   // Load projects
-  const projects = JSON.parse(fs.readFileSync(PROJECTS_JSON_PATH, 'utf8'));
-  
+  const projects = JSON.parse(fs.readFileSync(PROJECTS_JSON_PATH, "utf8"));
+
   // Get IDs that already have hand-crafted art
   const existingIds = getExistingArtIds();
   console.log(`   Found ${existingIds.size} hand-crafted art entries (protected).`);
-
-  // Also check what generated files already exist (to avoid re-generating)
-  const existingGenerated = new Set(
-    fs.readdirSync(GENERATED_DIR)
-      .filter(f => f.endsWith('.tsx'))
-      .map(f => f.replace(/^Generated/, '').replace(/Art\.tsx$/, ''))
-  );
 
   let generated = 0;
   const generatedMap = {};
 
   for (const project of projects) {
     const id = project.id;
-    
+
     // Skip if hand-crafted art exists
     if (existingIds.has(id)) {
       continue;
@@ -507,12 +556,12 @@ function generateArt() {
   }
 
   // Write index file for generated art
-  const indexLines = ['// Auto-generated index — do not edit manually'];
+  const indexLines = ["// Auto-generated index — do not edit manually"];
   const importLines = [];
   const exportMap = {};
 
   for (const [id, info] of Object.entries(generatedMap)) {
-    importLines.push(`import ${info.componentName} from './${info.fileName.replace('.tsx', '')}';`);
+    importLines.push(`import ${info.componentName} from './${info.fileName.replace(".tsx", "")}';`);
     exportMap[id] = info.componentName;
   }
 
@@ -520,38 +569,40 @@ function generateArt() {
   for (const project of projects) {
     const id = project.id;
     if (existingIds.has(id) || generatedMap[id]) continue;
-    
+
     const pascalName = toPascalCase(id);
     const fileName = `Generated${pascalName}Art.tsx`;
     if (fs.existsSync(path.join(GENERATED_DIR, fileName))) {
       const compName = `Generated${pascalName}Art`;
-      importLines.push(`import ${compName} from './${fileName.replace('.tsx', '')}';`);
+      importLines.push(`import ${compName} from './${fileName.replace(".tsx", "")}';`);
       exportMap[id] = compName;
     }
   }
 
-  const indexContent = `${indexLines.join('\n')}
+  const indexContent = `${indexLines.join("\n")}
 import React from 'react';
-${importLines.join('\n')}
+${importLines.join("\n")}
 
 interface GeneratedArtProps {
   projectId: string;
+  fallback?: React.ReactNode;
 }
 
 const generatedArtMap: Record<string, React.FC> = {
-${Object.entries(exportMap).map(([id, comp]) => `  '${id}': ${comp},`).join('\n')}
+${Object.entries(exportMap)
+  .map(([id, comp]) => `  '${id}': ${comp},`)
+  .join("\n")}
 };
 
-const GeneratedArt: React.FC<GeneratedArtProps> = ({ projectId }) => {
+const GeneratedArt: React.FC<GeneratedArtProps> = ({ projectId, fallback = null }) => {
   const Component = generatedArtMap[projectId.toLowerCase().trim()];
-  return Component ? <Component /> : null;
+  return Component ? <Component /> : <>{fallback}</>;
 };
 
 export default GeneratedArt;
-export { generatedArtMap };
 `;
 
-  fs.writeFileSync(path.join(GENERATED_DIR, 'index.tsx'), indexContent);
+  fs.writeFileSync(path.join(GENERATED_DIR, "index.tsx"), indexContent);
 
   console.log(`\n🎨 Art generation complete: ${generated} new, ${existingIds.size} protected.`);
 }

@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const LoanCalcArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -76,7 +76,6 @@ const LoanCalcArt: React.FC = () => {
 
         {/* Financial Growth Amortization Chart & Donut Gauge */}
         <g transform="translate(60, 20)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#loanFillClip)">
             {/* Amortization Growth Area Fill */}
@@ -98,7 +97,16 @@ const LoanCalcArt: React.FC = () => {
               fill="#010604"
               opacity="0.9"
             />
-            <text x="290" y="122" fill="#00ffc8" fontSize="28" fontFamily="sans-serif" fontWeight="bold">$</text>
+            <text
+              x="290"
+              y="122"
+              fill="#00ffc8"
+              fontSize="28"
+              fontFamily="sans-serif"
+              fontWeight="bold"
+            >
+              $
+            </text>
 
             {/* Slider Bars Visual */}
             <rect x="80" y="245" width="160" height="8" rx="4" fill="url(#loanGrad)" />
@@ -133,8 +141,26 @@ const LoanCalcArt: React.FC = () => {
             />
 
             {/* Sliders Outline */}
-            <rect x="80" y="245" width="160" height="8" rx="4" fill="none" stroke="#10b981" strokeWidth="1.5" />
-            <rect x="290" y="245" width="160" height="8" rx="4" fill="none" stroke="#10b981" strokeWidth="1.5" />
+            <rect
+              x="80"
+              y="245"
+              width="160"
+              height="8"
+              rx="4"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="290"
+              y="245"
+              width="160"
+              height="8"
+              rx="4"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="1.5"
+            />
           </g>
         </g>
       </svg>

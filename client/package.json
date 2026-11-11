@@ -1,42 +1,42 @@
 {
   "name": "client",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "sync": "node scripts/sync-repos.js",
+    "dev": "vp dev",
+    "sync": "node scripts/sync-repos.js && node scripts/generate-art.js && vp fmt src/components/project-arts/generated src/data/projects.json",
     "prebuild": "npm run sync",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build": "tsc -b && vp build",
+    "lint": "vp lint",
+    "check": "vp check",
+    "fmt": "vp fmt",
+    "preview": "vp preview"
   },
   "dependencies": {
-    "@types/animejs": "^3.1.13",
-    "animejs": "^3.2.2",
-    "axios": "^1.13.2",
-    "bootstrap": "^5.3.8",
-    "gsap": "^3.15.0",
-    "lucide-react": "^1.33.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.12.0"
+    "gsap": "^3.15.1",
+    "lucide-react": "^1.72.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "three": "^0.187.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
-    "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.182.0",
-    "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "globals": "^16.5.0",
-    "sass-embedded": "^1.97.2",
-    "three": "^0.182.0",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.6.0",
+    "vite-plus": "^1.6.0"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.6.0"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
   }
 }

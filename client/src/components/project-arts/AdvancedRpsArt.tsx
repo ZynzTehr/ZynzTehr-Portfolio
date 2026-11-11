@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const AdvancedRpsArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -73,7 +73,15 @@ const AdvancedRpsArt: React.FC = () => {
 
         {/* Dynamic Triangular Battle Ring */}
         <g className="tri-spin" opacity="0.2">
-          <circle cx="320" cy="145" r="115" fill="none" stroke="#ec4899" strokeWidth="1.5" strokeDasharray="12 12" />
+          <circle
+            cx="320"
+            cy="145"
+            r="115"
+            fill="none"
+            stroke="#ec4899"
+            strokeWidth="1.5"
+            strokeDasharray="12 12"
+          />
         </g>
 
         <g>
@@ -95,17 +103,23 @@ const AdvancedRpsArt: React.FC = () => {
             {/* Top Node: Scissors (Yellow) */}
             <circle cx="320" cy="65" r="32" fill="#eab308" opacity="0.9" />
             <circle cx="320" cy="65" r="24" fill="#080912" />
-            <text x="320" y="65" textAnchor="middle" dominantBaseline="central" fontSize="22">✂️</text>
+            <text x="320" y="65" textAnchor="middle" dominantBaseline="central" fontSize="22">
+              ✂️
+            </text>
 
             {/* Bottom Right Node: Paper (Pink) */}
             <circle cx="410" cy="210" r="32" fill="#ec4899" opacity="0.9" />
             <circle cx="410" cy="210" r="24" fill="#080912" />
-            <text x="410" y="210" textAnchor="middle" dominantBaseline="central" fontSize="22">✋</text>
+            <text x="410" y="210" textAnchor="middle" dominantBaseline="central" fontSize="22">
+              ✋
+            </text>
 
             {/* Bottom Left Node: Rock (Blue) */}
             <circle cx="230" cy="210" r="32" fill="#3b82f6" opacity="0.9" />
             <circle cx="230" cy="210" r="24" fill="#080912" />
-            <text x="230" y="210" textAnchor="middle" dominantBaseline="central" fontSize="22">✊</text>
+            <text x="230" y="210" textAnchor="middle" dominantBaseline="central" fontSize="22">
+              ✊
+            </text>
           </g>
 
           {/* OUTLINE LAYER (Glowing Node Borders on Top) */}
@@ -118,8 +132,26 @@ const AdvancedRpsArt: React.FC = () => {
 
         {/* Advanced RPS Tag */}
         <g transform="translate(255, 275)">
-          <rect width="130" height="28" rx="6" fill="rgba(236, 72, 153, 0.15)" stroke="#ec4899" strokeWidth="1.2" />
-          <text x="65" y="14" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="10" fontFamily="monospace" fontWeight="bold">ADVANCED // RPS</text>
+          <rect
+            width="130"
+            height="28"
+            rx="6"
+            fill="rgba(236, 72, 153, 0.15)"
+            stroke="#ec4899"
+            strokeWidth="1.2"
+          />
+          <text
+            x="65"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="10"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            ADVANCED // RPS
+          </text>
         </g>
       </svg>
     </div>

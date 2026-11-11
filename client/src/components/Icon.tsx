@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface IconProps {
   size?: number;
@@ -6,7 +6,7 @@ interface IconProps {
   style?: React.CSSProperties;
 }
 
-export const GithubIcon: React.FC<IconProps> = ({ size = 18, className = '', style }) => (
+export const GithubIcon: React.FC<IconProps> = ({ size = 18, className = "", style }) => (
   <svg
     width={size}
     height={size}

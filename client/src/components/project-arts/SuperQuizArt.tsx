@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const SuperQuizArt: React.FC = () => {
   return (
-    <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden">
+    <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
       <svg
         viewBox="0 0 640 320"
-        className="w-100 h-100"
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%", display: "block" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -75,28 +75,99 @@ const SuperQuizArt: React.FC = () => {
 
         {/* Floating Category Symbols */}
         <g className="sym-1" opacity="0.75">
-          <circle cx="120" cy="85" r="28" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" strokeWidth="1.5" />
-          <text x="120" y="85" textAnchor="middle" dominantBaseline="central" fill="#f59e0b" fontSize="22" fontFamily="monospace" fontWeight="bold">∑</text>
+          <circle
+            cx="120"
+            cy="85"
+            r="28"
+            fill="rgba(245, 158, 11, 0.12)"
+            stroke="#f59e0b"
+            strokeWidth="1.5"
+          />
+          <text
+            x="120"
+            y="85"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#f59e0b"
+            fontSize="22"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            ∑
+          </text>
         </g>
 
         <g className="sym-2" opacity="0.75">
-          <circle cx="520" cy="85" r="28" fill="rgba(0, 255, 200, 0.12)" stroke="#00ffc8" strokeWidth="1.5" />
-          <text x="520" y="85" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="18" fontFamily="monospace" fontWeight="bold">&lt;/&gt;</text>
+          <circle
+            cx="520"
+            cy="85"
+            r="28"
+            fill="rgba(0, 255, 200, 0.12)"
+            stroke="#00ffc8"
+            strokeWidth="1.5"
+          />
+          <text
+            x="520"
+            y="85"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="18"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            &lt;/&gt;
+          </text>
         </g>
 
         <g className="sym-3" opacity="0.75">
-          <circle cx="130" cy="225" r="26" fill="rgba(239, 68, 68, 0.12)" stroke="#ef4444" strokeWidth="1.5" />
-          <text x="130" y="225" textAnchor="middle" dominantBaseline="central" fill="#ef4444" fontSize="20" fontFamily="monospace" fontWeight="bold">π</text>
+          <circle
+            cx="130"
+            cy="225"
+            r="26"
+            fill="rgba(239, 68, 68, 0.12)"
+            stroke="#ef4444"
+            strokeWidth="1.5"
+          />
+          <text
+            x="130"
+            y="225"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ef4444"
+            fontSize="20"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            π
+          </text>
         </g>
 
         <g className="sym-2" opacity="0.75">
-          <circle cx="510" cy="225" r="26" fill="rgba(168, 85, 247, 0.12)" stroke="#a855f7" strokeWidth="1.5" />
-          <text x="510" y="225" textAnchor="middle" dominantBaseline="central" fill="#c084fc" fontSize="18" fontFamily="monospace" fontWeight="bold">√x</text>
+          <circle
+            cx="510"
+            cy="225"
+            r="26"
+            fill="rgba(168, 85, 247, 0.12)"
+            stroke="#a855f7"
+            strokeWidth="1.5"
+          />
+          <text
+            x="510"
+            y="225"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#c084fc"
+            fontSize="18"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            √x
+          </text>
         </g>
 
         {/* Central Luminous Question Core */}
         <g transform="translate(220, 25)">
-          
           {/* FILL LAYER (Bottom-to-Top) */}
           <g clipPath="url(#quizFillClip)">
             {/* Hexagon Shield Core */}
@@ -105,7 +176,7 @@ const SuperQuizArt: React.FC = () => {
               fill="url(#quizGrad)"
               opacity="0.9"
             />
-            
+
             {/* Question Mark Cutout Silhouette */}
             <text
               x="100"
@@ -151,8 +222,26 @@ const SuperQuizArt: React.FC = () => {
 
         {/* Trivia HUD Score Badge */}
         <g transform="translate(260, 255)">
-          <rect width="120" height="30" rx="8" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" strokeWidth="1.2" />
-          <text x="60" y="15" textAnchor="middle" dominantBaseline="central" fill="#00ffc8" fontSize="11" fontFamily="monospace" fontWeight="bold">ANIME.JS // GRID</text>
+          <rect
+            width="120"
+            height="30"
+            rx="8"
+            fill="rgba(245, 158, 11, 0.15)"
+            stroke="#f59e0b"
+            strokeWidth="1.2"
+          />
+          <text
+            x="60"
+            y="15"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#00ffc8"
+            fontSize="11"
+            fontFamily="monospace"
+            fontWeight="bold"
+          >
+            ANIME.JS // GRID
+          </text>
         </g>
       </svg>
     </div>
