@@ -1,5 +1,58 @@
-import { useLayoutEffect, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
 import { gsap, ScrollTrigger } from "./gsap";
+
+/**
+ * Where every act stands this frame, from flow positions and the scroll alone
+ * (no layout reads per frame). `enter[k]` runs 0 to 1 as act k slides from the
+ * viewport bottom to its top (act 0 is always 1). `share[k]` is the fraction
+ * of the viewport act k fills: what is left between its top and the top of
+ * the act sliding over it.
+ */
+export interface ActFrame {
+  vh: number;
+  y: number;
+  enter: number[];
+  share: number[];
+}
+
+type ActListener = (frame: ActFrame) => void;
+const actListeners = new Set<ActListener>();
+let lastActFrame: ActFrame | null = null;
+
+/** Subscribe to per-frame act positions; called at once with the latest frame. */
+export function subscribeActs(listener: ActListener): () => void {
+  actListeners.add(listener);
+  if (lastActFrame) listener(lastActFrame);
+  return () => {
+    actListeners.delete(listener);
+  };
+}
+
+/**
+ * An act filling less than this share of the viewport is dormant: its loops
+ * pause (globe, orbit, black hole) and the index folds back to its prompt.
+ */
+export const ACT_DORMANT_SHARE = 0.1;
+
+/** Which acts are awake (share at or above ACT_DORMANT_SHARE). Re-renders only on change. */
+export function useActsAwake(count: number): boolean[] {
+  const [awake, setAwake] = useState<boolean[]>(() =>
+    Array.from({ length: count }, (_, i) => i === 0),
+  );
+  useEffect(
+    () =>
+      subscribeActs((frame) => {
+        setAwake((prev) => {
+          const next = prev.map((_, i) => (frame.share[i] ?? 0) >= ACT_DORMANT_SHARE);
+          return next.some((v, i) => v !== prev[i]) ? next : prev;
+        });
+      }),
+    [],
+  );
+  return awake;
+}
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 /**
  * The document position an act occupies in the flow, whether or not it is
@@ -48,15 +101,23 @@ function offsetWithin(el: HTMLElement, act: HTMLElement): number {
  * so a tall act scrolls through in full and pins only once its bottom edge
  * meets the bottom of the viewport. The next act then slides up over it.
  *
- * While an act is being covered it sinks back: the sheet scales down a touch
- * and its shade darkens, both scrubbed to the scroll position of the act
- * coming over it. Reduced motion keeps the stacking (it is plain scrolling)
- * and drops the scale and shade.
+ * How the covered act leaves is set by its `data-exit`:
+ * - "sink" (default): it scales back a touch, a shade darkens it and it fades
+ *   out, while the incoming act's `.act__sheet` (its opaque panel) fades away,
+ *   so the incoming act settles onto the same page backdrop the covered act
+ *   had.
+ * - "swirl": it spins and shrinks into the centre of the viewport and fades,
+ *   as if pulled through an event horizon (the black hole of Act III).
+ * All of it is scrubbed to the incoming act's flow position. Reduced motion
+ * keeps the stacking and the fades, without scale or spin.
+ *
+ * It also publishes an ActFrame every scrolled frame (subscribeActs) and marks
+ * acts below ACT_DORMANT_SHARE with `data-dormant`, so CSS animations pause.
  *
  * Scroll positions are measured from each act's flow position (actFlowTop),
- * never from a rect that might be pinned. Keyboard focus that lands inside an
- * act the next one is covering scrolls back until the control is uncovered,
- * since the browser's own focus scrolling cannot see the sheet on top.
+ * never from a rect that might be pinned. Tab focus inside an act that the
+ * next one slides over is scrolled by flow geometry (see onFocusIn), since the
+ * browser's own focus scroll cannot see the sheet on top.
  */
 export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotion: boolean) {
   useLayoutEffect(() => {
@@ -65,13 +126,43 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
     const acts = Array.from(root.querySelectorAll<HTMLElement>(":scope > .act"));
     if (acts.length === 0) return;
 
+    // Flow tops change only with layout (resize, an act growing), never with scroll.
+    let flowTops = acts.map(actFlowTop);
+    let frameReq = 0;
+    const publish = () => {
+      frameReq = 0;
+      const vh = window.innerHeight;
+      const y = window.scrollY;
+      const enter = flowTops.map((top, k) => (k === 0 ? 1 : clamp01(1 - (top - y) / vh)));
+      const share = enter.map((e, k) => clamp01(e - (enter[k + 1] ?? 0)));
+      lastActFrame = { vh, y, enter, share };
+      acts.forEach((act, k) => {
+        const dormant = share[k] < ACT_DORMANT_SHARE;
+        if ((act.dataset.dormant === "true") !== dormant) act.dataset.dormant = String(dormant);
+        // A swirling act spins only its on-screen window (mission.css clips it),
+        // so a tall open index never sweeps thousands of pixels across the hole.
+        if (act.dataset.exit === "swirl") {
+          const swirling = (enter[k + 1] ?? 0) > 0;
+          if ((act.dataset.swirling === "true") !== swirling)
+            act.dataset.swirling = String(swirling);
+        }
+      });
+      actListeners.forEach((listener) => listener(lastActFrame!));
+    };
+    const schedule = () => {
+      if (!frameReq) frameReq = requestAnimationFrame(publish);
+    };
+
     const syncTops = () => {
       const vh = window.innerHeight;
       acts.forEach((act) => {
         act.style.setProperty("--act-top", `${Math.min(0, vh - act.offsetHeight)}px`);
       });
+      flowTops = acts.map(actFlowTop);
+      schedule();
     };
     syncTops();
+    window.addEventListener("scroll", schedule, { passive: true });
     // Acts change height as the index opens, filters, or a project stage opens.
     const observer = new ResizeObserver(syncTops);
     acts.forEach((act) => observer.observe(act));
@@ -130,27 +221,41 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
     window.addEventListener("pointerdown", onPointerDown, true);
     root.addEventListener("focusin", onFocusIn);
 
-    const ctx = reducedMotion
-      ? null
-      : gsap.context(() => {
-          acts.slice(0, -1).forEach((act, i) => {
-            const incoming = acts[i + 1];
-            const shade = act.querySelector<HTMLElement>(":scope > .act__shade");
-            const tl = gsap.timeline({
-              defaults: { ease: "none" },
-              scrollTrigger: {
-                // From the incoming act's top meeting the viewport bottom to it
-                // reaching the viewport top, measured in the flow.
-                start: () => actFlowTop(incoming) - window.innerHeight,
-                end: () => actFlowTop(incoming),
-                invalidateOnRefresh: true,
-                scrub: 0.35,
-              },
-            });
-            tl.fromTo(act, { scale: 1 }, { scale: 0.94 }, 0);
-            if (shade) tl.fromTo(shade, { opacity: 0 }, { opacity: 0.7 }, 0);
-          });
-        }, root);
+    const ctx = gsap.context(() => {
+      acts.slice(0, -1).forEach((act, i) => {
+        const incoming = acts[i + 1];
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            // From the incoming act's top meeting the viewport bottom to it
+            // reaching the viewport top, measured in the flow.
+            start: () => actFlowTop(incoming) - window.innerHeight,
+            end: () => actFlowTop(incoming),
+            invalidateOnRefresh: true,
+            scrub: reducedMotion ? true : 0.35,
+          },
+        });
+        if (act.dataset.exit === "swirl") {
+          // Pulled into the black hole: the spin quickens as the act shrinks.
+          if (!reducedMotion) {
+            tl.fromTo(act, { scale: 1 }, { scale: 0.02, ease: "power2.in", duration: 1 }, 0);
+            tl.fromTo(act, { rotate: 0 }, { rotate: 540, ease: "power3.in", duration: 1 }, 0);
+          }
+          tl.fromTo(act, { opacity: 1 }, { opacity: 0, duration: 0.4 }, 0.55);
+        } else {
+          const shade = act.querySelector<HTMLElement>(":scope > .act__shade");
+          if (!reducedMotion) {
+            tl.fromTo(act, { scale: 1 }, { scale: 0.94, duration: 1 }, 0);
+            if (shade) tl.fromTo(shade, { opacity: 0 }, { opacity: 0.7, duration: 1 }, 0);
+          }
+          // Gone by the time the incoming act is nine tenths in (dormant there).
+          tl.fromTo(act, { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0.6);
+        }
+        // The incoming panel dissolves into the page backdrop as it lands.
+        const sheet = incoming.querySelector<HTMLElement>(":scope > .act__sheet");
+        if (sheet) tl.fromTo(sheet, { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0.7);
+      });
+    }, root);
 
     // The page reaches its full height only once the acts mount; re-measure every
     // trigger (the footer's reveal in Layout included) against the real layout.
@@ -159,13 +264,19 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
     return () => {
       cancelAnimationFrame(refreshFrame);
       cancelAnimationFrame(focusFrame);
+      cancelAnimationFrame(frameReq);
+      window.removeEventListener("scroll", schedule);
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
       observer.disconnect();
       window.removeEventListener("resize", syncTops);
       root.removeEventListener("focusin", onFocusIn);
-      ctx?.revert();
-      acts.forEach((act) => act.style.removeProperty("--act-top"));
+      ctx.revert();
+      acts.forEach((act) => {
+        act.style.removeProperty("--act-top");
+        delete act.dataset.dormant;
+        delete act.dataset.swirling;
+      });
     };
   }, [rootRef, reducedMotion]);
 }

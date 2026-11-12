@@ -41,11 +41,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="portfolio-app-root min-h-screen flex flex-col justify-between relative">
-      {/* Orbital Telemetry Backdrop */}
-      <div className="animated-background" aria-hidden="true" />
-      <div className="orb orb-1" aria-hidden="true" />
-      <div className="orb orb-2" aria-hidden="true" />
-      <div className="orb orb-3" aria-hidden="true" />
+      {/* No backdrop layers: body's solid void color paints over anything behind
+          it, so the old gradient and blurred orbs were never visible yet cost a
+          composited, animated blur every frame. */}
 
       {/* Cursor fluid (upgrades.md: "apply this to the cursor"), drawn over the live page */}
       {enableFluidCursor && (

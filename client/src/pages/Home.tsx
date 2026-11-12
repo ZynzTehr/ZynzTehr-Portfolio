@@ -14,9 +14,11 @@ import ProjectCarousel from "../components/ProjectCarousel";
 import ProjectStage from "../components/ProjectStage";
 import CardMediaPreview from "../components/CardMediaPreview";
 import ScrollWidget from "../components/ScrollWidget";
+import SiteNav from "../components/SiteNav";
 import BrandMark from "../components/BrandMark";
 import MaskHeading from "../components/MaskHeading";
 import PixelButton from "../components/fx/PixelButton";
+import GlowCaret from "../components/fx/GlowCaret";
 import Laser from "../components/canvasui/Laser";
 import ParticleScroll from "../components/canvasui/ParticleScroll";
 import Ripple from "../components/canvasui/Ripple";
@@ -25,7 +27,8 @@ import { GithubIcon } from "../components/Icon";
 import { Flip, gsap, ScrollTrigger } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion, useReducedMotion } from "../lib/useReducedMotion";
-import { actFlowTop, useActStack } from "../lib/useActStack";
+import { actFlowTop, useActStack, useActsAwake } from "../lib/useActStack";
+import BlackHole from "../components/BlackHole";
 
 /**
  * Act I (Orbit), Act II (Index) and Act III (Transmission).
@@ -46,6 +49,8 @@ interface StageState {
 }
 
 const LIVE_COUNT = projects.filter((p) => Boolean(p.liveUrl)).length;
+/** Rock-paper-scissors builds in the index (the coda's running joke), counted, never assumed. */
+const RPS_COUNT = projects.filter((p) => /rock[\s-]*paper[\s-]*scissors/i.test(p.name)).length;
 const SEARCH_DEBOUNCE_MS = 120;
 
 /** Rectangular sapphire mask reveal for headings (the site's heading grammar). */
@@ -90,6 +95,8 @@ const Home: React.FC = () => {
   );
 
   const isGridRevealedRef = useRef(isGridRevealed);
+  /** Act III's on-screen top to hold while Act II folds above it (see the fold below). */
+  const holdActThreeRef = useRef<number | null>(null);
   const homeRef = useRef<HTMLElement>(null);
   const catalogRef = useRef<HTMLDivElement>(null);
   const indexAnchorRef = useRef<HTMLDivElement>(null);
@@ -297,6 +304,14 @@ const Home: React.FC = () => {
 
   useLayoutEffect(() => {
     isGridRevealedRef.current = isGridRevealed;
+    const actThree = codaRef.current;
+    const held = holdActThreeRef.current;
+    if (!isGridRevealed && held !== null && actThree) {
+      holdActThreeRef.current = null;
+      window.scrollTo({ top: actFlowTop(actThree) - held, behavior: "instant" });
+      ScrollTrigger.refresh();
+      return;
+    }
     const act = catalogRef.current;
     if (!isGridRevealed || !holdIndexTopRef.current || !act) return;
     holdIndexTopRef.current = false;
@@ -338,12 +353,40 @@ const Home: React.FC = () => {
     };
   }, [isGridRevealed, laserOn]);
 
+  // Opening or folding the index (and filtering, and stages) changes the page
+  // height under every later trigger, so re-measure on both edges.
   useEffect(() => {
-    if (isGridRevealed) ScrollTrigger.refresh();
+    ScrollTrigger.refresh();
   }, [isGridRevealed, indexProjects.length, stageProject?.id]);
 
   useMaskReveal(homeRef, []);
   useActStack(homeRef, reducedMotion);
+  const actsAwake = useActsAwake(3);
+
+  // Act II folds back to its prompt once it fills under a tenth of the screen:
+  // the cards, the sand and the laser go, and nothing keeps running for it.
+  // When it folds while above the viewport (Act III has taken over), the page
+  // above Act III shrinks, so the scroll is moved by the same amount and
+  // Act III stays exactly where it was.
+  const actTwoAwake = actsAwake[1];
+  const wasActTwoAwakeRef = useRef(actTwoAwake);
+  useEffect(() => {
+    const was = wasActTwoAwakeRef.current;
+    wasActTwoAwakeRef.current = actTwoAwake;
+    if (!was || actTwoAwake) return;
+    const actThree = codaRef.current;
+    if (!isGridRevealedRef.current) return;
+    if (actThree) {
+      const actThreeTop = actFlowTop(actThree) - window.scrollY;
+      holdActThreeRef.current = actThreeTop < window.innerHeight ? actThreeTop : null;
+    }
+    setStage((current) => (current?.source === "grid" ? null : current));
+    setSearchInput("");
+    setSearchQuery("");
+    setActiveTopic(null);
+    setLaserOn(false);
+    setIsGridRevealed(false);
+  }, [actTwoAwake]);
 
   // Act III: the transmission settles in and its numbers count up once.
   useLayoutEffect(() => {
@@ -427,6 +470,7 @@ const Home: React.FC = () => {
   return (
     <section ref={homeRef} className="portfolio-home-container w-full flex flex-col items-center">
       <ScrollWidget onBackToTop={handleBackToTop} />
+      <SiteNav />
 
       {/* The three acts are stacked sheets (useActStack): each pins once its
           bottom meets the viewport's, and the next act slides up over it. */}
@@ -434,7 +478,7 @@ const Home: React.FC = () => {
           in the flow when its act pins, so it always reports where the act
           really sits on the page (useActStack and the laser measure from it). */}
       <div className="act-anchor" aria-hidden="true" />
-      <div className="act act--1">
+      <div className="act act--1" data-exit="sink">
         <div className="act__shade" aria-hidden="true" />
         <div className="act__inner">
           <DevHud projectCount={projects.length} />
@@ -447,6 +491,7 @@ const Home: React.FC = () => {
               <ProjectCarousel
                 projects={orbitProjects}
                 paused={Boolean(stageProject && stage?.source === "carousel")}
+                dormant={!actsAwake[0]}
                 onSelectProject={(project, rect) => openStage(project, "carousel", rect)}
                 activeCategory={activeCategory}
                 onSelectCategory={(cat) => {
@@ -469,16 +514,19 @@ const Home: React.FC = () => {
         ref={catalogRef}
         id="index"
         className="act act--2 portfolio-catalog-section"
+        data-exit="swirl"
         // Keyboard focus keeps controls above the sand line while it is in use (useActStack).
         data-focus-clearance={
           isGridRevealed && !reducedMotion ? String(1 - PARTICLE_SCROLL_SPEC.point) : undefined
         }
       >
-        <div className="act__shade" aria-hidden="true" />
+        <div className="act__sheet" aria-hidden="true" />
         <div className="act__inner">
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div className="text-center md:text-left">
-              <p className="chapter-kicker m-0 mb-1.5">ACT II // INDEX</p>
+              <p className="chapter-kicker m-0 mb-1.5">
+                <span data-act-kicker="1">ACT II // INDEX</span>
+              </p>
               <MaskHeading className="text-xl md:text-[1.7rem] font-bold leading-tight font-display m-0 text-[var(--text-primary)]">
                 Every system, in one index
               </MaskHeading>
@@ -524,6 +572,7 @@ const Home: React.FC = () => {
                 ) : (
                   <Search size={15} className="search-icon-hint" aria-hidden="true" />
                 )}
+                <GlowCaret inputRef={searchInputRef} />
               </div>
             </div>
           </div>
@@ -724,58 +773,69 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Act III: Transmission */}
+      {/* Act III: Event horizon. Act II spirals into the black hole as this act
+          arrives (useActStack "swirl" exit); the act itself is transparent, so
+          its words sit over the hole. */}
+      <BlackHole awake={actsAwake[2]} />
       <div className="act-anchor" aria-hidden="true" />
       <section
         ref={codaRef}
         aria-labelledby="transmission-title"
         className="act act--3 transmission"
       >
-        <div className="act__inner">
+        <div className="act__inner transmission__inner">
           <Ripple className="transmission__ripple" native={false} {...RIPPLE_SPEC}>
-            <div className="transmission__inner glass-card">
-              <div className="coda-ambient-beam" aria-hidden="true" />
-              <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
-                <div className="max-w-[680px]">
-                  <div className="coda-stagger flex items-center gap-3 mb-4">
-                    <span className="coda-mark" aria-hidden="true">
-                      <BrandMark size={44} />
+            <div className="transmission__layout">
+              <header className="transmission__head">
+                <div className="coda-stagger flex items-center justify-center gap-3 mb-4">
+                  <span className="coda-mark" aria-hidden="true">
+                    <BrandMark size={40} />
+                  </span>
+                  <span className="chapter-kicker" data-act-kicker="2">
+                    ACT III // EVENT HORIZON
+                  </span>
+                </div>
+                <h2
+                  id="transmission-title"
+                  className="coda-stagger font-display font-bold text-[1.7rem] md:text-[2.4rem] leading-[1.12] text-[var(--text-primary)] m-0 mb-3"
+                >
+                  Ideas that get this close don&rsquo;t escape. They ship.
+                </h2>
+                <p className="coda-stagger m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
+                  {projects.length} repositories pulled in from a blank file: shaders that bend
+                  light, full-stack platforms that carry real weight
+                  {RPS_COUNT > 1
+                    ? `, and ${RPS_COUNT} rock-paper-scissors engines that had no business being this well engineered.`
+                    : "."}
+                </p>
+              </header>
+
+              {/* The hole shows through here. */}
+              <div className="transmission__horizon" aria-hidden="true" />
+
+              <div className="transmission__foot">
+                <div className="coda-stagger grid grid-cols-3 gap-2.5 md:gap-3">
+                  <div className="coda-stat-tile">
+                    <span className="coda-stat-tile__value" data-count={projects.length}>
+                      {projects.length}
                     </span>
-                    <span className="chapter-kicker">ACT III // TRANSMISSION</span>
+                    <span className="coda-stat-tile__label">Repositories pulled in</span>
                   </div>
-                  <h2
-                    id="transmission-title"
-                    className="coda-stagger font-display font-bold text-2xl md:text-[2.1rem] leading-[1.14] text-[var(--text-primary)] m-0 mb-3"
-                  >
-                    Every system here started from a blank file and shipped.
-                  </h2>
-                  <p className="coda-stagger m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
-                    Custom GLSL shaders, full-stack TypeScript platforms and interactive 3D, built
-                    to hold up when you read the source and to feel unmistakable when you use it.
-                  </p>
-                  <div className="coda-stagger grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-                    <div className="coda-stat-tile">
-                      <span className="coda-stat-tile__value" data-count={projects.length}>
-                        {projects.length}
-                      </span>
-                      <span className="coda-stat-tile__label">Open-source repositories</span>
-                    </div>
-                    <div className="coda-stat-tile">
-                      <span className="coda-stat-tile__value" data-count={LIVE_COUNT}>
-                        {LIVE_COUNT}
-                      </span>
-                      <span className="coda-stat-tile__label">Live deployments</span>
-                    </div>
-                    <div className="coda-stat-tile">
-                      <span className="coda-stat-tile__value coda-stat-tile__value--text">
-                        TS · React · WebGL2
-                      </span>
-                      <span className="coda-stat-tile__label">Core stack</span>
-                    </div>
+                  <div className="coda-stat-tile">
+                    <span className="coda-stat-tile__value" data-count={LIVE_COUNT}>
+                      {LIVE_COUNT}
+                    </span>
+                    <span className="coda-stat-tile__label">Still transmitting, live</span>
+                  </div>
+                  <div className="coda-stat-tile">
+                    <span className="coda-stat-tile__value coda-stat-tile__value--text">
+                      TS · React · WebGL2
+                    </span>
+                    <span className="coda-stat-tile__label">Source of the gravity</span>
                   </div>
                 </div>
 
-                <div className="coda-stagger flex flex-wrap items-center gap-3 shrink-0">
+                <div className="coda-stagger flex flex-wrap items-center justify-center gap-3">
                   <PixelButton
                     as="a"
                     href="https://jorgebucio.com/"

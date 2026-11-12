@@ -593,6 +593,10 @@ function createParticleScroll(
     const toDocEnd = docMax - window.scrollY;
     const host = findStickyHost();
     if (!host) return toDocEnd;
+    // The host is being transformed away (the site's swirl exit): its rect no
+    // longer means scroll position, and the rows have stopped moving, so they
+    // stay fully printed rather than read the spin as a scroll back up.
+    if (host.dataset.swirling === "true") return 0;
     // Pinned with its bottom on the viewport bottom: its bottom minus the viewport is what remains.
     return Math.min(toDocEnd, host.getBoundingClientRect().bottom - winH);
   }
@@ -603,6 +607,9 @@ function createParticleScroll(
     const band = Math.max(config.band, 1);
     const max = content.scrollHeight - content.clientHeight;
     if (max <= 1) {
+      // A sheet being swirled away (see scrollLeftForRows) keeps every row printed,
+      // whatever the smoothed scroll still says after a long jump.
+      if (findStickyHost()?.dataset.swirling === "true") return 1;
       // Layout reads are hoisted: updateRows fills rowFrame once per frame.
       const rect = rowFrame?.rect ?? output.getBoundingClientRect();
       const winH = rowFrame?.winH ?? Math.max(window.innerHeight || h, 1);

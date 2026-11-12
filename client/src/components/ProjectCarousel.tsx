@@ -26,6 +26,8 @@ interface ProjectCarouselProps {
   onSelectCategory: (category: string) => void;
   /** Hidden behind an open project: stop the orbit and the globe without unmounting. */
   paused?: boolean;
+  /** Act I fills under a tenth of the screen: hold the orbit and the globe, quietly. */
+  dormant?: boolean;
 }
 
 const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
@@ -34,6 +36,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   activeCategory,
   onSelectCategory,
   paused = false,
+  dormant = false,
 }) => {
   const canHover = useMediaQuery("(hover: hover)");
   const [isRotating, setIsRotating] = useState(true);
@@ -54,8 +57,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const prevCategoryRef = useRef(activeCategory);
   const prevPausedRef = useRef(paused);
   const [inView, setInView] = useState(true);
-  // Offscreen or behind an open project: stop the orbit loop and the globe render.
-  const idle = paused || !inView;
+  // Offscreen, covered by Act II, or behind an open project: stop the orbit
+  // loop and the globe render.
+  const idle = paused || dormant || !inView;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -329,7 +333,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       <div className="chapter-orbital-header w-full flex flex-col items-center sm:items-start gap-1.5 mb-1 px-1">
         <p className="chapter-kicker m-0 inline-flex items-center gap-2">
           <Orbit size={14} className="text-accent" aria-hidden="true" />
-          ACT I // ORBIT
+          <span data-act-kicker="0">ACT I // ORBIT</span>
         </p>
         <MaskHeading className="text-xl md:text-[1.7rem] font-bold leading-tight font-display m-0 text-[var(--text-primary)]">
           The latest systems, in orbit

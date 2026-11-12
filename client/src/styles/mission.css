@@ -953,22 +953,43 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Act III: transmission                                                */
+/* Act III: event horizon                                               */
 /* ------------------------------------------------------------------ */
 
+/* Transparent: the words sit over the black hole layer. Head at the top, the
+   numbers and calls to action at the bottom, the hole between them. */
 .transmission__inner {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(1.5rem, 4vw, 2.6rem);
+  --tx-pad-top: clamp(4.75rem, 11vh, 6.5rem);
+  --tx-pad-bottom: clamp(2rem, 6vh, 3.5rem);
+  padding-top: var(--tx-pad-top);
+  padding-bottom: var(--tx-pad-bottom);
 }
-.coda-ambient-beam {
-  position: absolute;
-  inset: -40% -20% auto auto;
-  width: 70%;
-  height: 160%;
-  background: radial-gradient(ellipse at center, rgba(68, 116, 255, 0.22), transparent 62%);
-  animation: ambientCodaDrift 14s ease-in-out infinite;
-  pointer-events: none;
+.transmission__layout {
+  min-height: calc(100svh - var(--tx-pad-top) - var(--tx-pad-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+.transmission__head {
+  max-width: 760px;
+  text-shadow: 0 2px 18px rgba(3, 6, 15, 0.85);
+}
+.transmission__horizon {
+  flex: 1;
+  min-height: clamp(150px, 28vh, 340px);
+}
+.transmission__foot {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+.transmission__foot > .grid {
+  width: 100%;
 }
 .coda-mark {
   display: inline-flex;
@@ -978,30 +999,171 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 0.9rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: rgba(10, 17, 36, 0.7);
+  /* No backdrop blur over a playing video; a dark tint keeps the numbers legible. */
+  background: rgba(5, 9, 20, 0.72);
+  text-align: left;
 }
 .coda-stat-tile__value {
   font-family: var(--font-mono);
-  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
   font-weight: 700;
   line-height: 1;
   color: var(--accent-bright);
   font-variant-numeric: tabular-nums;
 }
 .coda-stat-tile__value--text {
-  font-size: 0.95rem;
+  font-size: clamp(0.72rem, 1.6vw, 0.95rem);
   color: var(--text-primary);
 }
 .coda-stat-tile__label {
-  font-size: 0.78rem;
+  font-size: clamp(0.66rem, 1.5vw, 0.78rem);
   color: var(--text-secondary);
 }
 
+/* The black hole: fixed between Act I and Act II, faded in by BlackHole.tsx
+   as Act III arrives. A CSS hole sits under the Flow video as its stand-in. */
+.blackhole {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  background: #02040a;
+}
+/* The hole rests smaller than the frame so the words above and below stay
+   clear of the photon ring; --bh-grow is the arrival zoom from BlackHole.tsx. */
+/* Landscape: the hole rests smaller and a little low, so the paragraph above
+   clears the photon ring and its jets. */
+.blackhole {
+  --bh-rest: 0.6;
+  --bh-drop: 4vh;
+}
+@media (min-aspect-ratio: 4/5) and (max-aspect-ratio: 5/4) {
+  .blackhole {
+    --bh-rest: 0.6;
+    --bh-drop: 0px;
+  }
+}
+.blackhole__stage {
+  position: absolute;
+  inset: 0;
+  transform: translateY(var(--bh-drop, 0px)) scale(calc(var(--bh-rest) * var(--bh-grow, 1)));
+  transform-origin: 50% 50%;
+}
+/* Soft edges: the shrunken frame fades into the void instead of a hard box. */
+.blackhole__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+}
+/* Portrait: the frame is laid out as its own wide 16:9 box (the disk runs
+   off both edges) rather than cropped to the screen, so the soft mask follows
+   the real frame and the hole lands between the words and the numbers. */
+@media (max-aspect-ratio: 4/5) {
+  .blackhole {
+    --bh-rest: 1;
+    --bh-drop: 0px;
+  }
+  .blackhole__video {
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: 280vw;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    translate: -50% -50%;
+    object-fit: contain;
+  }
+}
+.blackhole__css {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vmin, 980px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+.blackhole__css > span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+.blackhole__glow {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(68, 116, 255, 0.28) 0%,
+    rgba(13, 89, 255, 0.1) 32%,
+    transparent 62%
+  );
+}
+/* A conic ring of light, tipped back into an ellipse and turning. */
+.blackhole__disk {
+  width: 78%;
+  height: 78%;
+  background:
+    radial-gradient(circle, transparent 0 31%, #000 31.5% 32%, transparent 33%),
+    conic-gradient(
+      from 0deg,
+      rgba(96, 165, 250, 0.95),
+      rgba(13, 89, 255, 0.35),
+      rgba(234, 242, 255, 0.9),
+      rgba(68, 116, 255, 0.4),
+      rgba(147, 197, 253, 0.95),
+      rgba(13, 89, 255, 0.3),
+      rgba(96, 165, 250, 0.95)
+    );
+  -webkit-mask: radial-gradient(circle, transparent 0 30%, #000 33% 52%, transparent 70%);
+  mask: radial-gradient(circle, transparent 0 30%, #000 33% 52%, transparent 70%);
+  filter: blur(3px);
+  transform: rotateX(74deg) rotate(0deg);
+  animation: blackholeDisk 18s linear infinite;
+}
+.blackhole__shadow {
+  width: 26%;
+  height: 26%;
+  background: #000;
+  box-shadow:
+    0 0 0 2px rgba(219, 234, 254, 0.85),
+    0 0 18px 4px rgba(96, 165, 250, 0.7),
+    0 0 60px 14px rgba(13, 89, 255, 0.35);
+}
+@keyframes blackholeDisk {
+  to {
+    transform: rotateX(74deg) rotate(360deg);
+  }
+}
+.blackhole[data-awake="false"] .blackhole__disk {
+  animation-play-state: paused;
+}
+/* Edges and the text bands go dark so the words read over the hole. */
+.blackhole__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 6, 15, 0.86) 0%,
+      rgba(3, 6, 15, 0.7) 30%,
+      transparent 42%,
+      transparent 68%,
+      rgba(3, 6, 15, 0.86) 100%
+    ),
+    radial-gradient(ellipse 80% 70% at 50% 50%, transparent 45%, rgba(3, 6, 15, 0.7) 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .coda-ambient-beam {
+  .blackhole__disk {
     animation: none;
   }
 }
@@ -1218,7 +1380,7 @@
   min-height: 100svh;
   margin-inline: calc(50% - 50vw);
   overflow-x: clip;
-  /* Scrubbed scale sinks the covered sheet around the middle of the viewport. */
+  /* Scrubbed exits (sink, swirl) pivot on the middle of the viewport. */
   transform-origin: 50% calc(100% - 50svh);
 }
 .act--1 {
@@ -1226,15 +1388,15 @@
   margin-top: -1.5rem;
   padding-top: 1.5rem;
 }
+/* Act II sits above the black hole layer (z 2), which sits above Act I. */
 .act--2 {
-  z-index: 2;
+  z-index: 3;
 }
 .act--3 {
-  z-index: 3;
+  z-index: 4;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  /* The last sheet runs down to the footer. */
+  /* The last act runs down to the footer. */
   margin-bottom: -1.5rem;
 }
 
@@ -1251,17 +1413,19 @@
   }
 }
 
-/* Sheets that slide over another are opaque and read as a raised panel: a
-   lit top edge, rounded shoulders and a shadow cast up onto the act beneath. */
-.act--2,
-.act--3 {
+/* Act II arrives as an opaque raised panel (a lit top edge, rounded shoulders,
+   a shadow cast up onto Act I). The panel is its own layer, .act__sheet, so
+   useActStack can dissolve it as the act lands: Act II then sits on the same
+   void color as Act I. ParticleScroll's sand band takes that same color (the
+   first solid background above it is body's), so the band always matches. */
+.act__sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   border-top: 1px solid rgba(96, 165, 250, 0.32);
   border-radius: 28px 28px 0 0;
-  /* A solid base under the gradient: ParticleScroll fills its sand band with
-     the first solid background it finds, so it must match the sheet. */
   background-color: #050b1a;
-  /* Fixed-length gradients: the sheet reaches its solid base within its first
-     few hundred pixels, where ParticleScroll's band color (that base) matches. */
   background-image:
     radial-gradient(ellipse 70% 320px at 50% 0%, rgba(13, 89, 255, 0.16), transparent 70%),
     linear-gradient(180deg, #071022 0, #050b1a 480px);
@@ -1269,12 +1433,13 @@
     0 -24px 60px rgba(0, 0, 0, 0.55),
     0 -1px 18px rgba(68, 116, 255, 0.18);
 }
+.act__inner {
+  z-index: 1;
+}
+
 .act--2 > .act__inner {
   padding-top: clamp(2rem, 5vh, 3.5rem);
   padding-bottom: clamp(2.5rem, 6vh, 4rem);
-}
-.act--3 > .act__inner {
-  padding-block: clamp(2.5rem, 8vh, 5rem);
 }
 
 /* Darkens a covered sheet; opacity is scrubbed by useActStack. */
@@ -1298,10 +1463,15 @@
 }
 
 @media (max-width: 640px) {
-  .act--2,
-  .act--3 {
+  .act__sheet {
     border-radius: 20px 20px 0 0;
   }
+}
+
+/* A dormant act (under a tenth of the viewport) holds its CSS loops. */
+.act[data-dormant="true"],
+.act[data-dormant="true"] * {
+  animation-play-state: paused !important;
 }
 
 /* Act II centers its prompt while the index is closed. Results always start
@@ -1331,4 +1501,271 @@
    the beam at that moment would never be seen unmasked. */
 .act--2 > .act__inner:has(#index-grid) {
   padding-bottom: calc(140px + 2.5rem);
+}
+
+/* ------------------------------------------------------------------ */
+/* Glowing search caret (GlowCaret): the native caret cannot glow.      */
+/* ------------------------------------------------------------------ */
+
+.floating-search-input {
+  caret-color: transparent;
+}
+.glow-caret {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: #cfe0ff;
+  box-shadow:
+    0 0 4px #93c5fd,
+    0 0 10px #60a5fa,
+    0 0 18px rgba(68, 116, 255, 0.85);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.glow-caret.is-on {
+  opacity: 1;
+}
+.glow-caret.is-on.is-blinking {
+  animation: glowCaretBlink 1.06s ease-in-out 0.5s infinite;
+}
+@keyframes glowCaretBlink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  92% {
+    opacity: 0.12;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-caret.is-on.is-blinking {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* The page scrolls without a native scrollbar: the scroll widget (the  */
+/* React atom with its progress ring) is the only scroll indicator.     */
+/* ------------------------------------------------------------------ */
+
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Site nav: the banner grown into a full-width bar (SiteNav.tsx)       */
+/* ------------------------------------------------------------------ */
+
+.site-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 45;
+  pointer-events: none;
+}
+.site-nav__chrome {
+  position: relative;
+  transition: transform 0.38s var(--ease-out);
+}
+.site-nav.is-tucked .site-nav__chrome {
+  transform: translateY(calc(-100% - 16px));
+}
+/* Grows out of the banner card: its clip opens from the card's rectangle. */
+.site-nav__bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  opacity: 0;
+  /* No backdrop blur: an opaque bar is far cheaper to scroll under. */
+  background: linear-gradient(180deg, #0a1124, #060b19);
+  box-shadow: inset 0 -1px 0 rgba(96, 165, 250, 0.22);
+}
+.site-nav__bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  height: 58px;
+  padding-inline: max(1rem, calc((100vw - 1320px) / 2 + 1.5rem));
+  border-bottom: 1px solid rgba(96, 165, 250, 0.22);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+}
+.site-nav.is-bar .site-nav__bar {
+  pointer-events: auto;
+}
+.site-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.site-nav__acts {
+  display: flex;
+  justify-content: center;
+  gap: clamp(1rem, 2.4vw, 2rem);
+  min-width: 0;
+}
+.site-nav__act {
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    opacity 0.25s linear,
+    color var(--dur-micro) var(--ease-out),
+    text-shadow var(--dur-micro) var(--ease-out);
+}
+.site-nav__act:hover,
+.site-nav__act:focus-visible {
+  color: #eaf2ff;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.75);
+}
+.site-nav__act:focus-visible,
+.site-nav__brand:focus-visible,
+.site-nav__ext-link:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+/* The act on screen leaves the bar (its link has flown to the heading). */
+.site-nav__act.is-away {
+  opacity: 0;
+  pointer-events: none;
+}
+.site-nav__act-short {
+  display: none;
+}
+.site-nav__ext {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.site-nav__ext-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+.site-nav__ext-link:hover {
+  color: #ffffff;
+}
+.site-nav__flights {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.site-nav__flight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  white-space: nowrap;
+  transform-origin: 0 0;
+  visibility: hidden;
+  will-change: transform;
+  text-shadow: 0 0 12px rgba(96, 165, 250, 0.55);
+}
+
+@media (max-width: 900px) {
+  .site-nav__ext-link span {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .site-nav__bar {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand ext"
+      "acts acts";
+    row-gap: 0.15rem;
+    height: auto;
+    padding-block: 0.45rem 0.35rem;
+  }
+  .site-nav__brand {
+    grid-area: brand;
+  }
+  .site-nav__ext {
+    grid-area: ext;
+  }
+  .site-nav__acts {
+    grid-area: acts;
+    justify-content: space-between;
+  }
+  .site-nav__act-long {
+    display: none;
+  }
+  .site-nav__act-short {
+    display: inline;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-nav__chrome {
+    transition: none;
+  }
+}
+
+/* Transformed acts (the swirl rotates Act II) must never widen or lengthen the
+   page: phones zoom out to fit a wider layout, which shrinks the scroll range.
+   Clip at the full-width app root; clip makes no scroll container, so sticky
+   acts and fixed layers behave exactly as before. */
+.portfolio-app-root {
+  overflow: clip;
+}
+
+/* Chrome's own clear glyph on search inputs duplicates our clear button. */
+.floating-search-input::-webkit-search-cancel-button,
+.floating-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/* The swirl turns only the act's on-screen window: a pinned act's top sits
+   --act-top above the viewport, so clip that much off before the transform. */
+.act[data-exit="swirl"][data-swirling="true"] {
+  clip-path: inset(calc(-1 * var(--act-top, 0px)) 0 0 0);
+}
+
+/* Short phones: Act III fits one screen (head, hole, numbers, buttons). */
+@media (max-height: 780px) and (max-width: 640px) {
+  .transmission__inner {
+    --tx-pad-top: 4.25rem;
+    --tx-pad-bottom: 1.25rem;
+  }
+  .transmission__horizon {
+    min-height: 120px;
+  }
+  .transmission__head h2 {
+    font-size: 1.5rem;
+  }
+  .transmission__foot {
+    gap: 0.75rem;
+  }
 }
