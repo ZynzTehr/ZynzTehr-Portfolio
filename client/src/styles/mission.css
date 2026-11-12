@@ -1043,7 +1043,8 @@
   max-width: none;
   /* The arrival zoom settles onto the hole itself. */
   transform: scale(var(--bh-grow, 1));
-  transform-origin: 76.56% 43.52%;
+  /* The hole in the frame (BlackHole.tsx HOLE_X / HOLE_Y). */
+  transform-origin: 78.21% 44.92%;
 }
 /* Portrait: the frame is narrower than tall screens, so its edges dissolve
    into the void. */
@@ -1128,7 +1129,13 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(3, 6, 15, 0.9) 0%, rgba(3, 6, 15, 0.72) 30%, transparent 52%),
+    linear-gradient(
+      90deg,
+      rgba(3, 6, 15, 0.92) 0%,
+      rgba(3, 6, 15, 0.82) 34%,
+      rgba(3, 6, 15, 0.45) 46%,
+      transparent 60%
+    ),
     linear-gradient(
       180deg,
       rgba(3, 6, 15, 0.55) 0%,
@@ -1625,7 +1632,6 @@ body::-webkit-scrollbar {
   cursor: pointer;
   white-space: nowrap;
   transition:
-    opacity 0.25s linear,
     color var(--dur-micro) var(--ease-out),
     text-shadow var(--dur-micro) var(--ease-out);
 }
@@ -1641,9 +1647,9 @@ body::-webkit-scrollbar {
   outline-offset: 4px;
   border-radius: 4px;
 }
-/* The act on screen leaves the bar (its link has flown to the heading). */
+/* The act on screen leaves the bar (its link fades into the act's heading;
+   SiteNav scrubs the opacity). */
 .site-nav__act.is-away {
-  opacity: 0;
   pointer-events: none;
 }
 .site-nav__act-short {
@@ -1666,22 +1672,6 @@ body::-webkit-scrollbar {
 }
 .site-nav__ext-link:hover {
   color: #ffffff;
-}
-.site-nav__flights {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-.site-nav__flight {
-  position: absolute;
-  left: 0;
-  top: 0;
-  margin: 0;
-  white-space: nowrap;
-  transform-origin: 0 0;
-  visibility: hidden;
-  will-change: transform;
-  text-shadow: 0 0 12px rgba(96, 165, 250, 0.55);
 }
 
 @media (max-width: 900px) {

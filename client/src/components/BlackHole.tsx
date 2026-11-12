@@ -5,8 +5,8 @@ import { useReducedMotion } from "../lib/useReducedMotion";
 /**
  * Act III's black hole: a fixed layer between Act I and Act II that fades in
  * while Act II spirals into it (useActStack "swirl" exit). The loop is the
- * owner's black hole image, recolored to the palette and set in motion with
- * Google Flow (image-to-video), stars falling into it included. A CSS hole
+ * owner's black hole, recolored to the palette and set in motion by the owner
+ * in Google Flow, stabilized here into a locked, seamless loop. A CSS hole
  * stands in if the video fails; reduced motion shows the poster frame.
  *
  * The hole is not at the centre of the frame, so the frame is placed by hand:
@@ -28,8 +28,8 @@ const POSTER = "/media/blackhole/blackhole-poster.jpg";
 /** The frame and the hole inside it (source pixels). */
 const FRAME_W = 1920;
 const FRAME_H = 1080;
-const HOLE_X = 1470 / FRAME_W;
-const HOLE_Y = 470 / FRAME_H;
+const HOLE_X = 1501.69 / FRAME_W;
+const HOLE_Y = 485.15 / FRAME_H;
 
 /** Fully in once Act III is three quarters of the way up the screen. */
 const FADE_END = 0.75;
