@@ -704,7 +704,10 @@
 @media (min-width: 769px) {
   .banner .slider .item .project-tile-3d {
     opacity: calc(0.42 + 0.58 * max(var(--facing, 1), 0));
-    transition: opacity var(--dur-ui) linear;
+    transition:
+      opacity var(--dur-ui) linear,
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.28s ease;
   }
   .banner .slider .item.is-rear .project-tile-3d > * {
     opacity: 0;
@@ -1056,6 +1059,9 @@
 @media (max-width: 768px) {
   .banner {
     position: relative;
+    /* The ring runs past both edges; clip it sideways only, so the globe's
+       vertical glow still shows. */
+    overflow-x: clip;
   }
   .banner::before {
     content: "";
@@ -1098,4 +1104,22 @@
 }
 .tile-inspect-hint.is-active .inspect-hint__label {
   color: var(--accent-bright);
+}
+
+/* Phone grid cards: the art is letterboxed small and has no hover video, so
+   the Motion badge only hid the art's caption. */
+@media (max-width: 640px) {
+  .card-video-badge {
+    display: none;
+  }
+}
+
+/* Keyboard focus on an orbit tile always shows, even when it does not pop
+   (focus restored after a project closes). */
+.banner .slider .item:focus-visible {
+  outline: none;
+}
+.banner .slider .item:focus-visible .project-tile-3d {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
 }

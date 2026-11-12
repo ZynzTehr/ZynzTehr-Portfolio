@@ -61,7 +61,7 @@ const InspectHint: React.FC<InspectHintProps> = ({ active }) => {
 
   return (
     <div className={`tile-inspect-hint ${active ? "is-active" : ""}`} aria-hidden="true">
-      {mounted ? (
+      {mounted && active && canSweep ? (
         <AsciiSweep
           className="inspect-hint__sweep"
           {...ASCII_SWEEP_SPEC}

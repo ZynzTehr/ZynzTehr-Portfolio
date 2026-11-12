@@ -11,6 +11,14 @@ import Earth3D from "./Earth3D";
 import CardMediaPreview from "./CardMediaPreview";
 import InspectHint from "./InspectHint";
 
+/**
+ * When Tab last moved focus. Focus restored by script after a project closes
+ * (Escape counts as a keyboard interaction, so it also matches :focus-visible)
+ * must not pause and turn the orbit; only real Tab navigation does.
+ */
+let lastTabAt = -Infinity;
+const TAB_FOCUS_WINDOW_MS = 400;
+
 interface ProjectCarouselProps {
   projects: Project[];
   onSelectProject: (project: Project, originRect: DOMRect | null) => void;
@@ -48,6 +56,14 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [inView, setInView] = useState(true);
   // Offscreen or behind an open project: stop the orbit loop and the globe render.
   const idle = paused || !inView;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Tab") lastTabAt = performance.now();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -359,7 +375,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 tabIndex={0}
                 aria-label={`${project.name}: open project details`}
                 data-project-tile={project.id}
-                className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${facing < 0 ? "is-rear" : ""}`}
+                className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${facing < 0 ? "is-rear" : ""} ${!isMobile && hoveredId === project.id ? "is-engaged" : ""}`}
                 style={
                   { "--position": index + 1, "--facing": facing.toFixed(3) } as React.CSSProperties
                 }
@@ -370,7 +386,11 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                     handleCardActivate(project, index, e.currentTarget);
                   }
                 }}
-                onMouseEnter={() => {
+                // Hover engages on a real pointer move, not on mouseenter: the orbit
+                // carries tiles under a still cursor, and that must not stop it.
+                onMouseMove={(e) => {
+                  if (hoveredId === project.id) return;
+                  if (e.movementX === 0 && e.movementY === 0) return;
                   setIsHovered(true);
                   setHoveredId(project.id);
                 }}
@@ -378,10 +398,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                   setIsHovered(false);
                   setHoveredId((prev) => (prev === project.id ? null : prev));
                 }}
-                onFocus={(e) => {
-                  // Only keyboard focus pauses and turns the orbit. Focus returned
+                onFocus={() => {
+                  // Only Tab navigation pauses and turns the orbit. Focus returned
                   // to this tile after a project closes must not hold the spin.
-                  if (!e.currentTarget.matches(":focus-visible")) return;
+                  if (performance.now() - lastTabAt > TAB_FOCUS_WINDOW_MS) return;
                   setIsHovered(true);
                   setHoveredId(project.id);
                   bringToFront(index);

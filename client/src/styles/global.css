@@ -413,11 +413,20 @@
     cursor: pointer;
   }
 
-  .banner .slider .item:hover,
-  .banner .slider .item:focus-within {
-    transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg))
-      translateZ(452px) scale(1.12);
+  /* Engaged = real pointer hover or Tab focus, set from JS (is-engaged).
+     CSS :hover would also fire when the orbit carries a tile under a still
+     cursor, and :focus-within when focus returns after a project closes.
+     The hit target (.item) keeps its geometry; only the card inside pops. */
+  .banner .slider .item.is-engaged {
     z-index: 20;
+  }
+
+  .banner .slider .item .project-tile-3d {
+    --tile-pop: 1.12;
+  }
+
+  .banner .slider .item.is-engaged .project-tile-3d {
+    transform: scale(var(--tile-pop));
   }
 
   /* 3D Carousel Tile Card */
@@ -446,8 +455,7 @@
     animation-play-state: paused;
   }
 
-  .banner .slider .item:hover .project-tile-3d,
-  .banner .slider .item:focus-within .project-tile-3d {
+  .banner .slider .item.is-engaged .project-tile-3d {
     background:
       linear-gradient(#0b1328, #0b1328) padding-box,
       conic-gradient(
@@ -519,8 +527,7 @@
     transition: color 0.2s ease;
   }
 
-  .banner .slider .item:hover .tile-inspect-hint,
-  .banner .slider .item:focus-within .tile-inspect-hint {
+  .banner .slider .item.is-engaged .tile-inspect-hint {
     color: var(--accent-bright);
   }
 
@@ -1056,9 +1063,8 @@
         translateZ(clamp(280px, 33vw, 410px));
     }
 
-    .banner .slider .item:hover {
-      transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg))
-        translateZ(clamp(300px, 35vw, 440px)) scale(1.1);
+    .banner .slider .item .project-tile-3d {
+      --tile-pop: 1.1;
     }
 
     .earth-container {
@@ -1148,6 +1154,7 @@
     }
 
     .banner .slider .item .project-tile-3d {
+      --tile-pop: 1;
       width: 100%;
       height: 100%;
       animation: none;
