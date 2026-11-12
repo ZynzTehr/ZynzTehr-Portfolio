@@ -5,10 +5,11 @@ import { prefersReducedMotion } from "../lib/useReducedMotion";
 import PixelButton from "./fx/PixelButton";
 import MaskHeading from "./MaskHeading";
 import { useMediaQuery } from "../lib/useReducedMotion";
-import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Orbit, Sparkles } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Layers, Orbit, Sparkles } from "lucide-react";
 import { categories, type Project } from "../data/projects";
 import Earth3D from "./Earth3D";
 import CardMediaPreview from "./CardMediaPreview";
+import InspectHint from "./InspectHint";
 
 interface ProjectCarouselProps {
   projects: Project[];
@@ -297,6 +298,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     if (window.innerWidth <= 768) {
       setActiveMobileIndex(index);
     }
+    // The stage covers the orbit, so this tile never gets its mouseleave or
+    // blur. Clear the hover pause now, or the orbit stays stopped on return.
+    setIsHovered(false);
+    setHoveredId(null);
     const mediaBox = cardElement?.querySelector(".tile-media-wrapper") as HTMLElement | null;
     const rect = (mediaBox ?? cardElement)?.getBoundingClientRect() ?? null;
     onSelectProject(project, rect);
@@ -373,7 +378,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                   setIsHovered(false);
                   setHoveredId((prev) => (prev === project.id ? null : prev));
                 }}
-                onFocus={() => {
+                onFocus={(e) => {
+                  // Only keyboard focus pauses and turns the orbit. Focus returned
+                  // to this tile after a project closes must not hold the spin.
+                  if (!e.currentTarget.matches(":focus-visible")) return;
                   setIsHovered(true);
                   setHoveredId(project.id);
                   bringToFront(index);
@@ -385,17 +393,19 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               >
                 <div className="carousel-card project-tile-3d">
                   <div className="tile-media-wrapper">
-                    <CardMediaPreview project={project} isActive={isCardActive} compact />
+                    <CardMediaPreview
+                      project={project}
+                      isActive={isCardActive}
+                      enableShader={false}
+                      compact
+                    />
                     <div className="tile-overlay-glow" />
                   </div>
 
                   <div className="tile-info">
                     <span className="tile-category-tag">{project.category}</span>
                     <h3 className="tile-title truncate">{project.name}</h3>
-                    <div className="tile-inspect-hint">
-                      <Eye size={12} className="mr-1" aria-hidden="true" />
-                      <span>Open</span>
-                    </div>
+                    <InspectHint active={isCardActive && !isMobile} />
                   </div>
                 </div>
               </div>

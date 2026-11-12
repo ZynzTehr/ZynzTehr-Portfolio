@@ -1075,3 +1075,27 @@
     pointer-events: none;
   }
 }
+
+/* Orbit tile call to action: "Inspect" sweeps into "Click for more info". */
+.tile-inspect-hint {
+  position: relative;
+  height: 1.15rem;
+  width: 100%;
+}
+.tile-inspect-hint .inspect-hint__sweep {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.inspect-hint__label {
+  display: flex;
+  align-items: center;
+  height: 1.15rem;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.tile-inspect-hint.is-active .inspect-hint__label {
+  color: var(--accent-bright);
+}
