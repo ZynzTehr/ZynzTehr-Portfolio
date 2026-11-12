@@ -20,15 +20,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const finePointer = useMediaQuery("(pointer: fine)");
   const enableFluidCursor = finePointer && !reducedMotion;
 
-  // The footer settles in as it enters the viewport. gsap.from in a layout
+  // The footer fades in as it enters the viewport. gsap.from in a layout
   // effect hides it before first paint, so it never flashes.
   useLayoutEffect(() => {
     const footerEl = footerRef.current;
     if (!footerEl || reducedMotion) return;
     const ctx = gsap.context(() => {
+      // Opacity only: the footer sits flush against the sheet above it, and a
+      // rise would open a strip of bare page under it.
       gsap.from(footerEl, {
         opacity: 0,
-        y: 12,
         duration: DUR.reveal,
         ease: EASE.out,
         clearProps: "transform,opacity",

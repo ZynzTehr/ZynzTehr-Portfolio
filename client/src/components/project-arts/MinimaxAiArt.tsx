@@ -170,7 +170,7 @@ const Score: React.FC<{ cx: number; y: number; score: number; lit?: boolean }> =
         dominantBaseline="central"
         fill={text}
         fontSize="9"
-        fontFamily="'JetBrains Mono', ui-monospace, monospace"
+        fontFamily="'IBM Plex Mono', ui-monospace, monospace"
         fontWeight="bold"
       >
         {label}
@@ -274,7 +274,12 @@ const MinimaxAiArt: React.FC = () => {
         <ellipse cx="320" cy="60" rx="150" ry="70" fill="url(#tictactoewithai-spot)" />
 
         {/* Ply labels */}
-        <g fontFamily="'JetBrains Mono', ui-monospace, monospace" fontWeight="bold" fontSize="9" letterSpacing="1">
+        <g
+          fontFamily="'IBM Plex Mono', ui-monospace, monospace"
+          fontWeight="bold"
+          fontSize="9"
+          letterSpacing="1"
+        >
           <path d="M 600,46 L 606,40 L 612,46 Z" fill="#60a5fa" />
           <text x="606" y="60" textAnchor="middle" fill="#60a5fa">
             MAX
@@ -429,7 +434,7 @@ const MinimaxAiArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

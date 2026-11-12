@@ -210,13 +210,13 @@ const PythonRpsArt: React.FC = () => {
               textAnchor="middle"
               fill="#93c5fd"
               fontSize="9"
-              fontFamily="'JetBrains Mono', ui-monospace, monospace"
+              fontFamily="'IBM Plex Mono', ui-monospace, monospace"
               opacity="0.8"
             >
               rps.py
             </text>
 
-            <g fontFamily="'JetBrains Mono', ui-monospace, monospace" fontSize="11.5">
+            <g fontFamily="'IBM Plex Mono', ui-monospace, monospace" fontSize="11.5">
               <text x="44" y="88" fill="#eaf2ff">
                 <tspan fill="#60a5fa">$</tspan> python3 rps.py
               </text>
@@ -274,7 +274,7 @@ const PythonRpsArt: React.FC = () => {
         </g>
 
         {/* ===== The dictionary ===== */}
-        <g fontFamily="'JetBrains Mono', ui-monospace, monospace">
+        <g fontFamily="'IBM Plex Mono', ui-monospace, monospace">
           <text x="350" y="110" fontSize="13" fill="#93c5fd" fontWeight="bold">
             BEATS = {"{"}
           </text>
@@ -378,7 +378,7 @@ const PythonRpsArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

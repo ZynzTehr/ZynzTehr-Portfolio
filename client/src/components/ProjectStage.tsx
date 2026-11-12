@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { gsap } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
 import PixelButton from "./fx/PixelButton";
+import CloseGlyph from "./fx/CloseGlyph";
 import { ASCIIFY_SPEC, GLYPH_RAIN_SPEC } from "./canvasui/spec";
 import {
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -12,7 +12,6 @@ import {
   Hash,
   Sparkles,
   Star,
-  X,
 } from "lucide-react";
 import { formatProjectDate, type Project } from "../data/projects";
 import { GithubIcon } from "./Icon";
@@ -30,6 +29,12 @@ interface ProjectStageProps {
   onSelectTopic?: (topic: string) => void;
   /** Increment to close with the exit motion from outside (for example, re-clicking the card). */
   closeRequest?: number;
+  /**
+   * The control that takes focus when this stage mounts: the close X on open,
+   * or prev / next when a step remounts the stage (an index stage moves to the
+   * row of the project it steps to), so repeated Enter keeps stepping.
+   */
+  initialFocus?: "close" | "prev" | "next";
 }
 
 const ProjectStage: React.FC<ProjectStageProps> = ({
@@ -42,11 +47,14 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
   onNext,
   onSelectTopic,
   closeRequest = 0,
+  initialFocus = "close",
 }) => {
   const stageRef = useRef<HTMLElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
   const dossierRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLElement>(null);
+  const prevBtnRef = useRef<HTMLElement>(null);
+  const nextBtnRef = useRef<HTMLElement>(null);
   const prevProjectIdRef = useRef<string | null>(null);
   const initialTornDownRef = useRef<boolean>(false);
   const seenCloseRef = useRef(closeRequest);
@@ -121,9 +129,18 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [requestClose, handleStepPrev, handleStepNext]);
 
-  // Focus management and smooth viewport alignment when stage mounts
+  // Focus lands on the close X when the stage opens. Stepping keeps focus where
+  // it is; if a step remounts the stage, focus returns to the step control.
   useEffect(() => {
-    closeBtnRef.current?.focus({ preventScroll: true });
+    const target =
+      initialFocus === "prev" ? prevBtnRef : initialFocus === "next" ? nextBtnRef : closeBtnRef;
+    target.current?.focus({ preventScroll: true });
+    // Mount only: later steps keep the user's focus.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Smooth viewport alignment when the stage mounts or steps
+  useEffect(() => {
     const stageEl = stageRef.current;
     if (!stageEl) return;
     const rect = stageEl.getBoundingClientRect();
@@ -373,51 +390,54 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
           {/* Right Column: Structured Metadata Tags, Description, Relocated Topics, and Controls */}
           <div ref={dossierRef} className="stage-dossier">
             <div className="flex flex-col gap-4">
-              {/* Top Stage Navigation Bar */}
+              {/* Top Stage Navigation Bar: position, step, close. The X is the
+                  only way out besides Esc, so it carries the focus on open. */}
               <div className="stage-stagger-item flex items-center justify-between gap-2">
-                <PixelButton
-                  ref={closeBtnRef}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => requestClose()}
-                  className="whitespace-nowrap"
-                >
-                  <ArrowLeft size={15} aria-hidden="true" />
-                  <span>Back</span>
-                </PixelButton>
+                <span className="font-telemetry text-xs text-[var(--text-muted)] whitespace-nowrap">
+                  {String(currentIndex + 1).padStart(2, "0")} /{" "}
+                  {String(totalCount).padStart(2, "0")}
+                </span>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-telemetry text-xs text-[var(--text-muted)] mr-1 whitespace-nowrap">
-                    {String(currentIndex + 1).padStart(2, "0")} /{" "}
-                    {String(totalCount).padStart(2, "0")}
-                  </span>
-                  <button
-                    type="button"
+                <div className="flex items-center gap-2 shrink-0">
+                  <PixelButton
+                    ref={prevBtnRef}
+                    variant="secondary"
+                    size="icon"
                     onClick={handleStepPrev}
-                    className="btn-stage-icon"
                     aria-label="Previous project"
                     title="Previous project"
                   >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
+                    <ChevronLeft
+                      size={18}
+                      className="pixel-btn__chevron pixel-btn__chevron--prev"
+                      aria-hidden="true"
+                    />
+                  </PixelButton>
+                  <PixelButton
+                    ref={nextBtnRef}
+                    variant="secondary"
+                    size="icon"
                     onClick={handleStepNext}
-                    className="btn-stage-icon"
                     aria-label="Next project"
                     title="Next project"
                   >
-                    <ChevronRight size={16} />
-                  </button>
-                  <button
-                    type="button"
+                    <ChevronRight
+                      size={18}
+                      className="pixel-btn__chevron pixel-btn__chevron--next"
+                      aria-hidden="true"
+                    />
+                  </PixelButton>
+                  <PixelButton
+                    ref={closeBtnRef}
+                    variant="secondary"
+                    size="icon"
+                    danger
                     onClick={() => requestClose()}
-                    className="btn-stage-icon"
                     aria-label="Close project view"
                     title="Close (Esc)"
                   >
-                    <X size={16} />
-                  </button>
+                    <CloseGlyph size={18} />
+                  </PixelButton>
                 </div>
               </div>
 

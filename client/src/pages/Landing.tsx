@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import GlyphRain from "../components/canvasui/GlyphRain";
 import { AsciiSweep } from "../components/canvasui/AsciiSweep";
 import Ripple, { type RippleHandle } from "../components/canvasui/Ripple";
@@ -40,7 +39,7 @@ const BEATS: Beat[] = [
     kicker: "Signal",
     headline: "Zynz Tehr",
     line: "Jorge Bucio, full-stack and creative systems engineer",
-    size: "clamp(3.4rem, 9vw, 6.4rem)",
+    size: "clamp(2.9rem, 13vw, 6.4rem)",
   },
   {
     code: "02",
@@ -187,17 +186,10 @@ const Landing: React.FC = () => {
     swapTo(beat);
   };
 
-  // The mark locks on in the viewfinder: brackets close in, the mark settles.
+  // The mark locks on: it spins in and settles, then the chrome follows.
   useLayoutEffect(() => {
     if (reducedMotion || !sectionRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.from(".prologue-corner", {
-        opacity: 0,
-        scale: 1.6,
-        duration: DUR.hero,
-        ease: EASE.out,
-        stagger: 0.05,
-      });
       gsap.from(markRef.current, {
         opacity: 0,
         scale: 1.8,
@@ -317,10 +309,6 @@ const Landing: React.FC = () => {
       >
         <GlyphRain className="prologue-rain" native={false} {...rainOptions}>
           <div className="prologue-stage">
-            <div className="prologue-corner corner-tl" aria-hidden="true" />
-            <div className="prologue-corner corner-tr" aria-hidden="true" />
-            <div className="prologue-corner corner-bl" aria-hidden="true" />
-            <div className="prologue-corner corner-br" aria-hidden="true" />
             <div className="prologue-head-slot" aria-hidden="true" />
 
             {/* The beats live under the rain: dimmed page, light pools (upgrades.md). */}
@@ -399,7 +387,6 @@ const Landing: React.FC = () => {
                   onActivate={() => launch(ctaCenter())}
                 >
                   <span>Launch</span>
-                  <ArrowRight size={19} className="pixel-btn__arrow" aria-hidden="true" />
                 </PixelButton>
               ) : null}
             </div>

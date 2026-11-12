@@ -442,7 +442,7 @@ const TorqueLineArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="11"
-            fontFamily="'JetBrains Mono', monospace"
+            fontFamily="'IBM Plex Mono', monospace"
             fontWeight="bold"
             letterSpacing="2"
           >

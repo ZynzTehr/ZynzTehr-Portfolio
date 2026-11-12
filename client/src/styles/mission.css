@@ -136,8 +136,15 @@
   min-height: 560px;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
+  /* Bleed past main's vertical padding so the rain runs edge to edge, from the
+     top of the page down to the footer with no strip of bare page between. */
   margin-top: -1.5rem;
+  margin-bottom: -1.5rem;
   overflow: hidden;
+}
+
+.portfolio-app-root:has(.prologue) .footer-hud {
+  margin-top: 0;
 }
 
 .prologue-ripple,
@@ -163,40 +170,6 @@
   gap: clamp(1rem, 2.6vh, 1.75rem);
   padding: 4.5rem 1.25rem 3rem;
   text-align: center;
-}
-
-.prologue-corner {
-  position: absolute;
-  width: clamp(28px, 4vw, 52px);
-  height: clamp(28px, 4vw, 52px);
-  border-color: rgba(96, 165, 250, 0.55);
-  border-style: solid;
-  border-width: 0;
-  pointer-events: none;
-}
-.prologue-corner.corner-tl {
-  top: clamp(18px, 4vh, 40px);
-  left: clamp(18px, 4vw, 48px);
-  border-top-width: 1.5px;
-  border-left-width: 1.5px;
-}
-.prologue-corner.corner-tr {
-  top: clamp(18px, 4vh, 40px);
-  right: clamp(18px, 4vw, 48px);
-  border-top-width: 1.5px;
-  border-right-width: 1.5px;
-}
-.prologue-corner.corner-bl {
-  bottom: clamp(18px, 4vh, 40px);
-  left: clamp(18px, 4vw, 48px);
-  border-bottom-width: 1.5px;
-  border-left-width: 1.5px;
-}
-.prologue-corner.corner-br {
-  bottom: clamp(18px, 4vh, 40px);
-  right: clamp(18px, 4vw, 48px);
-  border-bottom-width: 1.5px;
-  border-right-width: 1.5px;
 }
 
 /* Two aligned layers: the stage (under the rain) and the UI (crisp, above it).
@@ -357,9 +330,10 @@
   margin: 0;
   text-wrap: balance;
   font-family: var(--font-display);
+  font-stretch: 125%;
   font-weight: 700;
   line-height: 1.04;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.015em;
   color: var(--text-primary);
   text-shadow: 0 0 28px rgba(68, 116, 255, 0.5);
 }
@@ -517,6 +491,113 @@
 .pixel-btn:hover .pixel-btn__arrow,
 .pixel-btn:focus-visible .pixel-btn__arrow {
   transform: translateX(4px);
+}
+
+/* Icon-only pixel buttons: previous, next, close. Square, same surface. */
+.pixel-btn--icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 12px;
+}
+.pixel-btn--icon .pixel-btn__label {
+  gap: 0;
+}
+
+/* Chevrons lean the way they point. Hover only where hover exists, so a tap
+   never leaves the nudge stuck on. */
+.pixel-btn__chevron {
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+.pixel-btn:focus-visible .pixel-btn__chevron--prev {
+  transform: translateX(-3px);
+}
+.pixel-btn:focus-visible .pixel-btn__chevron--next {
+  transform: translateX(3px);
+}
+@media (hover: hover) {
+  .pixel-btn:hover .pixel-btn__chevron--prev {
+    transform: translateX(-3px);
+  }
+  .pixel-btn:hover .pixel-btn__chevron--next {
+    transform: translateX(3px);
+  }
+}
+
+/* The orbit's Pause pill matches the square arrows beside it. */
+.carousel-controls .pixel-btn--sm {
+  min-height: 44px;
+}
+
+/* Danger (close): on hover the surface warms to red and the X becomes an
+   abort reticle (strokes spin a quarter turn and tighten, a ring traces
+   itself around them). Hover only: keyboard focus keeps the standard ring, so
+   stepping with the arrow keys never flashes the close button red. */
+.close-glyph {
+  overflow: visible;
+}
+.close-glyph__cross,
+.close-glyph__a,
+.close-glyph__b {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+.close-glyph__cross {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.close-glyph__a,
+.close-glyph__b {
+  transition: transform 0.32s var(--ease-out);
+}
+.close-glyph__ring {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transform: rotate(-90deg);
+  transition:
+    stroke-dashoffset 0.45s var(--ease-out),
+    opacity 0.2s linear;
+}
+@media (hover: hover) {
+  .pixel-btn--danger:hover {
+    color: #ff6b6b;
+    border-color: #ff4d4d;
+    background: linear-gradient(#5c0b12, #33060b);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 180, 180, 0.2),
+      var(--tilt-shadow-x, 0px) var(--tilt-shadow-y, 8px) 22px rgba(255, 45, 45, 0.38),
+      0 0 22px rgba(255, 45, 45, 0.45);
+  }
+  .pixel-btn--danger:hover .close-glyph__cross {
+    transform: rotate(90deg);
+  }
+  .pixel-btn--danger:hover .close-glyph__a,
+  .pixel-btn--danger:hover .close-glyph__b {
+    transform: scale(0.62);
+  }
+  .pixel-btn--danger:hover .close-glyph__ring {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close-glyph__cross,
+  .close-glyph__a,
+  .close-glyph__b,
+  .close-glyph__ring,
+  .pixel-btn__chevron {
+    transition: none;
+  }
+  .pixel-btn .close-glyph__cross,
+  .pixel-btn .close-glyph__a,
+  .pixel-btn .close-glyph__b,
+  .pixel-btn .pixel-btn__chevron {
+    transform: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1122,4 +1203,132 @@
 .banner .slider .item:focus-visible .project-tile-3d {
   outline: 2px solid var(--accent-bright);
   outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Acts as stacked sheets (useActStack)                                 */
+/* ------------------------------------------------------------------ */
+
+/* Each act is a full-bleed sheet that pins once its bottom meets the bottom of
+   the viewport (--act-top, set in JS), so the next act slides up over it. */
+.act {
+  position: sticky;
+  top: var(--act-top, 0px);
+  width: 100vw;
+  min-height: 100svh;
+  margin-inline: calc(50% - 50vw);
+  overflow-x: clip;
+  /* Scrubbed scale sinks the covered sheet around the middle of the viewport. */
+  transform-origin: 50% calc(100% - 50svh);
+}
+.act--1 {
+  z-index: 1;
+  margin-top: -1.5rem;
+  padding-top: 1.5rem;
+}
+.act--2 {
+  z-index: 2;
+}
+.act--3 {
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* The last sheet runs down to the footer. */
+  margin-bottom: -1.5rem;
+}
+
+.act__inner {
+  position: relative;
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 768px) {
+  .act__inner {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* Sheets that slide over another are opaque and read as a raised panel: a
+   lit top edge, rounded shoulders and a shadow cast up onto the act beneath. */
+.act--2,
+.act--3 {
+  border-top: 1px solid rgba(96, 165, 250, 0.32);
+  border-radius: 28px 28px 0 0;
+  /* A solid base under the gradient: ParticleScroll fills its sand band with
+     the first solid background it finds, so it must match the sheet. */
+  background-color: #050b1a;
+  /* Fixed-length gradients: the sheet reaches its solid base within its first
+     few hundred pixels, where ParticleScroll's band color (that base) matches. */
+  background-image:
+    radial-gradient(ellipse 70% 320px at 50% 0%, rgba(13, 89, 255, 0.16), transparent 70%),
+    linear-gradient(180deg, #071022 0, #050b1a 480px);
+  box-shadow:
+    0 -24px 60px rgba(0, 0, 0, 0.55),
+    0 -1px 18px rgba(68, 116, 255, 0.18);
+}
+.act--2 > .act__inner {
+  padding-top: clamp(2rem, 5vh, 3.5rem);
+  padding-bottom: clamp(2.5rem, 6vh, 4rem);
+}
+.act--3 > .act__inner {
+  padding-block: clamp(2.5rem, 8vh, 5rem);
+}
+
+/* Darkens a covered sheet; opacity is scrubbed by useActStack. */
+.act__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: #02040b;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.act-anchor {
+  height: 0;
+}
+
+/* The home page's last sheet meets the footer with no strip of bare page. */
+.portfolio-app-root:has(.act--3) .footer-hud {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .act--2,
+  .act--3 {
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+/* Act II centers its prompt while the index is closed. Results always start
+   at the top of the sheet, so they print in from the beam as usual. */
+.act--2 {
+  display: flex;
+  flex-direction: column;
+}
+.act--2 > .act__inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.act--2 #index-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.act--2 #index-results:has(.archive-open-prompt) {
+  justify-content: center;
+}
+
+/* With the index open the grid must end above the laser beam (LASER_SPEC
+   offset 140px from the viewport bottom), because the sheet pins with its
+   bottom on the viewport's and Act III then covers it: anything left below
+   the beam at that moment would never be seen unmasked. */
+.act--2 > .act__inner:has(#index-grid) {
+  padding-bottom: calc(140px + 2.5rem);
 }

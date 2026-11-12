@@ -324,7 +324,7 @@ const SuperQuizArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

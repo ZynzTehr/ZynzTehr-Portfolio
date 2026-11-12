@@ -398,13 +398,22 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                   setIsHovered(false);
                   setHoveredId((prev) => (prev === project.id ? null : prev));
                 }}
-                onFocus={() => {
+                onFocus={(e) => {
                   // Only Tab navigation pauses and turns the orbit. Focus returned
                   // to this tile after a project closes must not hold the spin.
                   if (performance.now() - lastTabAt > TAB_FOCUS_WINDOW_MS) return;
                   setIsHovered(true);
                   setHoveredId(project.id);
                   bringToFront(index);
+                  // Phones scroll the orbit as a snapping row instead of rotating
+                  // it, and the snap can leave a Tab-focused tile half off-screen.
+                  if (isMobile) {
+                    e.currentTarget.scrollIntoView({
+                      inline: "center",
+                      block: "nearest",
+                      behavior: prefersReducedMotion() ? "auto" : "smooth",
+                    });
+                  }
                 }}
                 onBlur={() => {
                   setIsHovered(false);
@@ -469,22 +478,25 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
       {/* 3D Stage Controls */}
       <div className="carousel-controls flex items-center justify-center gap-4 mt-4 mb-6">
-        <button
-          type="button"
-          className="btn-carousel-ctrl"
+        <PixelButton
+          variant="secondary"
+          size="icon"
           onClick={() => handleRotate("left")}
           title="Previous system"
           aria-label="Previous system"
         >
-          <ChevronLeft size={18} />
-        </button>
+          <ChevronLeft
+            size={18}
+            className="pixel-btn__chevron pixel-btn__chevron--prev"
+            aria-hidden="true"
+          />
+        </PixelButton>
 
         {!isMobile && (
           <PixelButton
             variant="secondary"
             size="sm"
             onClick={togglePlayPause}
-
             title={isRotating ? "Pause the orbit" : "Resume the orbit"}
           >
             <span className={`play-morph ${isRotating ? "is-playing" : ""}`} aria-hidden="true">
@@ -495,15 +507,19 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           </PixelButton>
         )}
 
-        <button
-          type="button"
-          className="btn-carousel-ctrl"
+        <PixelButton
+          variant="secondary"
+          size="icon"
           onClick={() => handleRotate("right")}
           title="Next system"
           aria-label="Next system"
         >
-          <ChevronRight size={18} />
-        </button>
+          <ChevronRight
+            size={18}
+            className="pixel-btn__chevron pixel-btn__chevron--next"
+            aria-hidden="true"
+          />
+        </PixelButton>
       </div>
     </div>
   );

@@ -286,7 +286,7 @@ const MusicPortArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', monospace"
+            fontFamily="'IBM Plex Mono', monospace"
             fontWeight="bold"
             letterSpacing="1.5"
           >

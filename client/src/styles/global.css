@@ -23,9 +23,9 @@
   --text-muted: #8396c2;
 
   /* Typography Roles */
-  --font-display: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-display: "Archivo", system-ui, -apple-system, sans-serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Legacy Aliases Mapped to Unified Tokens */
   --bg-gradient: radial-gradient(circle at 18% 12%, #0a142d 0%, #060b19 48%, #03060f 100%);
@@ -185,7 +185,8 @@
   /* Typography Utilities */
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.025em;
+    font-stretch: 125%;
+    letter-spacing: -0.01em;
   }
 
   .font-telemetry {
@@ -516,7 +517,9 @@
     color: var(--text-primary);
     margin: 2px 0 5px 0;
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    /* Normal width: the orbit tiles are narrow and long names must fit. */
+    font-stretch: 100%;
+    letter-spacing: -0.005em;
   }
 
   .tile-inspect-hint {
@@ -625,33 +628,6 @@
     height: 650px;
     z-index: 1;
     pointer-events: none;
-  }
-
-  /* Stage Control Buttons */
-  .btn-carousel-ctrl {
-    background: rgba(10, 17, 36, 0.82);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
-    padding: 0.55rem 0.95rem;
-    min-height: 40px;
-    min-width: 40px;
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .btn-carousel-ctrl:hover {
-    background: rgba(68, 116, 255, 0.18);
-    border-color: var(--accent-bright);
-    color: #ffffff;
-    box-shadow: 0 0 16px rgba(68, 116, 255, 0.32);
-  }
-
-  .btn-play-pause {
-    padding: 0.55rem 1.25rem;
   }
 
   /* Project Grid Archive Cards */
@@ -895,6 +871,7 @@
   .notch-project-title {
     margin: 0;
     font-family: var(--font-display);
+    font-stretch: 125%;
     font-size: clamp(1rem, 1.55vw, 1.35rem);
     font-weight: 700;
     line-height: 1.15;
@@ -991,26 +968,6 @@
     font-size: 0.98rem;
     line-height: 1.68;
     color: var(--text-secondary);
-  }
-
-  .btn-stage-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0.5rem;
-    border-radius: 10px;
-    background: rgba(6, 11, 25, 0.75);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-  }
-
-  .btn-stage-icon:hover {
-    background: rgba(68, 116, 255, 0.16);
-    border-color: var(--accent-bright);
-    color: #ffffff;
   }
 
   /* Landing Page Animated Letters */
@@ -1176,7 +1133,7 @@
     }
 
     .banner .slider .item .tile-title {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       margin: 1px 0 2px 0;
       line-height: 1.2;
     }
@@ -1214,11 +1171,6 @@
       display: flex;
       margin-top: 0.25rem;
       margin-bottom: 1.25rem;
-    }
-
-    .btn-carousel-ctrl {
-      min-width: 44px;
-      min-height: 44px;
     }
 
     .project-grid-card {

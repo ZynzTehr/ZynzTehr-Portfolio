@@ -14,7 +14,7 @@ Working design document for the portfolio. It follows the creative-direction bri
 
 - **Expression: immersive.** The subject is creative engineering; the site is its own proof, so spectacle is evidence, not decoration. Every act still keeps the core task one click away (Skip on the prologue, cards always clickable, live/source links on every project).
 - **Organizing idea: a mission in orbit around one persistent object, the sapphire hex-orbit mark.** It is the subject's own mark (the hex already anchors the HUD here, and the orbit is the site's whole premise), so it fails the swap test for any other brand. Its roles:
-  1. Prologue: the spiraling orbit particles circle the call sign; the mark locks on in the viewfinder.
+  1. Prologue: the spiraling orbit particles circle the call sign; the mark locks on and settles.
   2. Launch: the particles spiral inward and the mark expands into the route cover.
   3. Orbit: the cover collapses into the HUD hex button (dock); the globe carries the orbit ring.
   4. Index: the laser horizon is the orbit line seen edge-on; cards print out of it.
@@ -22,6 +22,7 @@ Working design document for the portfolio. It follows the creative-direction bri
      The favicon is the same mark.
 - **References studied:** MyNewAgent `reports/Website motion and interaction analysis.md` (2026-11-04). Principles used: a recognizable object survives changes of state (Lando portrait, Enjoy monitor); object versus context in a stable card frame (Lando helmet cards: SVG art at rest, live media on hover); a brand cover that conceals route changes (Lando navigation); motion reviewed as sequences, not stills. Limits: the dossier's own; no exact timings are copied.
 - **Motion grammar (deliberately limited):** AsciiSweep for page-load and beat-swap text; rectangular sapphire masks for section headings; Laser plus ParticleScroll for content emergence; DecryptReveal and Asciify for media; pixel-ripple and Ripple for touch feedback; Liquid for the cursor; GlyphRain as the prologue and stage atmosphere. No other ad-hoc fades.
+- **Act transitions: stacked sheets.** Each act is a sticky sheet that pins once its bottom meets the viewport's; the next act slides up over it while the covered act sinks back (scale 0.94, shade to 0.7), scrubbed to scroll. Reduced motion keeps the stacking without the scale and shade. ParticleScroll finishes printing rows by the time their sheet pins.
 
 ## Visual and content system
 
@@ -42,14 +43,14 @@ One accent family (cobalt to ice) works as a moving system: the laser, the rain,
 
 ### Typography
 
-- **Display: Space Grotesk.** Geometric with quirks in the R, G and t; it carries the call sign, act titles and project names.
-- **Utility layer: JetBrains Mono, with a job.** Telemetry: act kickers, counters, tags, stack chips, coordinates. Uppercase, tracked, tabular numerals.
+- **Display: Archivo, expanded (font-stretch 125%).** Wide, confident letterforms in the spirit of spacecraft livery; it carries the call sign, act titles and project names. Orbit tile titles use the normal width (100%) so long names fit the narrow tiles.
+- **Utility layer: IBM Plex Mono, with a job.** Telemetry: act kickers, counters, tags, stack chips, coordinates. Uppercase, tracked, tabular numerals.
 - **Body: Plus Jakarta Sans.** Descriptions and controls.
 - Registers meet on purpose: a mono kicker sits directly against a display headline in every act.
 
 ### Voice and vocabulary
 
-Mission vocabulary used sparingly and consistently: signal, craft, launch, orbit, index, transmission. Actions are named for what they do ("Launch", "Open live build", "View source", "Back to orbit"). No "decrypt", "dossier", "materialize" or "command deck". No invented statistics: every number on the site is computed from `projects.json`.
+Mission vocabulary used sparingly and consistently: signal, craft, launch, orbit, index, transmission. Actions are named for what they do ("Launch", "Open live build", "View source", "Inspect"). The project stage closes with its X (or Esc); it has no separate Back button.. No "decrypt", "dossier", "materialize" or "command deck". No invented statistics: every number on the site is computed from `projects.json`.
 
 ### Copy (prologue beats)
 

@@ -10,7 +10,7 @@ import { initPixelRippleButton, type PixelRippleOptions } from "./pixelRipple";
  */
 
 type Variant = "primary" | "secondary";
-type Size = "sm" | "md" | "lg";
+type Size = "sm" | "md" | "lg" | "icon";
 
 const PALETTES: Record<Variant, PixelRippleOptions> = {
   primary: {
@@ -33,6 +33,15 @@ const PALETTES: Record<Variant, PixelRippleOptions> = {
   },
 };
 
+/** Close buttons warm to red under the pointer: tiles, glow and ripple. */
+const DANGER_PALETTE: PixelRippleOptions = {
+  baseColor: "#ff2d2d",
+  hoverGlowColor: "#ff5c5c",
+  rippleWaveColor: "#ff8a8a",
+  ripplePeakColor: "#ffd1d1",
+  alphaScale: 1,
+};
+
 interface CommonProps {
   variant?: Variant;
   size?: Size;
@@ -46,6 +55,8 @@ interface CommonProps {
   /** Called after the delay when delayActivate is set. */
   onActivate?: () => void;
   wrapperClassName?: string;
+  /** A dismissive action (close): the surface turns red under a hovering pointer. */
+  danger?: boolean;
 }
 
 type ButtonProps = CommonProps &
@@ -71,6 +82,7 @@ export const PixelButton = React.forwardRef<HTMLElement, PixelButtonProps>(
       delayActivate,
       onActivate,
       wrapperClassName,
+      danger = false,
       ...rest
     } = props;
     const ref = useRef<HTMLElement | null>(null);
@@ -104,13 +116,38 @@ export const PixelButton = React.forwardRef<HTMLElement, PixelButtonProps>(
       handleRef.current?.setPalette(PALETTES[variant]);
     }, [variant]);
 
+    // Danger buttons swap to the red palette while hovered (pointers that hover)
+    // and back on exit, on the same canvas, so a running ripple keeps playing.
+    useEffect(() => {
+      const el = ref.current;
+      if (!danger || !el) return;
+      let hot = false;
+      const canHover = window.matchMedia("(hover: hover)");
+      const sync = () => {
+        const next = canHover.matches && el.matches(":hover");
+        if (next === hot) return;
+        hot = next;
+        handleRef.current?.setPalette(
+          hot ? { ...PALETTES[variant], ...DANGER_PALETTE } : PALETTES[variant],
+        );
+      };
+      const events = ["pointerenter", "pointerleave"] as const;
+      // Leave fires before :hover clears, so read the state a frame later.
+      const onEvent = () => requestAnimationFrame(sync);
+      events.forEach((name) => el.addEventListener(name, onEvent));
+      return () => {
+        events.forEach((name) => el.removeEventListener(name, onEvent));
+        handleRef.current?.setPalette(PALETTES[variant]);
+      };
+    }, [danger, variant]);
+
     const setRef = (node: HTMLElement | null) => {
       ref.current = node;
       if (typeof forwardedRef === "function") forwardedRef(node);
       else if (forwardedRef) forwardedRef.current = node;
     };
 
-    const classes = `pixel-btn pixel-btn--${variant} pixel-btn--${size} ${className ?? ""}`;
+    const classes = `pixel-btn pixel-btn--${variant} pixel-btn--${size} ${danger ? "pixel-btn--danger" : ""} ${className ?? ""}`;
     const label = <span className="pixel-btn__label">{children}</span>;
 
     if (rest.as === "a") {

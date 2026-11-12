@@ -279,7 +279,7 @@ const BasicRpsArt: React.FC = () => {
                 y="4"
                 fill="#93c5fd"
                 fontSize="11"
-                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+                fontFamily="'IBM Plex Mono', ui-monospace, monospace"
                 fontWeight="bold"
               >
                 {row.label}
@@ -413,7 +413,7 @@ const BasicRpsArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

@@ -573,7 +573,29 @@ function createParticleScroll(
     } catch {}
   }
 
-  let rowFrame: { rect: DOMRect; winH: number; docMax: number } | null = null;
+  let rowFrame: { rect: DOMRect; winH: number; docMax: number; scrollLeft: number } | null = null;
+
+  // A sticky ancestor (a pinned sheet) stops carrying the rows up the viewport
+  // before the document ends, so the print line must finish by the time it pins,
+  // not at the end of the page. Found once; positions do not change at runtime.
+  let stickyHost: HTMLElement | null | undefined;
+  function findStickyHost() {
+    if (stickyHost !== undefined) return stickyHost;
+    let el: HTMLElement | null = output.parentElement;
+    while (el && el !== document.body && getComputedStyle(el).position !== "sticky") {
+      el = el.parentElement;
+    }
+    stickyHost = el && el !== document.body ? el : null;
+    return stickyHost;
+  }
+  /** Scroll left before the rows stop moving: the document end or the sticky sheet's pin. */
+  function scrollLeftForRows(winH: number, docMax: number) {
+    const toDocEnd = docMax - window.scrollY;
+    const host = findStickyHost();
+    if (!host) return toDocEnd;
+    // Pinned with its bottom on the viewport bottom: its bottom minus the viewport is what remains.
+    return Math.min(toDocEnd, host.getBoundingClientRect().bottom - winH);
+  }
 
   function rowTargetFor(docRowY: number) {
     if (reducedMotion || !hasCapturedContent) return 1;
@@ -587,10 +609,8 @@ function createParticleScroll(
       const docMax = rowFrame?.docMax ?? Math.max(0, document.documentElement.scrollHeight - winH);
       let line = Math.min(Math.max(config.point, 0), 1) * winH;
       if (docMax > 1) {
-        const endP = Math.min(
-          Math.max((window.scrollY - (docMax - winH * 0.45)) / (winH * 0.45), 0),
-          1,
-        );
+        const left = rowFrame?.scrollLeft ?? scrollLeftForRows(winH, docMax);
+        const endP = Math.min(Math.max(1 - left / (winH * 0.45), 0), 1);
         line += (winH + band - line) * endP * endP;
       } else {
         line = winH + band;
@@ -610,10 +630,12 @@ function createParticleScroll(
 
   function updateRows(dt: number, density: number, winStart: number, winLen: number) {
     const frameWinH = Math.max(window.innerHeight || output.clientHeight, 1);
+    const frameDocMax = Math.max(0, document.documentElement.scrollHeight - frameWinH);
     rowFrame = {
       rect: output.getBoundingClientRect(),
       winH: frameWinH,
-      docMax: Math.max(0, document.documentElement.scrollHeight - frameWinH),
+      docMax: frameDocMax,
+      scrollLeft: scrollLeftForRows(frameWinH, frameDocMax),
     };
     try {
       updateRowsInner(dt, density, winStart, winLen);

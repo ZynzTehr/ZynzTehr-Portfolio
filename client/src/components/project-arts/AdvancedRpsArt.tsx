@@ -298,7 +298,7 @@ const AdvancedRpsArt: React.FC = () => {
             textAnchor="middle"
             fill="#93c5fd"
             fontSize="11"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="3"
           >
@@ -343,7 +343,7 @@ const AdvancedRpsArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontFamily="'IBM Plex Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >
