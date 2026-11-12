@@ -31,10 +31,10 @@
     "forks": 0,
     "githubUrl": "https://github.com/ZynzTehr/vscode-fx",
     "liveUrl": "https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx",
-    "mediaType": "image",
+    "mediaType": "video",
     "mediaUrl": "/media/vscode-fx/portfolio.webp",
     "previewImage": "/media/vscode-fx/portfolio.webp",
-    "videoUrl": null,
+    "videoUrl": "/media/vscode-fx/portfolio.mp4",
     "updatedAt": "2026-11-05T22:47:32Z"
   },
   {

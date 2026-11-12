@@ -37,7 +37,11 @@ const MEDIA_OVERRIDES = {
   "python-rock-paper-scissors": {
     previewImage: "/media/python-rock-paper-scissors/portfolio.webp",
   },
-  "vscode-fx": { previewImage: "/media/vscode-fx/portfolio.webp" },
+  // The owner's real Motion Lab recording from the extension's README (static/demos/motion-lab.mp4).
+  "vscode-fx": {
+    previewImage: "/media/vscode-fx/portfolio.webp",
+    videoUrl: "/media/vscode-fx/portfolio.mp4",
+  },
   musicport: { previewImage: "/media/musicport/portfolio.webp" },
   "super-quiz": { previewImage: "/media/super-quiz/portfolio.webp" },
   "tic-tac-toe-withai": { previewImage: "/media/tic-tac-toe-withai/portfolio.webp" },
