@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Film } from "lucide-react";
 import type { Project } from "../data/projects";
 import ProjectArt from "./project-arts/ProjectArt";
+import GlyphField from "./fx/GlyphField";
 import DecryptReveal from "./canvasui/DecryptReveal";
 import { DECRYPT_REVEAL_SPEC } from "./canvasui/spec";
 import { useMediaQuery, useReducedMotion } from "../lib/useReducedMotion";
@@ -22,11 +23,14 @@ interface CardMediaPreviewProps {
   enableShader?: boolean;
   compact?: boolean;
   /**
-   * Rest on the project's SVG art (the orbit). Without it the card rests on the
-   * live snapshot and hover decodes it through the glyph shader into the clip
-   * (the index); the art then only stands in when the snapshot fails to load.
+   * What the card shows at rest:
+   * - "art": the project's SVG art, crossfading to media on hover (the orbit);
+   * - "glyph": the snapshot as living glyphs (GlyphField), decoding through
+   *   the glyph shader into the clip on hover (the index, fine pointers);
+   * - "snapshot": the plain snapshot (the index on touch, where nothing hovers).
+   * The art stands in whenever the snapshot fails to load.
    */
-  restingArt?: boolean;
+  rest?: "art" | "glyph" | "snapshot";
 }
 
 const OPEN_MS = 640;
@@ -39,7 +43,7 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   isActive,
   enableShader = isActive,
   compact = false,
-  restingArt = true,
+  rest = "art",
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reducedMotion = useReducedMotion();
@@ -137,8 +141,12 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   );
 
   // Missing media: the SVG art stays as the card's face instead of a broken image.
-  const revealed = (isActive || !restingArt) && !mediaFailed;
-  const showArt = restingArt || mediaFailed;
+  const mode = rest === "glyph" && !finePointer ? "snapshot" : rest;
+  const revealed = (isActive || mode !== "art") && !mediaFailed;
+  const showArt = mode === "art" || mediaFailed;
+  // The glyphs hold until the decode shader is up (it opens from the same
+  // cipher), so the plain snapshot never flashes between the two.
+  const glyphHidden = canUseShader ? shaderMounted : isActive;
 
   return (
     <div className={`card-media-surface ${revealed ? "is-revealed" : ""}`}>
@@ -151,6 +159,14 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
             mediaUrl={project.mediaUrl}
           />
         </div>
+      )}
+
+      {mode === "glyph" && !mediaFailed && (
+        <GlyphField
+          src={project.previewImage}
+          className={`card-glyph-rest ${glyphHidden ? "is-hidden" : ""}`}
+          paused={glyphHidden}
+        />
       )}
 
       <div className="card-snapshot-reveal" aria-hidden={!revealed}>

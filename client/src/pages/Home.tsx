@@ -701,7 +701,7 @@ const Home: React.FC = () => {
                                 project={project}
                                 isActive={isHovered || isSelected}
                                 enableShader={isHovered && !stageProject}
-                                restingArt={false}
+                                rest="glyph"
                               />
                               <span className="grid-category-badge">{project.category}</span>
                             </div>
