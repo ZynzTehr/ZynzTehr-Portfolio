@@ -236,9 +236,10 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
           },
         });
         if (act.dataset.exit === "swirl") {
-          // Pulled into the black hole: the spin quickens as the act shrinks.
+          // Pulled into the black hole: it shrinks early (about half size a
+          // quarter of the way in), then the spin quickens as it falls in.
           if (!reducedMotion) {
-            tl.fromTo(act, { scale: 1 }, { scale: 0.02, ease: "power2.in", duration: 1 }, 0);
+            tl.fromTo(act, { scale: 1 }, { scale: 0.02, ease: "power2.out", duration: 1 }, 0);
             tl.fromTo(act, { rotate: 0 }, { rotate: 540, ease: "power3.in", duration: 1 }, 0);
           }
           tl.fromTo(act, { opacity: 1 }, { opacity: 0, duration: 0.4 }, 0.55);
