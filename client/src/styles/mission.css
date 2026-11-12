@@ -929,12 +929,14 @@
 .scroll-widget {
   position: fixed;
   top: 0;
-  right: clamp(0.75rem, 2vw, 2rem);
+  /* Stacked atom over chevron: about 46px, so it rides inside the page gutter. */
+  right: max(8px, calc((100vw - 1320px) / 2 - 54px));
   z-index: 40;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  gap: 0;
+  padding: 0.2rem 0.2rem 0.3rem;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   background: rgba(10, 17, 36, 0.82);

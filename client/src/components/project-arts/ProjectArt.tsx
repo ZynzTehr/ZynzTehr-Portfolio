@@ -18,6 +18,14 @@ import NextChapterArt from "./NextChapterArt";
 import PythonRpsArt from "./PythonRpsArt";
 import NewAgeChessArt from "./NewAgeChessArt";
 import CountdownTimerArt from "./CountdownTimerArt";
+import MusicPortArt from "./MusicPortArt";
+import AniBeamArt from "./AniBeamArt";
+import CampfireArt from "./CampfireArt";
+import JobSeanceArt from "./JobSeanceArt";
+import FleetPulseArt from "./FleetPulseArt";
+import TorqueLineArt from "./TorqueLineArt";
+import NextChapterWeekOneArt from "./NextChapterWeekOneArt";
+import VscodeFxArt from "./VscodeFxArt";
 
 interface ProjectArtProps {
   projectId: string;
@@ -35,6 +43,22 @@ const ProjectArt: React.FC<ProjectArtProps> = ({
   const id = projectId.toLowerCase().trim();
 
   switch (id) {
+    case "musicport":
+      return <MusicPortArt />;
+    case "anibeam":
+      return <AniBeamArt />;
+    case "campfire-of-the-damned":
+      return <CampfireArt />;
+    case "jobseance":
+      return <JobSeanceArt />;
+    case "fleet-pulse":
+      return <FleetPulseArt />;
+    case "torque-line":
+      return <TorqueLineArt />;
+    case "next-chapter-week-one":
+      return <NextChapterWeekOneArt />;
+    case "vscode-fx":
+      return <VscodeFxArt />;
     case "new-age-chess":
     case "newagechess":
       return <NewAgeChessArt />;

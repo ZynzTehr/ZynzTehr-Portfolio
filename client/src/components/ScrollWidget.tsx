@@ -15,6 +15,10 @@ interface ScrollWidgetProps {
  * the top. The animation loop sleeps whenever the widget has settled.
  */
 
+/** Below this width the page gutter cannot hold the widget, so it uses the
+ *  thumb-zone behavior (rests at the bottom, tucks while scrolling down). */
+const GUTTER_FIT_WIDTH = 1436;
+
 const RING_R = 21;
 const RING_C = 2 * Math.PI * RING_R;
 
@@ -54,7 +58,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
 
     const measure = () => {
       const hud = document.querySelector<HTMLElement>(".dev-hud");
-      const mobile = window.innerWidth <= 768;
+      const mobile = window.innerWidth < GUTTER_FIT_WIDTH;
       bottomMargin = mobile ? 84 : 78;
       startTop = hud
         ? hud.getBoundingClientRect().bottom + window.scrollY + 12
@@ -112,7 +116,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
         Math.min(40, velocity + ((y - lastY) / Math.max(1, now - lastT)) * 16),
       );
       // Phones: tuck away while scrolling down, return on the way back up.
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth < GUTTER_FIT_WIDTH) {
         // Rests out of the way at the top (the filters live there) and while
         // scrolling down; returns on the way back up.
         if (y < 200 || y > lastY + 4) widget.classList.add("is-tucked");
