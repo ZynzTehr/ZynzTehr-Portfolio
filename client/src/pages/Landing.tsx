@@ -12,7 +12,7 @@ import { launchCover } from "../lib/routeCover";
 import { projects } from "../data/projects";
 import { gsap } from "../lib/gsap";
 import { DUR, EASE, PROLOGUE } from "../lib/motion";
-import { useReducedMotion } from "../lib/useReducedMotion";
+import { prefersReducedMotion, useReducedMotion } from "../lib/useReducedMotion";
 import { loadHome } from "../lib/loadHome";
 
 /**
@@ -47,14 +47,14 @@ const BEATS: Beat[] = [
     kicker: "Craft",
     headline: "Built from a blank file",
     line: "Hand-written WebGL shaders, real-time systems and interfaces that answer back",
-    size: "clamp(2.1rem, 6vw, 4.4rem)",
+    size: "clamp(1.8rem, 4.6vw, 3.4rem)",
   },
   {
     code: "03",
     kicker: "Launch",
     headline: `${projects.length} systems in orbit`,
     line: `${LIVE_COUNT} running live. All of them open source.`,
-    size: "clamp(2.3rem, 6.6vw, 4.8rem)",
+    size: "clamp(2rem, 5vw, 3.8rem)",
   },
 ];
 
@@ -90,7 +90,10 @@ function markSeen() {
 const Landing: React.FC = () => {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
-  const [settledStart] = useState<boolean>(() => typeof window !== "undefined" && readSeen());
+  // Returning visitors and reduced motion start on beat 03 with Launch ready.
+  const [settledStart] = useState<boolean>(
+    () => typeof window !== "undefined" && (readSeen() || prefersReducedMotion()),
+  );
 
   // Two AsciiSweep slots; each holds a beat index or null (the blank page-load panel).
   const [slots, setSlots] = useState<[number | null, number | null]>(() =>
@@ -111,6 +114,7 @@ const Landing: React.FC = () => {
   const slotsRef = useRef(slots);
   const slotIndexRef = useRef(slotIndex);
   const launchingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     slotsRef.current = slots;
@@ -137,7 +141,8 @@ const Landing: React.FC = () => {
       });
       setActiveBeat(beat);
       setBeatRun((n) => n + 1);
-      setShowCta(beat === 2);
+      // Launch only appears once beat 03 has landed (onSweepEnd).
+      setShowCta(false);
       later(() => setSlotIndex(other), 140);
     },
     [later],
@@ -226,7 +231,13 @@ const Landing: React.FC = () => {
     };
   }, [showCta, reducedMotion, settledStart]);
 
-  useEffect(() => clearTimers, [clearTimers]);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearTimers();
+    };
+  }, [clearTimers]);
 
   // Fetch the orbit while the prologue plays, once the first paint has settled.
   useEffect(() => {
@@ -254,11 +265,13 @@ const Landing: React.FC = () => {
       rippleRef.current?.splashAtClient(origin.x, origin.y, 1.2);
       setLaunching(true);
       setRainBoost(true);
-      window.setTimeout(() => {
-        void launchCover(origin).then(() => navigate("/home"));
+      later(() => {
+        void launchCover(origin).then(() => {
+          if (mountedRef.current) void navigate("/home");
+        });
       }, 160);
     },
-    [clearTimers, navigate, reducedMotion],
+    [clearTimers, later, navigate, reducedMotion],
   );
 
   const ctaCenter = () => {
@@ -278,60 +291,25 @@ const Landing: React.FC = () => {
         open-source systems, {LIVE_COUNT} running live.
       </h1>
 
+      {/* No native capture wraps another: Ripple and GlyphRain take their overlay
+          paths so AsciiSweep's own native capture (and its band) can show. */}
       <Ripple
         className="prologue-ripple"
+        native={false}
         {...RIPPLE_SPEC}
         onReady={(handle) => {
           rippleRef.current = handle;
         }}
       >
-        <GlyphRain className="prologue-rain" {...rainOptions}>
+        <GlyphRain className="prologue-rain" native={false} {...rainOptions}>
           <div className="prologue-stage">
             <div className="prologue-corner corner-tl" aria-hidden="true" />
             <div className="prologue-corner corner-tr" aria-hidden="true" />
             <div className="prologue-corner corner-bl" aria-hidden="true" />
             <div className="prologue-corner corner-br" aria-hidden="true" />
+            <div className="prologue-head-slot" aria-hidden="true" />
 
-            <div className="prologue-head">
-              <div ref={markRef} className="prologue-mark" aria-hidden="true">
-                <BrandMark size={46} />
-              </div>
-              <p className="prologue-chrome prologue-kicker">ZYNZTEHR // PROLOGUE</p>
-              <div
-                className="prologue-chrome prologue-stepper"
-                role="group"
-                aria-label="Prologue beats"
-              >
-                {BEATS.map((beat, idx) => {
-                  const state =
-                    activeBeat === idx ? "is-active" : activeBeat > idx ? "is-passed" : "";
-                  return (
-                    <button
-                      key={beat.code}
-                      type="button"
-                      onClick={() => jumpTo(idx)}
-                      aria-current={activeBeat === idx ? "step" : undefined}
-                      className={`prologue-beat-pill ${state}`}
-                    >
-                      <span className="prologue-beat-pill__code">{beat.code}</span>
-                      <span className="prologue-beat-pill__label">{beat.kicker}</span>
-                      <span className="prologue-beat-pill__track" aria-hidden="true">
-                        <span
-                          key={activeBeat === idx ? `run-${beatRun}` : "idle"}
-                          className="prologue-beat-pill__fill"
-                          style={
-                            {
-                              "--beat-dur": `${PROLOGUE.sweep + PROLOGUE.hold}s`,
-                            } as React.CSSProperties
-                          }
-                        />
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
+            {/* The beats live under the rain: dimmed page, light pools (upgrades.md). */}
             <div className="prologue-beats" aria-hidden="true">
               {reducedMotion ? (
                 <BeatPanel beat={BEATS[activeBeat]} />
@@ -349,32 +327,78 @@ const Landing: React.FC = () => {
                 </AsciiSweep>
               )}
             </div>
-
-            <div className="prologue-actions">
-              <div ref={ctaRef} className={`prologue-cta ${ctaVisible ? "is-shown" : ""}`}>
-                {ctaVisible ? (
-                  <PixelButton
-                    variant="primary"
-                    size="lg"
-                    delayActivate={reducedMotion ? 0 : 260}
-                    onActivate={() => launch(ctaCenter())}
-                  >
-                    <span>Launch</span>
-                    <ArrowRight size={19} className="pixel-btn__arrow" aria-hidden="true" />
-                  </PixelButton>
-                ) : null}
-              </div>
-              <PixelButton
-                variant="secondary"
-                size="sm"
-                className="prologue-chrome"
-                onClick={() => launch()}
-              >
-                Skip intro
-              </PixelButton>
-            </div>
+            <div className="prologue-actions-slot" aria-hidden="true" />
           </div>
         </GlyphRain>
+
+        {/* Controls stay crisp above the rain's dim. */}
+        <div className="prologue-ui">
+          <div className="prologue-head">
+            <div ref={markRef} className="prologue-mark" aria-hidden="true">
+              <BrandMark size={46} />
+            </div>
+            <p className="prologue-chrome prologue-kicker">ZYNZTEHR // PROLOGUE</p>
+            <div
+              className="prologue-chrome prologue-stepper"
+              role="group"
+              aria-label="Prologue beats"
+            >
+              {BEATS.map((beat, idx) => {
+                const state =
+                  activeBeat === idx ? "is-active" : activeBeat > idx ? "is-passed" : "";
+                return (
+                  <button
+                    key={beat.code}
+                    type="button"
+                    onClick={() => jumpTo(idx)}
+                    aria-current={activeBeat === idx ? "step" : undefined}
+                    className={`prologue-beat-pill ${state}`}
+                  >
+                    <span className="prologue-beat-pill__code">{beat.code}</span>
+                    <span className="prologue-beat-pill__label">{beat.kicker}</span>
+                    <span className="prologue-beat-pill__track" aria-hidden="true">
+                      <span
+                        key={activeBeat === idx ? `run-${beatRun}` : "idle"}
+                        className="prologue-beat-pill__fill"
+                        style={
+                          {
+                            "--beat-dur": `${PROLOGUE.sweep + PROLOGUE.hold}s`,
+                          } as React.CSSProperties
+                        }
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="prologue-beats-gap" aria-hidden="true" />
+
+          <div className="prologue-actions">
+            <div ref={ctaRef} className={`prologue-cta ${ctaVisible ? "is-shown" : ""}`}>
+              {ctaVisible ? (
+                <PixelButton
+                  variant="primary"
+                  size="lg"
+                  delayActivate={reducedMotion ? 0 : 260}
+                  onActivate={() => launch(ctaCenter())}
+                >
+                  <span>Launch</span>
+                  <ArrowRight size={19} className="pixel-btn__arrow" aria-hidden="true" />
+                </PixelButton>
+              ) : null}
+            </div>
+            <PixelButton
+              variant="secondary"
+              size="sm"
+              className="prologue-chrome"
+              onClick={() => launch()}
+            >
+              Skip intro
+            </PixelButton>
+          </div>
+        </div>
       </Ripple>
 
       <OrbitParticles collapsing={launching} />

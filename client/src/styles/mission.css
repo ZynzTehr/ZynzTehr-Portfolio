@@ -85,9 +85,17 @@
   border-color: #4474ff;
 }
 
+/* Launch: the orbit visibly spirals inward, then fades as the mark forms. */
 .orbit-particles.is-collapsing {
-  transform: scale(0.04);
+  transform: scale(0.04) rotate(220deg);
   opacity: 0;
+  transition:
+    transform 0.6s var(--ease-in-out),
+    opacity 0.2s linear 0.45s;
+}
+.orbit-particles.is-collapsing .particle {
+  filter: blur(2px);
+  box-shadow: 0 0 14px rgba(96, 165, 250, 0.95);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -119,6 +127,9 @@
 /* ------------------------------------------------------------------ */
 
 .prologue {
+  --pro-head-h: 132px;
+  --pro-beats-h: clamp(190px, 28vh, 250px);
+  --pro-actions-h: 124px;
   position: relative;
   width: 100vw;
   height: 100svh;
@@ -188,7 +199,41 @@
   border-right-width: 1.5px;
 }
 
+/* Two aligned layers: the stage (under the rain) and the UI (crisp, above it).
+   Slots in the stage reserve the exact heights the UI layer uses. */
+.prologue-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 2.6vh, 1.75rem);
+  padding: 4.5rem 1.25rem 3rem;
+  pointer-events: none;
+}
+.prologue-ui > * {
+  pointer-events: auto;
+}
+.prologue-head-slot,
 .prologue-head {
+  height: var(--pro-head-h);
+  flex: none;
+}
+.prologue-actions-slot,
+.prologue-actions {
+  height: var(--pro-actions-h);
+  flex: none;
+}
+.prologue-beats-gap {
+  height: var(--pro-beats-h);
+  flex: none;
+  pointer-events: none !important;
+}
+
+.prologue-head {
+  justify-content: flex-end;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -286,7 +331,10 @@
 .prologue-beats {
   position: relative;
   width: min(1040px, 100%);
-  height: clamp(190px, 28vh, 250px);
+  height: var(--pro-beats-h);
+  flex: none;
+  /* Keep AsciiSweep's z-indexed panels inside, under the rain overlay. */
+  isolation: isolate;
 }
 
 .prologue-sweep {
@@ -307,6 +355,7 @@
 
 .beat-panel__headline {
   margin: 0;
+  text-wrap: balance;
   font-family: var(--font-display);
   font-weight: 700;
   line-height: 1.04;
@@ -321,8 +370,9 @@
   font-family: var(--font-sans);
   font-size: clamp(0.95rem, 1.4vw, 1.08rem);
   line-height: 1.55;
-  /* Brighter than --text-secondary: GlyphRain dims the page by its spec 0.5. */
-  color: #dfe7ff;
+  /* White: GlyphRain dims the page by its spec 0.5, and this must stay 4.5:1. */
+  color: #ffffff;
+  text-wrap: balance;
 }
 
 .prologue-actions {
@@ -722,6 +772,29 @@
 /* Act II: index                                                        */
 /* ------------------------------------------------------------------ */
 
+/* Grid card: a non-interactive article with one full-card button under the links. */
+.project-grid-card {
+  position: relative;
+}
+.card-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.card-hit:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+.project-grid-card .card-icon-link {
+  position: relative;
+  z-index: 2;
+}
+
 .archive-open-prompt {
   border: 1px dashed rgba(96, 165, 250, 0.28);
   border-radius: var(--radius-lg);
@@ -764,6 +837,12 @@
 }
 .archive-laser.is-on {
   opacity: 1;
+  animation: laserIgnite var(--dur-reveal) var(--ease-out) both;
+}
+@keyframes laserIgnite {
+  from {
+    opacity: 0;
+  }
 }
 .archive-laser > div:first-child {
   position: absolute !important;
@@ -918,6 +997,19 @@
 .scroll-widget.is-away .scroll-widget__chevron {
   transform: rotate(180deg);
 }
+.scroll-widget.is-tucked {
+  opacity: 0;
+  translate: 0 18px;
+  pointer-events: none;
+}
+.scroll-widget {
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out),
+    opacity var(--dur-ui) var(--ease-out),
+    translate var(--dur-ui) var(--ease-out);
+}
+
 @keyframes chevronNudge {
   0%,
   100% {
@@ -931,5 +1023,16 @@
 @media (prefers-reduced-motion: reduce) {
   .scroll-widget.is-top .scroll-widget__chevron {
     animation: none;
+  }
+}
+
+/* Reduced motion: project art loops settle on their final frame. */
+@media (prefers-reduced-motion: reduce) {
+  .card-svg-resting *,
+  .card-media-surface svg *,
+  .project-tile-3d svg * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
   }
 }

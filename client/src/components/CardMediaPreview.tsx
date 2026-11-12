@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Film } from "lucide-react";
 import type { Project } from "../data/projects";
 import ProjectArt from "./project-arts/ProjectArt";
@@ -50,12 +50,14 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
     cancelAnimationFrame(frameRef.current);
     const from = radiusRef.current;
     const to = wantShader ? DECRYPT_REVEAL_SPEC.radius : 0;
-    const duration = wantShader ? OPEN_MS : CLOSE_MS;
+    // A project opening over the card releases the shader at once (WebGL budget);
+    // a plain pointer exit gets the visible re-encrypt.
+    const duration = wantShader ? OPEN_MS : isActive ? 0 : CLOSE_MS;
     let mountFrame = 0;
     if (wantShader) mountFrame = requestAnimationFrame(() => setShaderMounted(true));
     const start = performance.now();
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
+      const t = duration <= 0 ? 1 : Math.min(1, (now - start) / duration);
       const r = from + (to - from) * easeOut(t);
       radiusRef.current = r;
       setRadius(r);
@@ -67,20 +69,26 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
       cancelAnimationFrame(frameRef.current);
       cancelAnimationFrame(mountFrame);
     };
+    // isActive only matters at the moment wantShader flips.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wantShader]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (isActive && !reducedMotion) {
+  // The clip can mount twice (plain, then inside DecryptReveal), so play()
+  // runs on whichever <video> node is attached. It only renders while active.
+  const attachVideo = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current = video;
+    if (video) {
       void video.play().catch(() => {
-        // Autoplay suppressed; the snapshot stays visible.
+        // Autoplay suppressed; the still stays visible.
       });
-    } else {
-      video.pause();
-      video.currentTime = 0;
     }
-  }, [isActive, reducedMotion]);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      videoRef.current?.pause();
+    };
+  }, []);
 
   const mediaNodes = (
     <div className="relative w-full h-full">
@@ -95,7 +103,7 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
       />
       {project.videoUrl && isActive && !reducedMotion && (
         <video
-          ref={videoRef}
+          ref={attachVideo}
           src={project.videoUrl}
           poster={project.previewImage}
           crossOrigin="anonymous"

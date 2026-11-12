@@ -102,8 +102,11 @@ Keyboard: every action reachable by Tab; visible focus ring in ice; the stage tr
 
 ## Deliberate trade-offs
 
-- **Native HTML-in-canvas** is enabled where the effect wraps a bounded block (AsciiSweep, DecryptReveal, GlyphRain on the landing page, Asciify, Ripple). Liquid, Laser and ParticleScroll keep their DOM fallback paths on this site: their native modes require wrapping the page or the archive in a fixed-height inner-scroll canvas, and Laser and ParticleScroll would nest one capture canvas inside another. The fallback still renders their described behavior.
+- **Native HTML-in-canvas** is enabled where an effect wraps a bounded block and nothing captures around it: AsciiSweep (prologue beats and HUD text), DecryptReveal (cards) and Asciify (stage image). GlyphRain, Ripple, Liquid, Laser and ParticleScroll use their overlay paths on this site: their native modes would need to wrap the page or the archive in a fixed-height inner-scroll canvas, or would nest one capture inside another. The overlay paths render each effect's described behavior, with the specific limits noted below.
 - **DecryptReveal** mounts on hover only (cards rest on their SVG art, per the owner's earlier direction). The decode radius animates from 0 to the configured 400 on entry so the cipher-to-image decode is visible.
+
+- **Liquid** runs its overlay path (it wraps no content), which cannot distort the page; its overlay coverage is capped at 50% (spec source 82%) so text under the trail stays readable. **Laser** in its overlay path has no captured texture, so `shimmer` (12) and the bezel are inert; the beam, heat glow, sparkle, scroll reactivity and the below-beam mask render.
+- **Prologue layering:** Ripple and GlyphRain take their overlay paths so no native capture wraps another (nested captures hid AsciiSweep's band and cost a full-viewport re-capture every frame). The beats stay under the rain's spec dim; the kicker, stepper, Launch and Skip sit above it for contrast.
 
 ## Implementation handoff
 

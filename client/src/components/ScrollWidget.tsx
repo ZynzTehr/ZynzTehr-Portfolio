@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import { useReducedMotion } from "../lib/useReducedMotion";
 
@@ -73,6 +74,12 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
 
       const travel = Math.max(0, window.innerHeight - bottomMargin - startTop);
       targetY = startTop + progress * travel;
+      // Never ride over the footer.
+      const footer = document.querySelector(".footer-hud");
+      if (footer) {
+        const limit = footer.getBoundingClientRect().top - widget.offsetHeight - 12;
+        targetY = Math.min(targetY, Math.max(12, limit));
+      }
       currentY = currentY < 0 || reducedMotion ? targetY : currentY + (targetY - currentY) * 0.18;
       if (Math.abs(targetY - currentY) < 0.3) currentY = targetY;
 
@@ -104,6 +111,13 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
         -40,
         Math.min(40, velocity + ((y - lastY) / Math.max(1, now - lastT)) * 16),
       );
+      // Phones: tuck away while scrolling down, return on the way back up.
+      if (window.innerWidth <= 768) {
+        if (y > lastY + 4 && y > 200) widget.classList.add("is-tucked");
+        else if (y < lastY - 4 || y < 200) widget.classList.remove("is-tucked");
+      } else {
+        widget.classList.remove("is-tucked");
+      }
       lastY = y;
       lastT = now;
       setAtTop(y < 120);
@@ -155,7 +169,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
 
   const label = atTop ? "Scroll to the index" : "Back to top";
 
-  return (
+  return createPortal(
     <button
       ref={widgetRef}
       type="button"
@@ -183,7 +197,8 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
       <span className="scroll-widget__chevron" aria-hidden="true">
         <ChevronDown size={16} />
       </span>
-    </button>
+    </button>,
+    document.body,
   );
 };
 

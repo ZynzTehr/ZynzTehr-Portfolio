@@ -1736,10 +1736,27 @@ export function AsciiSweep({
     instanceRef.current?.setOptions(options);
   });
 
+  // Portfolio addition: with no WebGL2 engine the DOM fallback swaps panels
+  // instantly, so report that swap as a finished sweep. Consumers that chain
+  // on onSweepEnd (the prologue) then keep going instead of stalling.
+  const lastSlotRef = useRef(index >= 1 ? 1 : 0);
+  const onSweepEndRef = useRef(options.onSweepEnd);
+  useEffect(() => {
+    onSweepEndRef.current = options.onSweepEnd;
+  });
+
   useEffect(() => {
     const slot = index >= 1 ? 1 : 0;
     const instance = instanceRef.current;
-    if (!instance || instance.current() === slot) return;
+    if (!instance) {
+      if (slot !== lastSlotRef.current) {
+        lastSlotRef.current = slot;
+        onSweepEndRef.current?.(slot);
+      }
+      return;
+    }
+    lastSlotRef.current = slot;
+    if (instance.current() === slot) return;
     const base = options.angle ?? 0;
     instance.sweep(slot, {
       angle: directional && slot === 0 ? base + 180 : base,

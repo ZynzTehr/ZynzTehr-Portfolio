@@ -23,6 +23,8 @@ export interface PixelRippleOptions {
 
 export interface PixelRippleHandle {
   triggerRipple: (x?: number, y?: number, strength?: number) => void;
+  /** Swap colors, tile size or alpha in place (for example, a pill turning active). */
+  setPalette: (palette: Partial<PixelRippleOptions>) => void;
   destroy: () => void;
 }
 
@@ -38,17 +40,16 @@ export function initPixelRippleButton(
   buttonEl: HTMLButtonElement,
   options: PixelRippleOptions = {},
 ): PixelRippleHandle {
-  const {
+  const { onClick = null, shape = "rect", actionDelay = 560 } = options;
+  // Palette fields stay live so a button can change variant without a remount.
+  let {
     pixelSize = 5,
     gap = 1,
     baseColor = "#22d3ee",
     hoverGlowColor = "#67e8f9",
     rippleWaveColor = "#a5f3fc",
     ripplePeakColor = "#ecfeff",
-    onClick = null,
     alphaScale = 1,
-    shape = "rect",
-    actionDelay = 560,
   } = options;
   const canvas = document.createElement("canvas");
   canvas.className = "pixel-ripple-canvas";
@@ -239,6 +240,16 @@ export function initPixelRippleButton(
   resize();
   return {
     triggerRipple: ripple,
+    setPalette(palette) {
+      pixelSize = palette.pixelSize ?? pixelSize;
+      gap = palette.gap ?? gap;
+      baseColor = palette.baseColor ?? baseColor;
+      hoverGlowColor = palette.hoverGlowColor ?? hoverGlowColor;
+      rippleWaveColor = palette.rippleWaveColor ?? rippleWaveColor;
+      ripplePeakColor = palette.ripplePeakColor ?? ripplePeakColor;
+      alphaScale = palette.alphaScale ?? alphaScale;
+      requestDraw();
+    },
     destroy() {
       disposed = true;
       if (frame != null) cancelAnimationFrame(frame);

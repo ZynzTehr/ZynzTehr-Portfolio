@@ -22,6 +22,7 @@ interface DevHudProps {
 const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
   const hudRef = useRef<HTMLElement>(null);
   const hexRef = useRef<HTMLSpanElement>(null);
+  const dockedRef = useRef<boolean | null>(null);
   const [displayCount, setDisplayCount] = useState<number>(() =>
     prefersReducedMotion() ? projectCount : 0,
   );
@@ -29,12 +30,16 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
   useLayoutEffect(() => {
     const reduced = prefersReducedMotion();
     const hexWrap = hexRef.current?.querySelector(".hex-btn-wrap");
-    const docked = dockCover(
-      () => hexRef.current?.getBoundingClientRect() ?? null,
-      () => window.setTimeout(() => hexWrap?.classList.remove("is-docking"), 1000),
-    );
-    // The edge draws itself in as the mark arrives.
-    if (docked) hexWrap?.classList.add("is-docking");
+    // Dock once per mount (StrictMode re-runs this effect on the same node).
+    if (dockedRef.current === null) {
+      dockedRef.current = dockCover(
+        () => hexRef.current?.getBoundingClientRect() ?? null,
+        () => window.setTimeout(() => hexWrap?.classList.remove("is-docking"), 1000),
+      );
+      // The edge draws itself in as the mark arrives.
+      if (dockedRef.current) hexWrap?.classList.add("is-docking");
+    }
+    const docked = dockedRef.current;
     if (reduced) return;
 
     const ctx = gsap.context(() => {
@@ -101,12 +106,16 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
                   </span>
                 </div>
                 <p className="m-0 text-[var(--text-secondary)] text-sm flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <Code2 size={15} className="text-accent" aria-hidden="true" />
-                  <span>Full-stack and creative systems engineer</span>
-                  <span className="text-[var(--text-muted)]" aria-hidden="true">
+                  <Code2
+                    size={15}
+                    className="text-accent hidden md:inline-block"
+                    aria-hidden="true"
+                  />
+                  <span className="text-balance">Full-stack and creative systems engineer</span>
+                  <span className="text-[var(--text-muted)] hidden md:inline" aria-hidden="true">
                     /
                   </span>
-                  <span className="text-accent font-telemetry font-medium tabular-nums">
+                  <span className="text-accent font-telemetry font-medium tabular-nums basis-full md:basis-auto">
                     {displayCount} repositories
                   </span>
                 </p>

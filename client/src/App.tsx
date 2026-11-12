@@ -12,7 +12,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <Layout>
-        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+        <Suspense fallback={<div className="min-h-svh w-full" aria-busy="true" />}>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/home" element={<Home />} />

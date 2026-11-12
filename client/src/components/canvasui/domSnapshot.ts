@@ -124,7 +124,20 @@ export function paintFallbackSnapshot(
         paintFallbackSvg(ctx, current, rect, rootRect);
       } else {
         paintFallbackMedia(ctx, element, style, rect, rootRect);
+        // Text belongs to this element's own content box: clip it to the
+        // element's overflow (line-clamped descriptions must not spill out).
+        const own = intersectFallbackRects(state.clip, state.childrenClip);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(
+          own.left - rootRect.left,
+          own.top - rootRect.top,
+          Math.max(0, own.right - own.left),
+          Math.max(0, own.bottom - own.top),
+        );
+        ctx.clip();
         paintFallbackText(ctx, element, style, rootRect);
+        ctx.restore();
         paintFallbackBorders(ctx, style, rect, rootRect);
       }
       ctx.restore();

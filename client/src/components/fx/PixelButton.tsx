@@ -74,6 +74,7 @@ export const PixelButton = React.forwardRef<HTMLElement, PixelButtonProps>(
       ...rest
     } = props;
     const ref = useRef<HTMLElement | null>(null);
+    const handleRef = useRef<ReturnType<typeof initPixelRippleButton> | null>(null);
     const activateRef = useRef(onActivate);
 
     useEffect(() => {
@@ -88,10 +89,20 @@ export const PixelButton = React.forwardRef<HTMLElement, PixelButtonProps>(
         actionDelay: delayActivate ?? 0,
         onClick: delayActivate !== undefined ? () => activateRef.current?.() : null,
       });
-      return () => handle.destroy();
-      // The palette and delay are fixed for the button's lifetime.
+      handleRef.current = handle;
+      return () => {
+        handleRef.current = null;
+        handle.destroy();
+      };
+      // The delay is fixed for the button's lifetime; the palette follows below.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Variant changes (a category pill turning active) repaint without a remount,
+    // so the press ripple that caused the change keeps playing.
+    useEffect(() => {
+      handleRef.current?.setPalette(PALETTES[variant]);
+    }, [variant]);
 
     const setRef = (node: HTMLElement | null) => {
       ref.current = node;

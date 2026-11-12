@@ -277,7 +277,10 @@ void main () {
     vec3 tint = uRainbow == 1.0
       ? clamp(fluid / max(mag, 1e-3), 0.0, 1.0)
       : uColor;
-    float overlay = (1.0 - exp(-mag * uIntensity * 0.5)) * 0.82;
+    // Portfolio cap: the overlay path cannot distort, and at the spec's
+    // intensity 7.6 it would cover text at 82%. 0.5 keeps the trail vivid
+    // while text under it stays readable.
+    float overlay = (1.0 - exp(-mag * uIntensity * 0.5)) * 0.5;
     outColor = vec4(toSrgb(clamp(tint, 0.0, 1.0)) * overlay, overlay);
     return;
   }

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "../lib/gsap";
+import { DUR, EASE } from "../lib/motion";
 import PixelButton from "./fx/PixelButton";
 import { ASCIIFY_SPEC, GLYPH_RAIN_SPEC } from "./canvasui/spec";
 import {
@@ -48,6 +49,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
   const closeBtnRef = useRef<HTMLElement>(null);
   const prevProjectIdRef = useRef<string | null>(null);
   const initialTornDownRef = useRef<boolean>(false);
+  const seenCloseRef = useRef(closeRequest);
   const stepDirectionRef = useRef<1 | -1>(1);
   const isClosingRef = useRef<boolean>(false);
 
@@ -56,25 +58,30 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   });
 
-  const requestClose = useCallback(() => {
-    if (isClosingRef.current) return;
-    if (reducedMotion || !stageRef.current) {
-      onClose();
-      return;
-    }
-    isClosingRef.current = true;
-    gsap.to(stageRef.current, {
-      opacity: 0,
-      y: -10,
-      scale: 0.98,
-      duration: 0.26,
-      ease: "power2.inOut",
-      onComplete: () => {
-        isClosingRef.current = false;
-        onClose();
-      },
-    });
-  }, [onClose, reducedMotion]);
+  /** Exit motion, then `after` (defaults to onClose). Topic chips pass their own continuation. */
+  const requestClose = useCallback(
+    (after?: () => void) => {
+      const done = after ?? onClose;
+      if (isClosingRef.current) return;
+      if (reducedMotion || !stageRef.current) {
+        done();
+        return;
+      }
+      isClosingRef.current = true;
+      gsap.to(stageRef.current, {
+        opacity: 0,
+        y: -10,
+        scale: 0.98,
+        duration: DUR.ui,
+        ease: EASE.in,
+        onComplete: () => {
+          isClosingRef.current = false;
+          done();
+        },
+      });
+    },
+    [onClose, reducedMotion],
+  );
 
   const handleStepPrev = useCallback(() => {
     if (isClosingRef.current) return;
@@ -153,7 +160,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
       const items = dossierEl.querySelectorAll(".stage-stagger-item");
 
       if (isInitialOpen) {
-        gsap.fromTo(stageEl, { opacity: 0.92 }, { opacity: 1, duration: 0.38, ease: "power2.out" });
+        gsap.fromTo(stageEl, { opacity: 0.92 }, { opacity: 1, duration: DUR.ui, ease: EASE.out });
 
         if (originRect && originRect.width > 20 && originRect.height > 20) {
           const dest = mediaEl.getBoundingClientRect();
@@ -177,8 +184,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               scaleX: 1,
               scaleY: 1,
               opacity: 1,
-              duration: 0.68,
-              ease: "expo.out",
+              duration: DUR.hero,
+              ease: EASE.out,
               clearProps: "transform",
             },
           );
@@ -190,8 +197,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               x: 0,
               scale: 1,
               opacity: 1,
-              duration: 0.56,
-              ease: "expo.out",
+              duration: DUR.reveal,
+              ease: EASE.out,
               clearProps: "transform",
             },
           );
@@ -205,9 +212,9 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               x: 0,
               y: 0,
               opacity: 1,
-              duration: 0.54,
+              duration: DUR.reveal,
               delay: 0.14,
-              ease: "expo.out",
+              ease: EASE.out,
               clearProps: "transform",
             },
           );
@@ -221,9 +228,9 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               x: 0,
               y: 0,
               opacity: 1,
-              duration: 0.54,
+              duration: DUR.reveal,
               delay: 0.18,
-              ease: "expo.out",
+              ease: EASE.out,
               clearProps: "transform",
             },
           );
@@ -235,10 +242,10 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
           {
             opacity: 1,
             x: 0,
-            duration: 0.52,
+            duration: DUR.reveal,
             stagger: 0.055,
             delay: 0.12,
-            ease: "power3.out",
+            ease: EASE.out,
             clearProps: "transform",
           },
         );
@@ -253,8 +260,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               opacity: 1,
               scale: 1,
               x: 0,
-              duration: 0.48,
-              ease: "expo.out",
+              duration: DUR.ui,
+              ease: EASE.out,
               clearProps: "transform",
             },
           );
@@ -264,7 +271,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
           gsap.fromTo(
             topLeftNotch,
             { x: -10, opacity: 0.45 },
-            { x: 0, opacity: 1, duration: 0.38, ease: "expo.out", clearProps: "transform" },
+            { x: 0, opacity: 1, duration: DUR.ui, ease: EASE.out, clearProps: "transform" },
           );
         }
 
@@ -272,7 +279,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
           gsap.fromTo(
             bottomRightNotch,
             { x: 10, opacity: 0.45 },
-            { x: 0, opacity: 1, duration: 0.38, ease: "expo.out", clearProps: "transform" },
+            { x: 0, opacity: 1, duration: DUR.ui, ease: EASE.out, clearProps: "transform" },
           );
         }
 
@@ -282,9 +289,9 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
           {
             opacity: 1,
             x: 0,
-            duration: 0.42,
+            duration: DUR.ui,
             stagger: 0.04,
-            ease: "power3.out",
+            ease: EASE.out,
             clearProps: "transform",
           },
         );
@@ -299,7 +306,11 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
 
   // An outside close request (re-clicking the open card) still gets the exit motion.
   useEffect(() => {
-    if (closeRequest > 0) requestClose();
+    // Only react to requests made after this instance mounted; a new stage must
+    // never close itself because of an earlier request.
+    if (closeRequest === seenCloseRef.current) return;
+    seenCloseRef.current = closeRequest;
+    requestClose();
   }, [closeRequest, requestClose]);
 
   const formattedDate = formatProjectDate(project.updatedAt);
@@ -368,7 +379,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                   ref={closeBtnRef}
                   variant="secondary"
                   size="sm"
-                  onClick={requestClose}
+                  onClick={() => requestClose()}
                   className="whitespace-nowrap"
                 >
                   <ArrowLeft size={15} aria-hidden="true" />
@@ -400,7 +411,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={requestClose}
+                    onClick={() => requestClose()}
                     className="btn-stage-icon"
                     aria-label="Close project view"
                     title="Close (Esc)"
@@ -445,7 +456,7 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                         <button
                           key={topic}
                           type="button"
-                          onClick={() => onSelectTopic(topic)}
+                          onClick={() => requestClose(() => onSelectTopic(topic))}
                           className="dossier-topic-chip is-interactive"
                           title={`Show every project tagged #${topic}`}
                         >

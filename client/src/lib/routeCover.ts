@@ -40,6 +40,9 @@ export function getCoverPhase(): CoverPhase {
 /** Start the cover from a viewport point. Resolves once the screen is covered. */
 export function launchCover(origin: { x: number; y: number }): Promise<void> {
   if (state.phase !== "idle") return Promise.resolve();
+  // Clear anything a previous, interrupted journey left behind.
+  coverRuntime.dockTarget = null;
+  coverRuntime.onDocked = null;
   return new Promise((resolve) => {
     coverRuntime.coveredResolve = resolve;
     setCoverState({ phase: "covering", origin });

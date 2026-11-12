@@ -72,32 +72,26 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed, delayMs, duration]);
 
-  if (completed) {
-    return (
-      <div className={className} style={style}>
-        {children}
-      </div>
-    );
-  }
-
+  // One tree: the real children paint from the first frame (they are the LCP
+  // and never remount), and the sweep's opaque panels cover them until it lands.
   return (
     <div className={className} style={{ position: "relative", ...style }}>
-      <div aria-hidden="true" style={{ visibility: "hidden", pointerEvents: "none" }}>
-        {children}
-      </div>
-      <AsciiSweep
-        {...options}
-        native={native}
-        index={slotIndex}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        onSweepEnd={() => {
-          finish();
-          window.setTimeout(() => setCompleted(true), FADE_TAIL_MS);
-        }}
-        alternate={children}
-      >
-        <div className="w-full h-full" />
-      </AsciiSweep>
+      <div>{children}</div>
+      {!completed ? (
+        <AsciiSweep
+          {...options}
+          native={native}
+          index={slotIndex}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          onSweepEnd={() => {
+            finish();
+            window.setTimeout(() => setCompleted(true), FADE_TAIL_MS);
+          }}
+          alternate={<div aria-hidden="true">{children}</div>}
+        >
+          <div className="w-full h-full" />
+        </AsciiSweep>
+      ) : null}
     </div>
   );
 };

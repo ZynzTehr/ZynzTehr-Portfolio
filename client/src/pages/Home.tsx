@@ -1,4 +1,12 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ArrowUpRight, ExternalLink, Globe, Hash, RotateCcw, Search, X } from "lucide-react";
 import { formatProjectDate, projects, type Project } from "../data/projects";
 import DevHud from "../components/DevHud";
@@ -7,13 +15,14 @@ import ProjectStage from "../components/ProjectStage";
 import CardMediaPreview from "../components/CardMediaPreview";
 import ScrollWidget from "../components/ScrollWidget";
 import BrandMark from "../components/BrandMark";
+import MaskHeading from "../components/MaskHeading";
 import PixelButton from "../components/fx/PixelButton";
 import Laser from "../components/canvasui/Laser";
 import ParticleScroll from "../components/canvasui/ParticleScroll";
 import Ripple from "../components/canvasui/Ripple";
 import { LASER_SPEC, PARTICLE_SCROLL_SPEC, RIPPLE_SPEC } from "../components/canvasui/spec";
 import { GithubIcon } from "../components/Icon";
-import { gsap, ScrollTrigger } from "../lib/gsap";
+import { Flip, gsap, ScrollTrigger } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion, useReducedMotion } from "../lib/useReducedMotion";
 
@@ -62,19 +71,6 @@ function useMaskReveal(scope: React.RefObject<HTMLElement | null>, deps: unknown
   }, deps);
 }
 
-const MaskHeading: React.FC<{
-  as?: "h2" | "h3";
-  className?: string;
-  children: React.ReactNode;
-}> = ({ as: Tag = "h2", className, children }) => (
-  <Tag className={className}>
-    <span className="mask-reveal">
-      <span className="mask-reveal__text">{children}</span>
-      <span className="mask-reveal__block" aria-hidden="true" />
-    </span>
-  </Tag>
-);
-
 const Home: React.FC = () => {
   const reducedMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState<string>("Recent");
@@ -94,7 +90,15 @@ const Home: React.FC = () => {
   const catalogRef = useRef<HTMLDivElement>(null);
   const codaRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const lastOpenedIdRef = useRef<string | null>(null);
+  const flipStateRef = useRef<Flip.FlipState | null>(null);
+
+  /** Record card positions just before the index list changes, so it can FLIP. */
+  const captureFlip = useCallback(() => {
+    if (prefersReducedMotion()) return;
+    const cards = document.querySelectorAll("#index-grid .project-card-col");
+    if (cards.length) flipStateRef.current = Flip.getState(cards);
+  }, []);
+  const lastOpenedRef = useRef<{ id: string; source: StageState["source"] } | null>(null);
 
   useEffect(() => {
     const syncCols = () => setGridColumns(window.innerWidth >= 1024 ? 3 : 2);
@@ -104,9 +108,12 @@ const Home: React.FC = () => {
 
   // Debounced search: the input stays instant, the index re-filters once typing pauses.
   useEffect(() => {
-    const t = window.setTimeout(() => setSearchQuery(searchInput), SEARCH_DEBOUNCE_MS);
+    const t = window.setTimeout(() => {
+      captureFlip();
+      setSearchQuery(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
-  }, [searchInput]);
+  }, [searchInput, captureFlip]);
 
   // The orbit follows the category only, so searching the index never empties the orbit.
   const orbitProjects = useMemo(
@@ -133,20 +140,29 @@ const Home: React.FC = () => {
   const stageProject = stage ? (stageList.find((p) => p.id === stage.project.id) ?? null) : null;
   const stageIndex = stageProject ? stageList.findIndex((p) => p.id === stageProject.id) : 0;
 
+  // A stage whose project was filtered out is dropped, so it never reappears later.
+  useEffect(() => {
+    if (!stage || stageProject) return;
+    const frame = requestAnimationFrame(() => setStage(null));
+    return () => cancelAnimationFrame(frame);
+  }, [stage, stageProject]);
+
   const focusOrigin = useCallback(() => {
-    const id = lastOpenedIdRef.current;
-    if (!id) return;
+    const last = lastOpenedRef.current;
+    if (!last) return;
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(
-        `[data-project-card="${id}"], [data-project-tile="${id}"]`,
-      );
-      el?.focus({ preventScroll: true });
+      const id = CSS.escape(last.id);
+      const el =
+        last.source === "grid"
+          ? document.querySelector<HTMLElement>(`#index-grid [data-project-card="${id}"]`)
+          : document.querySelector<HTMLElement>(`#orbit [data-project-tile="${id}"]`);
+      (el ?? searchInputRef.current)?.focus({ preventScroll: true });
     });
   }, []);
 
   const openStage = useCallback(
     (project: Project, source: StageState["source"], rect: DOMRect | null) => {
-      lastOpenedIdRef.current = project.id;
+      lastOpenedRef.current = { id: project.id, source };
       setStage({ project, source, originRect: rect });
     },
     [],
@@ -162,7 +178,7 @@ const Home: React.FC = () => {
       if (!stage || stageList.length === 0) return;
       const idx = stageList.findIndex((p) => p.id === stage.project.id);
       const next = stageList[(idx + direction + stageList.length) % stageList.length];
-      lastOpenedIdRef.current = next.id;
+      lastOpenedRef.current = { id: next.id, source: stage.source };
       setStage({ project: next, source: stage.source, originRect: null });
     },
     [stage, stageList],
@@ -170,26 +186,55 @@ const Home: React.FC = () => {
 
   const revealIndex = useCallback(() => setIsGridRevealed(true), []);
 
-  const handleSelectTopic = useCallback((topic: string) => {
-    setActiveTopic(topic);
-    setSearchInput("");
-    setSearchQuery("");
-    setStage(null);
-    setIsGridRevealed(true);
-    requestAnimationFrame(() => {
-      catalogRef.current?.scrollIntoView({
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-        block: "start",
+  const handleSelectTopic = useCallback(
+    (topic: string) => {
+      captureFlip();
+      setActiveTopic(topic);
+      setSearchInput("");
+      setSearchQuery("");
+      setStage(null);
+      setIsGridRevealed(true);
+      requestAnimationFrame(() => {
+        catalogRef.current?.scrollIntoView({
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+          block: "start",
+        });
+        searchInputRef.current?.focus({ preventScroll: true });
       });
-    });
-  }, []);
+    },
+    [captureFlip],
+  );
 
   const resetFilters = useCallback(() => {
+    captureFlip();
     setSearchInput("");
     setSearchQuery("");
     setActiveTopic(null);
     setActiveCategory("Recent");
-  }, []);
+  }, [captureFlip]);
+
+  // Filtering glides: surviving cards move from their old place, new ones rise in.
+  useLayoutEffect(() => {
+    const state = flipStateRef.current;
+    flipStateRef.current = null;
+    if (!state) return;
+    const cards = document.querySelectorAll("#index-grid .project-card-col");
+    const tween = Flip.from(state, {
+      targets: cards,
+      duration: DUR.reveal,
+      ease: EASE.out,
+      stagger: 0.02,
+      onEnter: (els) =>
+        gsap.fromTo(
+          els,
+          { opacity: 0, scale: 0.94 },
+          { opacity: 1, scale: 1, duration: DUR.reveal, ease: EASE.out },
+        ),
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [indexProjects]);
 
   const openIndexFromPrompt = () => {
     setIsGridRevealed(true);
@@ -212,6 +257,16 @@ const Home: React.FC = () => {
       trigger.kill();
     };
   }, [isGridRevealed]);
+
+  // Keyboard focus and scrollIntoView keep clear of the beam and the sand line.
+  useEffect(() => {
+    if (!isGridRevealed || !laserOn || prefersReducedMotion()) return;
+    const root = document.documentElement;
+    root.style.scrollPaddingBottom = `calc((1 - ${PARTICLE_SCROLL_SPEC.point}) * 100vh + 24px)`;
+    return () => {
+      root.style.scrollPaddingBottom = "";
+    };
+  }, [isGridRevealed, laserOn]);
 
   useEffect(() => {
     if (isGridRevealed) ScrollTrigger.refresh();
@@ -315,8 +370,11 @@ const Home: React.FC = () => {
             onSelectProject={(project, rect) => openStage(project, "carousel", rect)}
             activeCategory={activeCategory}
             onSelectCategory={(cat) => {
-              setStage(null);
-              setActiveCategory(cat);
+              captureFlip();
+              startTransition(() => {
+                setStage(null);
+                setActiveCategory(cat);
+              });
             }}
           />
         </div>
@@ -355,7 +413,7 @@ const Home: React.FC = () => {
                 }}
                 placeholder=" "
                 autoComplete="off"
-                aria-controls="index-grid"
+                aria-controls="index-results"
               />
               <label htmlFor="archive-search-input" className="floating-search-label">
                 Search by name, stack or topic
@@ -380,13 +438,14 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {isGridRevealed && hasActiveFilter && (
+        {/* Always present while the index is open, so filtering never shifts the grid. */}
+        {isGridRevealed && (
           <div
             className="archive-filter-bar mb-5 flex flex-wrap items-center justify-between gap-2"
             role="status"
           >
             <div className="flex flex-wrap items-center gap-2 text-xs font-telemetry text-[var(--text-secondary)]">
-              <span>Showing</span>
+              <span>{hasActiveFilter ? "Showing" : `Showing all ${projects.length}`}</span>
               {activeCategory !== "Recent" && (
                 <span className="filter-scope-pill">{activeCategory}</span>
               )}
@@ -399,159 +458,172 @@ const Home: React.FC = () => {
               {searchQuery.trim() && (
                 <span className="filter-scope-pill">"{searchQuery.trim()}"</span>
               )}
-              <span className="text-accent tabular-nums">{indexProjects.length} matched</span>
+              {hasActiveFilter && (
+                <span className="text-accent tabular-nums">{indexProjects.length} matched</span>
+              )}
             </div>
-            <PixelButton variant="secondary" size="sm" onClick={resetFilters}>
+            <PixelButton
+              variant="secondary"
+              size="sm"
+              onClick={resetFilters}
+              wrapperClassName={hasActiveFilter ? "" : "invisible"}
+              tabIndex={hasActiveFilter ? undefined : -1}
+              aria-hidden={hasActiveFilter ? undefined : true}
+            >
               <RotateCcw size={12} aria-hidden="true" />
               <span>Clear filters</span>
             </PixelButton>
           </div>
         )}
 
-        {!isGridRevealed ? (
-          <div className="archive-open-prompt text-center py-12 my-4 flex flex-col items-center justify-center gap-4">
-            <MaskHeading
-              as="h3"
-              className="text-base md:text-lg font-semibold text-[var(--text-primary)] font-display m-0"
-            >
-              Open the full index
-            </MaskHeading>
-            <p className="text-[var(--text-secondary)] text-sm m-0 max-w-[460px] leading-relaxed">
-              All {projects.length} systems, searchable by name, stack or topic. They print in out
-              of the orbit line.
-            </p>
-            <PixelButton variant="primary" size="md" onClick={openIndexFromPrompt}>
-              <Search size={16} aria-hidden="true" />
-              <span>Open the index</span>
-            </PixelButton>
-          </div>
-        ) : indexProjects.length === 0 ? (
-          <div className="glass-card p-10 my-4 text-center flex flex-col items-center justify-center gap-3">
-            <p className="m-0 font-display text-lg font-semibold text-[var(--text-primary)]">
-              Nothing in the index matches{" "}
-              {searchQuery.trim() ? `"${searchQuery.trim()}"` : "these filters"}
-            </p>
-            <p className="m-0 text-sm text-[var(--text-secondary)] max-w-[420px]">
-              Clear the search or switch categories to bring every system back.
-            </p>
-            <PixelButton variant="secondary" size="md" onClick={resetFilters}>
-              <RotateCcw size={15} aria-hidden="true" />
-              <span>Show all {projects.length}</span>
-            </PixelButton>
-          </div>
-        ) : (
-          <ParticleScroll className="w-full" native={false} {...PARTICLE_SCROLL_SPEC}>
-            <div
-              id="index-grid"
-              className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 archive-cards-grid"
-            >
-              {indexProjects.map((project, index) => {
-                const isHovered = hoveredGridId === project.id;
-                const isSelected = stageProject?.id === project.id && stage?.source === "grid";
-                return (
-                  <React.Fragment key={project.id}>
-                    {index === inlineStageRowStart && (
-                      <div className="col-span-2 lg:col-span-3 my-1">{renderStage("grid")}</div>
-                    )}
-                    <div className="project-card-col min-w-0">
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        data-project-card={project.id}
-                        aria-expanded={isSelected}
-                        aria-label={`${project.name}: open project details`}
-                        className={`project-grid-card h-full ${isSelected ? "is-selected" : ""}`}
-                        onMouseEnter={() => setHoveredGridId(project.id)}
-                        onMouseLeave={() =>
-                          setHoveredGridId((prev) => (prev === project.id ? null : prev))
-                        }
-                        onFocus={() => setHoveredGridId(project.id)}
-                        onBlur={() =>
-                          setHoveredGridId((prev) => (prev === project.id ? null : prev))
-                        }
-                        onClick={(e) => activateCard(project, e.currentTarget)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            activateCard(project, e.currentTarget);
+        <div id="index-results">
+          {!isGridRevealed ? (
+            <div className="archive-open-prompt text-center py-12 my-4 flex flex-col items-center justify-center gap-4">
+              <MaskHeading
+                as="h3"
+                className="text-base md:text-lg font-semibold text-[var(--text-primary)] font-display m-0"
+              >
+                Open the full index
+              </MaskHeading>
+              <p className="text-[var(--text-secondary)] text-sm m-0 max-w-[460px] leading-relaxed">
+                All {projects.length} systems, searchable by name, stack or topic. They print in
+                along the orbit line.
+              </p>
+              <PixelButton variant="primary" size="md" onClick={openIndexFromPrompt}>
+                <Search size={16} aria-hidden="true" />
+                <span>Open the index</span>
+              </PixelButton>
+            </div>
+          ) : indexProjects.length === 0 ? (
+            <div className="glass-card p-10 my-4 text-center flex flex-col items-center justify-center gap-3">
+              <p className="m-0 font-display text-lg font-semibold text-[var(--text-primary)]">
+                Nothing in the index matches{" "}
+                {searchQuery.trim() ? `"${searchQuery.trim()}"` : "these filters"}
+              </p>
+              <p className="m-0 text-sm text-[var(--text-secondary)] max-w-[420px]">
+                Clear the search or switch categories to bring every system back.
+              </p>
+              <PixelButton variant="secondary" size="md" onClick={resetFilters}>
+                <RotateCcw size={15} aria-hidden="true" />
+                <span>Show all {projects.length}</span>
+              </PixelButton>
+            </div>
+          ) : (
+            <ParticleScroll className="w-full" native={false} {...PARTICLE_SCROLL_SPEC}>
+              <div
+                id="index-grid"
+                className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 archive-cards-grid"
+              >
+                {indexProjects.map((project, index) => {
+                  const isHovered = hoveredGridId === project.id;
+                  const isSelected = stageProject?.id === project.id && stage?.source === "grid";
+                  return (
+                    <React.Fragment key={project.id}>
+                      {index === inlineStageRowStart && (
+                        <div className="col-span-2 lg:col-span-3 my-1">{renderStage("grid")}</div>
+                      )}
+                      <div className="project-card-col min-w-0" data-flip-id={project.id}>
+                        {/* A non-interactive card with one full-card button; the live
+                          and source links sit above it, so nothing is nested. */}
+                        <article
+                          className={`project-grid-card h-full ${isSelected ? "is-selected" : ""}`}
+                          onMouseEnter={() => setHoveredGridId(project.id)}
+                          onMouseLeave={() =>
+                            setHoveredGridId((prev) => (prev === project.id ? null : prev))
                           }
-                        }}
-                      >
-                        <div className="grid-card-media relative">
-                          <CardMediaPreview
-                            project={project}
-                            isActive={isHovered || isSelected}
-                            enableShader={isHovered && !stageProject}
+                          onFocus={() => setHoveredGridId(project.id)}
+                          onBlur={() =>
+                            setHoveredGridId((prev) => (prev === project.id ? null : prev))
+                          }
+                        >
+                          <button
+                            type="button"
+                            className="card-hit"
+                            data-project-card={project.id}
+                            aria-expanded={isSelected}
+                            aria-label={`${project.name}: open project details`}
+                            onClick={(e) => {
+                              const card =
+                                e.currentTarget.closest<HTMLElement>(".project-grid-card");
+                              if (card) activateCard(project, card);
+                            }}
                           />
-                          <span className="grid-category-badge">{project.category}</span>
-                        </div>
-
-                        <div className="grid-card-body p-3 md:p-6 flex flex-col justify-between grow">
-                          <div>
-                            <div className="flex justify-between items-start mb-1.5 md:mb-2">
-                              <h3 className="text-xs md:text-lg font-bold leading-snug text-[var(--text-primary)] font-display m-0 truncate">
-                                {project.name}
-                              </h3>
-                              <ArrowUpRight
-                                size={17}
-                                aria-hidden="true"
-                                className="card-corner-arrow text-accent shrink-0 ml-2"
-                              />
-                            </div>
-                            <p className="hidden md:line-clamp-3 text-[var(--text-secondary)] text-sm mb-4 leading-relaxed project-card-desc">
-                              {project.description}
-                            </p>
+                          <div className="grid-card-media relative">
+                            <CardMediaPreview
+                              project={project}
+                              isActive={isHovered || isSelected}
+                              enableShader={isHovered && !stageProject}
+                            />
+                            <span className="grid-category-badge">{project.category}</span>
                           </div>
 
-                          <div>
-                            <div className="flex flex-wrap gap-1.5 mb-2.5 md:mb-4">
-                              {project.techStack.slice(0, 3).map((tech) => (
-                                <span key={tech} className="tech-pill-small">
-                                  {tech}
-                                </span>
-                              ))}
+                          <div className="grid-card-body p-3 md:p-6 flex flex-col justify-between grow">
+                            <div>
+                              <div className="flex justify-between items-start mb-1.5 md:mb-2">
+                                <h3 className="text-xs md:text-lg font-bold leading-snug text-[var(--text-primary)] font-display m-0 truncate">
+                                  {project.name}
+                                </h3>
+                                <ArrowUpRight
+                                  size={17}
+                                  aria-hidden="true"
+                                  className="card-corner-arrow text-accent shrink-0 ml-2"
+                                />
+                              </div>
+                              <p className="hidden md:line-clamp-3 text-[var(--text-secondary)] text-sm mb-4 leading-relaxed project-card-desc">
+                                {project.description}
+                              </p>
                             </div>
-                            <div className="card-footer-meta flex justify-between items-center pt-2 border-t border-[var(--border-subtle)] text-[0.65rem] md:text-xs">
-                              <span className="text-[var(--text-muted)] font-telemetry">
-                                {project.language} · {formatProjectDate(project.updatedAt)}
-                              </span>
-                              <div className="flex gap-1.5">
-                                {project.liveUrl && (
+
+                            <div>
+                              <div className="flex flex-wrap gap-1.5 mb-2.5 md:mb-4">
+                                {project.techStack.slice(0, 3).map((tech) => (
+                                  <span key={tech} className="tech-pill-small">
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="card-footer-meta flex justify-between items-center pt-2 border-t border-[var(--border-subtle)] text-[0.65rem] md:text-xs">
+                                <span className="text-[var(--text-muted)] font-telemetry">
+                                  {project.language} · {formatProjectDate(project.updatedAt)}
+                                </span>
+                                <div className="flex gap-1.5">
+                                  {project.liveUrl && (
+                                    <a
+                                      href={project.liveUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="card-icon-link text-accent"
+                                      onClick={(e) => e.stopPropagation()}
+                                      title="Open live build"
+                                      aria-label={`${project.name}: open live build`}
+                                    >
+                                      <ExternalLink size={15} />
+                                    </a>
+                                  )}
                                   <a
-                                    href={project.liveUrl}
+                                    href={project.githubUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="card-icon-link text-accent"
+                                    className="card-icon-link text-[var(--text-primary)]"
                                     onClick={(e) => e.stopPropagation()}
-                                    title="Open live build"
-                                    aria-label={`${project.name}: open live build`}
+                                    title="View source"
+                                    aria-label={`${project.name}: view source`}
                                   >
-                                    <ExternalLink size={15} />
+                                    <GithubIcon size={15} />
                                   </a>
-                                )}
-                                <a
-                                  href={project.githubUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="card-icon-link text-[var(--text-primary)]"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="View source"
-                                  aria-label={`${project.name}: view source`}
-                                >
-                                  <GithubIcon size={15} />
-                                </a>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </article>
                       </div>
-                    </div>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </ParticleScroll>
-        )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </ParticleScroll>
+          )}
+        </div>
       </div>
 
       {/* Act III: Transmission */}
@@ -633,11 +705,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* upgrades.md: Laser at the bottom of the page while the index is open */}
-      {isGridRevealed && (
-        <div
-          className={`archive-laser ${laserOn && isGridRevealed ? "is-on" : ""}`}
-          aria-hidden="true"
-        >
+      {/* Mounted only while it burns and no project covers the page (WebGL budget). */}
+      {isGridRevealed && laserOn && !stageProject && (
+        <div className="archive-laser is-on" aria-hidden="true">
           <Laser className="w-full h-full" native={false} {...LASER_SPEC}>
             <div className="w-full h-full" />
           </Laser>

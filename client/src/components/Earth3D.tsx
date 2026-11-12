@@ -342,11 +342,14 @@ const Earth3D: React.FC<Earth3DProps> = ({
     let targetRotationY = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!interactive) return;
+      if (!interactive || pausedRef.current) return;
       const rect = mountRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      // Hidden (display:none) gives a zero rect: dividing by it would poison the
+      // rotation with NaN and blank the globe for good.
+      if (!rect || rect.width < 1 || rect.height < 1) return;
       const mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const mouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      if (!Number.isFinite(mouseX) || !Number.isFinite(mouseY)) return;
       targetRotationY = mouseX * 0.2;
       targetRotationX = mouseY * 0.15;
     };
@@ -398,6 +401,9 @@ const Earth3D: React.FC<Earth3DProps> = ({
       if (!reducedMotion) {
         earth.rotation.x += (targetRotationX - earth.rotation.x) * Math.min(1, 0.05 * k);
         earth.rotation.y += targetRotationY * 0.01 * k;
+      }
+      if (!Number.isFinite(earth.rotation.x) || !Number.isFinite(earth.rotation.y)) {
+        earth.rotation.set(0, 0, 0);
       }
       atmosphere.rotation.y = earth.rotation.y;
 

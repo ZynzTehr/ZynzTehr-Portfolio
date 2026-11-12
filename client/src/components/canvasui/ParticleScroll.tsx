@@ -401,6 +401,7 @@ function createParticleScroll(
   function captureFallback() {
     window.clearTimeout(fallbackTimer);
     fallbackTimer = 0;
+    fallbackStale = false;
     if (htmlInCanvas || destroyed) return;
     try {
       const dpr = Math.min(getCanvasPixelRatio(output, gl!), 1.25);
@@ -409,6 +410,18 @@ function createParticleScroll(
       contentDirty = true;
       wake();
     } catch {}
+  }
+
+  // Portfolio addition: hover states and lazy images mutate the grid often. The
+  // snapshot only matters while some row is still sand, so changes just mark it
+  // stale, and the capture runs (throttled) when a row actually needs it.
+  let fallbackStale = false;
+
+  function markFallbackStale() {
+    if (htmlInCanvas || destroyed) return;
+    fallbackStale = true;
+    if (!rowsAssembled) queueFallbackCapture(180);
+    start();
   }
 
   function queueFallbackCapture(delay = 32) {
@@ -639,6 +652,7 @@ function createParticleScroll(
       if (inWin && p < minP) minP = p;
     }
     rowsAssembled = minP >= 0.9995;
+    if (fallbackStale && !rowsAssembled) queueFallbackCapture(180);
     rowWindow.fill(1);
     const from = Math.min(Math.max(winStart, 0), docRows);
     const to = Math.min(winStart + winLen, docRows);
@@ -795,7 +809,7 @@ function createParticleScroll(
   content.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  const contentObserver = htmlInCanvas ? null : new MutationObserver(() => queueFallbackCapture());
+  const contentObserver = htmlInCanvas ? null : new MutationObserver(() => markFallbackStale());
   contentObserver?.observe(content, {
     attributes: true,
     attributeFilter: ["class", "hidden", "src", "srcset", "style"],
@@ -804,8 +818,7 @@ function createParticleScroll(
     subtree: true,
   });
   function onFallbackLoad() {
-    queueFallbackCapture(0);
-    start();
+    markFallbackStale();
   }
   if (!htmlInCanvas) {
     content.addEventListener("load", onFallbackLoad, true);

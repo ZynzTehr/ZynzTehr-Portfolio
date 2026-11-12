@@ -48,21 +48,28 @@ const RouteCover: React.FC = () => {
     }
 
     if (phase === "covered") {
+      let fade: gsap.core.Tween | null = null;
       failsafeRef.current = window.setTimeout(() => {
         if (getCoverState().phase !== "covered") return;
-        gsap.to([field, mark], {
+        fade = gsap.to([field, mark], {
           opacity: 0,
           duration: DUR.ui,
           ease: EASE.inOut,
-          onComplete: () => setCoverState({ phase: "idle" }),
+          // A dock that arrives during the fade wins; only a still-covered state resets.
+          onComplete: () => {
+            if (getCoverState().phase === "covered") setCoverState({ phase: "idle" });
+          },
         });
       }, 1600);
       return () => {
         if (failsafeRef.current) window.clearTimeout(failsafeRef.current);
+        fade?.kill();
       };
     }
 
     if (phase === "docking") {
+      // A late dock may arrive mid-failsafe fade: start from a fully visible mark.
+      gsap.set(mark, { opacity: 1 });
       const target = coverRuntime.dockTarget?.() ?? null;
       const from = mark.getBoundingClientRect();
       const tl = gsap.timeline({
