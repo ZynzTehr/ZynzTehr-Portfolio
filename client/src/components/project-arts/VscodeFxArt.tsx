@@ -197,207 +197,216 @@ const VscodeFxArt: React.FC = () => {
           )}
         </g>
 
-        {/* Editor window */}
-        <rect x="120" y="28" width="400" height="224" rx="12" fill="url(#vscodefx-window)" />
+        {/* Editor window, scaled and lowered so the long category pill clears it */}
+        <g transform="translate(320 154) scale(0.8) translate(-320 -140)">
+          <rect x="120" y="28" width="400" height="224" rx="12" fill="url(#vscodefx-window)" />
 
-        {/* Active-line neon bloom spilling past the window edges */}
-        <rect
-          x="70"
-          y="118"
-          width="500"
-          height="24"
-          rx="12"
-          fill="#0d59ff"
-          opacity="0.55"
-          filter="url(#vscodefx-bloom)"
-          className="vscodefx-line-pulse"
-        />
-
-        <g clipPath="url(#vscodefx-editor-clip)">
-          {/* Title bar */}
-          <rect x="120" y="28" width="400" height="24" fill="#0a1128" />
-          <circle cx="136" cy="40" r="3.6" fill="#4474ff" opacity="0.9" />
-          <circle cx="148" cy="40" r="3.6" fill="#60a5fa" opacity="0.7" />
-          <circle cx="160" cy="40" r="3.6" fill="#93c5fd" opacity="0.5" />
-          <rect x="262" y="35" width="116" height="10" rx="5" fill="#16224a" />
-
-          {/* Tab strip divider */}
-          <rect x="146" y="52" width="374" height="1" fill="#1a2a5c" />
-
-          {/* Activity bar */}
-          <rect x="120" y="52" width="26" height="188" fill="#080e22" />
+          {/* Active-line neon bloom spilling past the window edges */}
           <rect
-            x="127"
-            y="62"
-            width="12"
-            height="12"
-            rx="3"
-            fill="none"
-            stroke="#60a5fa"
-            strokeWidth="1.6"
+            x="70"
+            y="118"
+            width="500"
+            height="24"
+            rx="12"
+            fill="#0d59ff"
+            opacity="0.55"
+            filter="url(#vscodefx-bloom)"
+            className="vscodefx-line-pulse"
           />
-          <circle
-            cx="133"
-            cy="90"
-            r="5"
-            fill="none"
-            stroke="#4474ff"
-            strokeWidth="1.4"
-            opacity="0.6"
-          />
-          <rect
-            x="128"
-            y="104"
-            width="10"
-            height="10"
-            rx="2"
-            fill="none"
-            stroke="#4474ff"
-            strokeWidth="1.4"
-            opacity="0.5"
-          />
-          <rect x="120" y="60" width="2" height="16" fill="#93c5fd" />
 
-          {/* Gutter line numbers */}
-          <g fill="#4474ff" opacity="0.35">
-            {[70, 90, 110, 150, 170, 190, 210, 230].map((y) => (
-              <rect key={y} x="158" y={y - 2} width="12" height="4" rx="2" />
-            ))}
-          </g>
+          <g clipPath="url(#vscodefx-editor-clip)">
+            {/* Title bar */}
+            <rect x="120" y="28" width="400" height="24" fill="#0a1128" />
+            <circle cx="136" cy="40" r="3.6" fill="#4474ff" opacity="0.9" />
+            <circle cx="148" cy="40" r="3.6" fill="#60a5fa" opacity="0.7" />
+            <circle cx="160" cy="40" r="3.6" fill="#93c5fd" opacity="0.5" />
+            <rect x="262" y="35" width="116" height="10" rx="5" fill="#16224a" />
 
-          {/* Dim code tokens */}
-          {CODE_ROWS.map(([y, tokens]) => (
-            <g key={y}>
-              {tokens.map(([x, w, tone]) => (
-                <rect
-                  key={x}
-                  x={x}
-                  y={y - 3}
-                  width={w}
-                  height="6"
-                  rx="3"
-                  fill={TONES[tone]}
-                  opacity={tone === 0 ? 0.28 : 0.42}
-                />
+            {/* Tab strip divider */}
+            <rect x="146" y="52" width="374" height="1" fill="#1a2a5c" />
+
+            {/* Activity bar */}
+            <rect x="120" y="52" width="26" height="188" fill="#080e22" />
+            <rect
+              x="127"
+              y="62"
+              width="12"
+              height="12"
+              rx="3"
+              fill="none"
+              stroke="#60a5fa"
+              strokeWidth="1.6"
+            />
+            <circle
+              cx="133"
+              cy="90"
+              r="5"
+              fill="none"
+              stroke="#4474ff"
+              strokeWidth="1.4"
+              opacity="0.6"
+            />
+            <rect
+              x="128"
+              y="104"
+              width="10"
+              height="10"
+              rx="2"
+              fill="none"
+              stroke="#4474ff"
+              strokeWidth="1.4"
+              opacity="0.5"
+            />
+            <rect x="120" y="60" width="2" height="16" fill="#93c5fd" />
+
+            {/* Gutter line numbers */}
+            <g fill="#4474ff" opacity="0.35">
+              {[70, 90, 110, 150, 170, 190, 210, 230].map((y) => (
+                <rect key={y} x="158" y={y - 2} width="12" height="4" rx="2" />
               ))}
             </g>
-          ))}
 
-          {/* ACTIVE LINE: neon band */}
-          <g className="vscodefx-line-pulse">
-            <rect x="146" y="119" width="374" height="22" fill="url(#vscodefx-activeline)" />
-            <rect x="146" y="119" width="374" height="1.4" fill="#93c5fd" opacity="0.7" />
-            <rect x="146" y="139.6" width="374" height="1.4" fill="#93c5fd" opacity="0.7" />
+            {/* Dim code tokens */}
+            {CODE_ROWS.map(([y, tokens]) => (
+              <g key={y}>
+                {tokens.map(([x, w, tone]) => (
+                  <rect
+                    key={x}
+                    x={x}
+                    y={y - 3}
+                    width={w}
+                    height="6"
+                    rx="3"
+                    fill={TONES[tone]}
+                    opacity={tone === 0 ? 0.28 : 0.42}
+                  />
+                ))}
+              </g>
+            ))}
+
+            {/* ACTIVE LINE: neon band */}
+            <g className="vscodefx-line-pulse">
+              <rect x="146" y="119" width="374" height="22" fill="url(#vscodefx-activeline)" />
+              <rect x="146" y="119" width="374" height="1.4" fill="#93c5fd" opacity="0.7" />
+              <rect x="146" y="139.6" width="374" height="1.4" fill="#93c5fd" opacity="0.7" />
+            </g>
+            <rect
+              x="146"
+              y="119"
+              width="3"
+              height="22"
+              fill="#93c5fd"
+              filter="url(#vscodefx-glow)"
+            />
+            <rect x="157" y="127" width="14" height="6" rx="3" fill="#e0ecff" />
+
+            {/* Active line tokens, glowing */}
+            <g filter="url(#vscodefx-glow)">
+              <rect x="188" y="126" width="46" height="8" rx="4" fill="#a78bfa" />
+              <rect x="240" y="126" width="38" height="8" rx="4" fill="#60a5fa" />
+              <rect x="284" y="126" width="62" height="8" rx="4" fill="#93c5fd" />
+              <rect x="352" y="126" width="30" height="8" rx="4" fill="#4474ff" />
+            </g>
+
+            {/* Status bar */}
+            <rect x="120" y="240" width="400" height="12" fill="#0d59ff" opacity="0.85" />
+            <rect x="440" y="243.5" width="46" height="5" rx="2.5" fill="#e0ecff" opacity="0.7" />
           </g>
-          <rect x="146" y="119" width="3" height="22" fill="#93c5fd" filter="url(#vscodefx-glow)" />
-          <rect x="157" y="127" width="14" height="6" rx="3" fill="#e0ecff" />
 
-          {/* Active line tokens, glowing */}
-          <g filter="url(#vscodefx-glow)">
-            <rect x="188" y="126" width="46" height="8" rx="4" fill="#a78bfa" />
-            <rect x="240" y="126" width="38" height="8" rx="4" fill="#60a5fa" />
-            <rect x="284" y="126" width="62" height="8" rx="4" fill="#93c5fd" />
-            <rect x="352" y="126" width="30" height="8" rx="4" fill="#4474ff" />
-          </g>
-
-          {/* Status bar */}
-          <rect x="120" y="240" width="400" height="12" fill="#0d59ff" opacity="0.85" />
-          <rect x="440" y="243.5" width="46" height="5" rx="2.5" fill="#e0ecff" opacity="0.7" />
-        </g>
-
-        {/* Window frame */}
-        <rect
-          x="120"
-          y="28"
-          width="400"
-          height="224"
-          rx="12"
-          fill="none"
-          stroke="url(#vscodefx-frame)"
-          strokeWidth="1.8"
-          opacity="0.85"
-        />
-
-        {/* Material ripple from the click */}
-        <circle
-          cx="392"
-          cy="130"
-          r="40"
-          fill="url(#vscodefx-ripplefill)"
-          className="vscodefx-ripple"
-        />
-        <circle
-          cx="392"
-          cy="130"
-          r="78"
-          fill="none"
-          stroke="#a78bfa"
-          strokeWidth="2.4"
-          className="vscodefx-ripple"
-        />
-        <circle
-          cx="392"
-          cy="130"
-          r="52"
-          fill="none"
-          stroke="#93c5fd"
-          strokeWidth="1.6"
-          className="vscodefx-ripple vscodefx-ripple-late"
-        />
-        {/* Resting rings so the ripple reads even when frozen */}
-        <circle cx="392" cy="130" r="30" fill="url(#vscodefx-ripplefill)" />
-        <circle
-          cx="392"
-          cy="130"
-          r="48"
-          fill="none"
-          stroke="#a78bfa"
-          strokeWidth="1.2"
-          opacity="0.3"
-          strokeDasharray="2 5"
-        />
-        <circle
-          cx="392"
-          cy="130"
-          r="28"
-          fill="none"
-          stroke="#a78bfa"
-          strokeWidth="2"
-          opacity="0.85"
-          filter="url(#vscodefx-glow)"
-        />
-
-        {/* Smooth cursor: comet trail + caret */}
-        <g className="vscodefx-caret">
+          {/* Window frame */}
           <rect
-            x="300"
-            y="128"
-            width="90"
-            height="4"
-            rx="2"
-            fill="url(#vscodefx-trail)"
-            className="vscodefx-trail"
+            x="120"
+            y="28"
+            width="400"
+            height="224"
+            rx="12"
+            fill="none"
+            stroke="url(#vscodefx-frame)"
+            strokeWidth="1.8"
+            opacity="0.85"
           />
-          <rect
-            x="389"
-            y="118"
-            width="3.4"
-            height="24"
-            rx="1.2"
-            fill="#e0ecff"
+
+          {/* Material ripple from the click */}
+          <circle
+            cx="392"
+            cy="130"
+            r="40"
+            fill="url(#vscodefx-ripplefill)"
+            className="vscodefx-ripple"
+          />
+          <circle
+            cx="392"
+            cy="130"
+            r="78"
+            fill="none"
+            stroke="#a78bfa"
+            strokeWidth="2.4"
+            className="vscodefx-ripple"
+          />
+          <circle
+            cx="392"
+            cy="130"
+            r="52"
+            fill="none"
+            stroke="#93c5fd"
+            strokeWidth="1.6"
+            className="vscodefx-ripple vscodefx-ripple-late"
+          />
+          {/* Resting rings so the ripple reads even when frozen */}
+          <circle cx="392" cy="130" r="30" fill="url(#vscodefx-ripplefill)" />
+          <circle
+            cx="392"
+            cy="130"
+            r="48"
+            fill="none"
+            stroke="#a78bfa"
+            strokeWidth="1.2"
+            opacity="0.3"
+            strokeDasharray="2 5"
+          />
+          <circle
+            cx="392"
+            cy="130"
+            r="28"
+            fill="none"
+            stroke="#a78bfa"
+            strokeWidth="2"
+            opacity="0.85"
             filter="url(#vscodefx-glow)"
           />
-        </g>
 
-        {/* Mouse pointer clicking at the caret */}
-        <g className="vscodefx-pointer">
-          <path
-            d="M 396,134 L 396,160 L 402.5,154 L 407,164.5 L 411.5,162.5 L 407,152.5 L 415.5,152 Z"
-            fill="#e0ecff"
-            stroke="#020308"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
+          {/* Smooth cursor: comet trail + caret */}
+          <g className="vscodefx-caret">
+            <rect
+              x="300"
+              y="128"
+              width="90"
+              height="4"
+              rx="2"
+              fill="url(#vscodefx-trail)"
+              className="vscodefx-trail"
+            />
+            <rect
+              x="389"
+              y="118"
+              width="3.4"
+              height="24"
+              rx="1.2"
+              fill="#e0ecff"
+              filter="url(#vscodefx-glow)"
+            />
+          </g>
+
+          {/* Mouse pointer clicking at the caret */}
+          <g className="vscodefx-pointer">
+            <path
+              d="M 396,134 L 396,160 L 402.5,154 L 407,164.5 L 411.5,162.5 L 407,152.5 L 415.5,152 Z"
+              fill="#e0ecff"
+              stroke="#020308"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+          </g>
         </g>
 
         {/* Caption */}
@@ -417,7 +426,7 @@ const VscodeFxArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="monospace"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

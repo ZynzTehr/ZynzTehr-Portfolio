@@ -1,5 +1,133 @@
 import React from "react";
 
+/*
+ * Basic Rock Paper Scissors: the original hand-styled version that uses real
+ * objects instead of hands. A stone pile, a stack of ruled paper and a pair of
+ * scissors wait as selection tiles (a soft hover lift moves across them), the
+ * computer's monitor shuffles through the same three objects, and a wins / ties
+ * / losses tally sits underneath.
+ */
+
+type Obj = "rock" | "paper" | "scissors";
+
+// Each object is drawn in a ~80x80 box centred on 0,0.
+const Thing: React.FC<{ kind: Obj }> = ({ kind }) => {
+  if (kind === "rock") {
+    return (
+      <g strokeLinejoin="round" strokeLinecap="round">
+        <path
+          d="M -32,18 L -31,4 L -22,-6 L -8,-10 L 0,-22 L 16,-21 L 27,-8 L 31,10 L 26,18 Z"
+          fill="url(#basicrockpaperscissors-stone)"
+          stroke="#93c5fd"
+          strokeWidth="2.6"
+        />
+        <path
+          d="M 0,-22 L 4,-6 L -8,-10 M 4,-6 L 27,-8 M 4,-6 L 10,12"
+          fill="none"
+          stroke="#60a5fa"
+          strokeWidth="1.6"
+          opacity="0.7"
+        />
+        <path d="M 3,-19 L 15,-18" stroke="#eaf2ff" strokeWidth="2" opacity="0.55" fill="none" />
+        <path
+          d="M -34,26 L -32,14 L -22,9 L -12,12 L -9,22 L -14,28 Z"
+          fill="url(#basicrockpaperscissors-stone)"
+          stroke="#93c5fd"
+          strokeWidth="2.4"
+        />
+        <path
+          d="M 6,27 L 6,16 L 16,10 L 28,13 L 32,23 L 26,29 Z"
+          fill="url(#basicrockpaperscissors-stone)"
+          stroke="#93c5fd"
+          strokeWidth="2.4"
+        />
+        <path
+          d="M -8,29 L -6,21 L 2,19 L 6,26 L 2,30 Z"
+          fill="#1a2b62"
+          stroke="#93c5fd"
+          strokeWidth="2"
+        />
+      </g>
+    );
+  }
+  if (kind === "paper") {
+    return (
+      <g strokeLinejoin="round">
+        <rect
+          x="-20"
+          y="-28"
+          width="42"
+          height="54"
+          rx="2"
+          fill="#162a66"
+          stroke="#4474ff"
+          strokeWidth="2"
+          transform="rotate(-10)"
+        />
+        <path
+          d="M -22,-28 L 12,-28 L 22,-18 L 22,28 L -22,28 Z"
+          fill="#eaf2ff"
+          stroke="#93c5fd"
+          strokeWidth="2"
+          transform="rotate(6)"
+        />
+        <g transform="rotate(6)">
+          <path d="M 12,-28 L 12,-18 L 22,-18" fill="#b7cdfa" stroke="#93c5fd" strokeWidth="1.6" />
+          <g stroke="#4474ff" strokeWidth="1.4" opacity="0.75">
+            <line x1="-17" y1="-16" x2="17" y2="-16" />
+            <line x1="-17" y1="-8" x2="17" y2="-8" />
+            <line x1="-17" y1="0" x2="17" y2="0" />
+            <line x1="-17" y1="8" x2="17" y2="8" />
+            <line x1="-17" y1="16" x2="17" y2="16" />
+          </g>
+          <line
+            x1="-11"
+            y1="-26"
+            x2="-11"
+            y2="26"
+            stroke="#0d59ff"
+            strokeWidth="1.4"
+            opacity="0.6"
+          />
+        </g>
+      </g>
+    );
+  }
+  return (
+    <g transform="rotate(22)" strokeLinejoin="round" strokeLinecap="round">
+      {/* blades */}
+      <path
+        d="M 2,9 L -17,-37 Q -15,-41 -12,-38 L 11,3 Z"
+        fill="#dbe8ff"
+        stroke="#93c5fd"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M -2,9 L 17,-37 Q 15,-41 12,-38 L -11,3 Z"
+        fill="#b7cdfa"
+        stroke="#93c5fd"
+        strokeWidth="1.8"
+      />
+      {/* ring handles */}
+      <ellipse cx="-12" cy="21" rx="8.5" ry="10.5" fill="none" stroke="#0d59ff" strokeWidth="6" />
+      <ellipse cx="12" cy="21" rx="8.5" ry="10.5" fill="none" stroke="#4474ff" strokeWidth="6" />
+      <circle cx="0" cy="-4" r="2.8" fill="#0b1328" stroke="#93c5fd" strokeWidth="1.4" />
+    </g>
+  );
+};
+
+const TILES: { kind: Obj; x: number }[] = [
+  { kind: "rock", x: 98 },
+  { kind: "paper", x: 202 },
+  { kind: "scissors", x: 306 },
+];
+
+const TALLY: { label: string; count: number; fill: string }[] = [
+  { label: "W", count: 3, fill: "#60a5fa" },
+  { label: "T", count: 2, fill: "#93c5fd" },
+  { label: "L", count: 1, fill: "#4474ff" },
+];
+
 const BasicRpsArt: React.FC = () => {
   return (
     <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
@@ -10,283 +138,286 @@ const BasicRpsArt: React.FC = () => {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="basicGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#00d8ff" />
-            <stop offset="50%" stopColor="#00ffc8" />
-            <stop offset="100%" stopColor="#ef4444" />
-          </linearGradient>
-
-          <linearGradient id="rockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00d8ff" />
-            <stop offset="100%" stopColor="#0284c7" />
-          </linearGradient>
-
-          <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="100%" stopColor="#10b981" />
-          </linearGradient>
-
-          <linearGradient id="scissorsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f43f5e" />
-            <stop offset="100%" stopColor="#ef4444" />
-          </linearGradient>
-
-          <radialGradient id="basicBg" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stopColor="#121728" />
-            <stop offset="60%" stopColor="#070914" />
+          <radialGradient id="basicrockpaperscissors-bg" cx="40%" cy="42%" r="80%">
+            <stop offset="0%" stopColor="#0b1328" />
+            <stop offset="55%" stopColor="#060a18" />
             <stop offset="100%" stopColor="#020308" />
           </radialGradient>
 
-          <filter id="basicGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
+          <pattern
+            id="basicrockpaperscissors-grid"
+            width="32"
+            height="32"
+            patternUnits="userSpaceOnUse"
+          >
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#4474ff" strokeWidth="0.6" />
+          </pattern>
+
+          <radialGradient id="basicrockpaperscissors-pool" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#0d59ff" stopOpacity="0.16" />
+            <stop offset="60%" stopColor="#0d59ff" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#0d59ff" stopOpacity="0" />
+          </radialGradient>
+
+          <linearGradient id="basicrockpaperscissors-tile" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#14245a" />
+            <stop offset="100%" stopColor="#080f26" />
+          </linearGradient>
+
+          <linearGradient id="basicrockpaperscissors-stone" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#2a4594" />
+            <stop offset="100%" stopColor="#0f1a3c" />
+          </linearGradient>
+
+          <linearGradient id="basicrockpaperscissors-screen" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#0f1d48" />
+            <stop offset="100%" stopColor="#060b1d" />
+          </linearGradient>
+
+          <filter id="basicrockpaperscissors-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          <clipPath id="basicFillClip">
-            <rect x="0" y="0" width="640" height="320" className="basic-fill-rect" />
-          </clipPath>
         </defs>
 
         <style>{`
-          @keyframes basicRise {
-            0% { y: 320px; height: 0px; }
-            100% { y: 0px; height: 320px; }
-          }
-          @keyframes basicDraw {
-            0% { stroke-dashoffset: 1400; opacity: 0; }
-            20% { opacity: 1; }
-            100% { stroke-dashoffset: 0; opacity: 1; }
-          }
-          @keyframes floatEmblem1 {
+          @keyframes basicrockpaperscissorsLift {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+            6%, 27% { transform: translateY(-8px); }
+            33% { transform: translateY(0px); }
           }
-          @keyframes floatEmblem2 {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(6px); }
+          @keyframes basicrockpaperscissorsPick {
+            0%, 100% { opacity: 0; }
+            6%, 27% { opacity: 1; }
+            33% { opacity: 0; }
           }
-          @keyframes floatEmblem3 {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+          @keyframes basicrockpaperscissorsShuffle {
+            0% { opacity: 0; transform: scale(0.85); }
+            3%, 36% { opacity: 1; transform: scale(1); }
+            40%, 100% { opacity: 0; transform: scale(0.85); }
           }
-          @keyframes energyFlow {
-            0% { stroke-dashoffset: 60; }
-            100% { stroke-dashoffset: 0; }
+          @keyframes basicrockpaperscissorsDots {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
           }
-          .basic-fill-rect {
-            animation: basicRise 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-            y: 320px;
-            height: 0px;
+          .basicrockpaperscissors-lift {
+            animation: basicrockpaperscissorsLift 6s ease-in-out infinite;
           }
-          .basic-outline {
-            stroke-dasharray: 1400;
-            stroke-dashoffset: 1400;
-            animation: basicDraw 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          .basicrockpaperscissors-pick {
+            opacity: 0;
+            animation: basicrockpaperscissorsPick 6s ease-in-out infinite;
           }
-          .emblem-rock { animation: floatEmblem1 3.2s infinite ease-in-out; }
-          .emblem-paper { animation: floatEmblem2 3.2s infinite ease-in-out 0.5s; }
-          .emblem-scissors { animation: floatEmblem3 3.2s infinite ease-in-out 1s; }
-          .energy-track { stroke-dasharray: 8 8; animation: energyFlow 2s linear infinite; }
+          .basicrockpaperscissors-shuffle {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: basicrockpaperscissorsShuffle 6s ease-in-out infinite;
+          }
+          .basicrockpaperscissors-dot {
+            animation: basicrockpaperscissorsDots 1.8s ease-in-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .basicrockpaperscissors-lift,
+            .basicrockpaperscissors-pick,
+            .basicrockpaperscissors-shuffle,
+            .basicrockpaperscissors-dot { animation: none; }
+            .basicrockpaperscissors-shuffle-first { opacity: 1; }
+          }
         `}</style>
 
         {/* Background */}
-        <rect width="640" height="320" fill="url(#basicBg)" />
+        <rect width="640" height="320" fill="url(#basicrockpaperscissors-bg)" />
+        <rect width="640" height="320" fill="url(#basicrockpaperscissors-grid)" opacity="0.07" />
+        <ellipse cx="202" cy="134" rx="200" ry="104" fill="url(#basicrockpaperscissors-pool)" />
 
-        {/* Cyber Circuit Grid Lines */}
-        <g stroke="rgba(0, 216, 255, 0.1)" strokeWidth="1">
-          <line x1="60" y1="145" x2="580" y2="145" />
-          <line x1="180" y1="40" x2="180" y2="260" />
-          <line x1="320" y1="40" x2="320" y2="260" />
-          <line x1="460" y1="40" x2="460" y2="260" />
+        {/* ===== Player's selection tiles: real objects ===== */}
+        {TILES.map((t, i) => (
+          <g
+            key={t.kind}
+            className="basicrockpaperscissors-lift"
+            style={{ animationDelay: `${i * 2}s` }}
+          >
+            <g transform={`translate(${t.x} 128)`}>
+              <rect
+                className="basicrockpaperscissors-pick"
+                x="-46"
+                y="-52"
+                width="92"
+                height="104"
+                rx="16"
+                fill="none"
+                stroke="#60a5fa"
+                strokeWidth="2.5"
+                style={{ animationDelay: `${i * 2}s` }}
+                filter="url(#basicrockpaperscissors-glow)"
+              />
+              <rect
+                x="-42"
+                y="-48"
+                width="84"
+                height="96"
+                rx="13"
+                fill="url(#basicrockpaperscissors-tile)"
+                stroke="#4474ff"
+                strokeWidth="1.4"
+                strokeOpacity="0.6"
+              />
+              <Thing kind={t.kind} />
+            </g>
+          </g>
+        ))}
+
+        {/* Tally: wins / ties / losses */}
+        <g transform="translate(110 220)">
+          {TALLY.map((row, i) => (
+            <g key={row.label} transform={`translate(${i * 66} 0)`}>
+              <text
+                x="0"
+                y="4"
+                fill="#93c5fd"
+                fontSize="11"
+                fontFamily="'JetBrains Mono', ui-monospace, monospace"
+                fontWeight="bold"
+              >
+                {row.label}
+              </text>
+              {Array.from({ length: 3 }, (_, k) => (
+                <circle
+                  key={k}
+                  cx={16 + k * 11}
+                  cy="0"
+                  r="3.6"
+                  fill={k < row.count ? row.fill : "none"}
+                  stroke={row.fill}
+                  strokeWidth="1.4"
+                  opacity={k < row.count ? 1 : 0.4}
+                />
+              ))}
+            </g>
+          ))}
         </g>
 
-        {/* Energy Track Connector Loop */}
-        <path
-          d="M 180,145 C 240,95 260,95 320,145 C 380,195 400,195 460,145"
+        {/* VS divider: two chevrons facing off */}
+        <g
+          transform="translate(0 8)"
           fill="none"
-          stroke="rgba(0, 255, 200, 0.35)"
-          strokeWidth="2"
-          className="energy-track"
-        />
-        <path
-          d="M 460,145 C 380,85 260,85 180,145"
-          fill="none"
-          stroke="rgba(0, 216, 255, 0.25)"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
-
-        {/* FILL LAYER (Bottom-to-Top animated unveil) */}
-        <g clipPath="url(#basicFillClip)">
-          {/* Top Versus / Score HUD */}
-          <g transform="translate(250, 28)">
-            <rect
-              width="140"
-              height="32"
-              rx="16"
-              fill="#080c18"
-              stroke="rgba(0, 255, 200, 0.4)"
-              strokeWidth="1.5"
-            />
-            <text
-              x="70"
-              y="16"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#00ffc8"
-              fontSize="12"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              PLAYER VS CPU
-            </text>
-          </g>
-
-          {/* Node 1: Rock Emblem (Left - 180, 145) */}
-          <g className="emblem-rock" transform="translate(0, 0)">
-            <circle cx="180" cy="145" r="46" fill="url(#rockGrad)" opacity="0.85" />
-            <circle cx="180" cy="145" r="38" fill="#070914" />
-            <circle cx="180" cy="145" r="32" fill="rgba(0, 216, 255, 0.12)" />
-            <text x="180" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
-              ✊
-            </text>
-            <rect
-              x="145"
-              y="200"
-              width="70"
-              height="22"
-              rx="11"
-              fill="rgba(0, 216, 255, 0.15)"
-              stroke="#00d8ff"
-              strokeWidth="1"
-            />
-            <text
-              x="180"
-              y="211"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#00d8ff"
-              fontSize="11"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              ROCK
-            </text>
-          </g>
-
-          {/* Node 2: Paper Emblem (Center - 320, 145) */}
-          <g className="emblem-paper" transform="translate(0, 0)">
-            <circle cx="320" cy="145" r="46" fill="url(#paperGrad)" opacity="0.85" />
-            <circle cx="320" cy="145" r="38" fill="#070914" />
-            <circle cx="320" cy="145" r="32" fill="rgba(0, 255, 200, 0.12)" />
-            <text x="320" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
-              ✋
-            </text>
-            <rect
-              x="285"
-              y="200"
-              width="70"
-              height="22"
-              rx="11"
-              fill="rgba(0, 255, 200, 0.15)"
-              stroke="#00ffc8"
-              strokeWidth="1"
-            />
-            <text
-              x="320"
-              y="211"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#00ffc8"
-              fontSize="11"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              PAPER
-            </text>
-          </g>
-
-          {/* Node 3: Scissors Emblem (Right - 460, 145) */}
-          <g className="emblem-scissors" transform="translate(0, 0)">
-            <circle cx="460" cy="145" r="46" fill="url(#scissorsGrad)" opacity="0.85" />
-            <circle cx="460" cy="145" r="38" fill="#070914" />
-            <circle cx="460" cy="145" r="32" fill="rgba(239, 68, 68, 0.12)" />
-            <text x="460" y="146" textAnchor="middle" dominantBaseline="central" fontSize="28">
-              ✌️
-            </text>
-            <rect
-              x="420"
-              y="200"
-              width="80"
-              height="22"
-              rx="11"
-              fill="rgba(239, 68, 68, 0.15)"
-              stroke="#ef4444"
-              strokeWidth="1"
-            />
-            <text
-              x="460"
-              y="211"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#ef4444"
-              fontSize="11"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              SCISSORS
-            </text>
-          </g>
-        </g>
-
-        {/* OUTLINE LAYER (Laser draw-in outline with glow) */}
-        <g className="basic-outline" filter="url(#basicGlow)">
-          {/* Rock Ring Outline */}
-          <circle cx="180" cy="145" r="46" fill="none" stroke="#00d8ff" strokeWidth="3" />
-
-          {/* Paper Ring Outline */}
-          <circle cx="320" cy="145" r="46" fill="none" stroke="#00ffc8" strokeWidth="3" />
-
-          {/* Scissors Ring Outline */}
-          <circle cx="460" cy="145" r="46" fill="none" stroke="#ef4444" strokeWidth="3" />
-
-          {/* Top Score Ring */}
-          <rect
-            x="250"
-            y="28"
-            width="140"
-            height="32"
-            rx="16"
-            fill="none"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
+          stroke="#93c5fd"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M 372,106 L 384,120 L 372,134" />
+          <path d="M 406,106 L 394,120 L 406,134" />
+          <line
+            x1="389"
+            y1="62"
+            x2="389"
+            y2="92"
+            stroke="#4474ff"
+            strokeWidth="1.4"
+            opacity="0.5"
+          />
+          <line
+            x1="389"
+            y1="148"
+            x2="389"
+            y2="178"
+            stroke="#4474ff"
+            strokeWidth="1.4"
+            opacity="0.5"
           />
         </g>
 
-        {/* Bottom Tag */}
-        <g transform="translate(240, 275)">
+        {/* ===== The computer chooses... ===== */}
+        <g transform="translate(0 8)">
+          <rect x="420" y="56" width="160" height="118" rx="12" fill="#0d59ff" opacity="0.08" />
           <rect
-            width="160"
+            x="428"
+            y="62"
+            width="144"
+            height="104"
+            rx="10"
+            fill="url(#basicrockpaperscissors-screen)"
+            stroke="#93c5fd"
+            strokeWidth="2.5"
+          />
+          <rect
+            x="436"
+            y="70"
+            width="128"
+            height="88"
+            rx="6"
+            fill="none"
+            stroke="#4474ff"
+            strokeWidth="1"
+            opacity="0.4"
+          />
+          {TILES.map((t, i) => (
+            <g key={t.kind} transform={`translate(500 114) scale(0.82)`}>
+              <g
+                className={`basicrockpaperscissors-shuffle${i === 1 ? " basicrockpaperscissors-shuffle-first" : ""}`}
+                style={{ animationDelay: `${(i * 2 + 2) % 6}s` }}
+              >
+                <Thing kind={t.kind} />
+              </g>
+            </g>
+          ))}
+          <path
+            d="M 490,166 L 510,166 L 514,184 L 486,184 Z"
+            fill="#0f1a3c"
+            stroke="#4474ff"
+            strokeWidth="1.6"
+          />
+          <rect
+            x="466"
+            y="184"
+            width="68"
+            height="7"
+            rx="3.5"
+            fill="#13204a"
+            stroke="#4474ff"
+            strokeWidth="1.6"
+          />
+          {/* thinking dots */}
+          <g fill="#93c5fd">
+            {[0, 1, 2].map((k) => (
+              <circle
+                key={k}
+                className="basicrockpaperscissors-dot"
+                cx={488 + k * 12}
+                cy="208"
+                r="3"
+                style={{ animationDelay: `${k * 0.3}s` }}
+              />
+            ))}
+          </g>
+        </g>
+
+        {/* Caption */}
+        <g transform="translate(210, 272)">
+          <rect
+            width="220"
             height="28"
             rx="6"
-            fill="rgba(0, 255, 200, 0.12)"
-            stroke="#00ffc8"
+            fill="rgba(13, 89, 255, 0.12)"
+            stroke="#4474ff"
             strokeWidth="1.2"
           />
           <text
-            x="80"
+            x="110"
             y="14"
             textAnchor="middle"
             dominantBaseline="central"
-            fill="#00ffc8"
+            fill="#93c5fd"
             fontSize="10"
-            fontFamily="monospace"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
             fontWeight="bold"
+            letterSpacing="1"
           >
-            VANILLA JS // RPS
+            BASIC-RPS // YOU VS CPU
           </text>
         </g>
       </svg>

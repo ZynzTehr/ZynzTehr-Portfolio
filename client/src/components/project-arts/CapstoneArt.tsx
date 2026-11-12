@@ -1,5 +1,103 @@
 import React from "react";
 
+/*
+ * Capstone "Magical Story Time": a Mad Libs storybook. Lines of story copy
+ * carry blank word slots; some are already filled with the player's words,
+ * one word flies in from the input form to fill its blank, and a magic wand
+ * scatters sparkles over the page.
+ */
+
+type Token = { kind: "word" | "blank" | "fill" | "drop"; w: number };
+type Line = { y: number; tokens: Token[] };
+
+const w = (width: number): Token => ({ kind: "word", w: width });
+const blank = (width: number): Token => ({ kind: "blank", w: width });
+const fill = (width: number): Token => ({ kind: "fill", w: width });
+const drop = (width: number): Token => ({ kind: "drop", w: width });
+
+const GAP = 7;
+
+// The book sits low enough to clear the card's category pill (top-left of the media).
+const BOOK_DY = 14;
+
+const LEFT_PAGE: Line[] = [
+  { y: 92, tokens: [w(34), w(22), fill(54), w(20)] },
+  { y: 114, tokens: [w(48), w(30), w(26), w(30)] },
+  { y: 136, tokens: [w(26), blank(52), w(38), w(16)] },
+  { y: 158, tokens: [w(40), w(24), w(50), w(18)] },
+  { y: 180, tokens: [fill(48), w(30), w(42)] },
+  { y: 202, tokens: [w(30), w(44), w(22)] },
+];
+
+const RIGHT_PAGE: Line[] = [
+  { y: 92, tokens: [w(28), w(40), w(36), w(26)] },
+  { y: 114, tokens: [w(22), drop(50), w(30), w(18)] },
+  { y: 136, tokens: [w(44), w(26), w(50)] },
+  { y: 158, tokens: [w(30), fill(52), w(22), w(22)] },
+  { y: 180, tokens: [w(36), w(28), blank(48)] },
+  { y: 202, tokens: [w(40), w(26), w(20)] },
+];
+
+// Lay a page's tokens out left to right, returning absolute x positions.
+const layout = (lines: Line[], x0: number) =>
+  lines.flatMap(({ y, tokens }) => {
+    let x = x0;
+    return tokens.map((t) => {
+      const placed = { ...t, x, y: y + BOOK_DY };
+      x += t.w + GAP;
+      return placed;
+    });
+  });
+
+const PLACED = [...layout(LEFT_PAGE, 150), ...layout(RIGHT_PAGE, 344)];
+const DROP = PLACED.find((t) => t.kind === "drop") ?? { x: 0, y: 0, w: 0 };
+
+// Word-input form on the right; the first field's word is the one that flies.
+const FORM_X = 548;
+const FIELD_W = 64;
+const FIELDS = [110, 142, 174];
+const CHIP_H = 15;
+const FLY_DX = FORM_X + 7 - DROP.x;
+const FLY_DY = FIELDS[0] - DROP.y;
+
+// Four-point sparkle.
+const sparkle = (cx: number, cy: number, r: number): string =>
+  `M ${cx},${cy - r} Q ${cx + r * 0.18},${cy - r * 0.18} ${cx + r},${cy} ` +
+  `Q ${cx + r * 0.18},${cy + r * 0.18} ${cx},${cy + r} ` +
+  `Q ${cx - r * 0.18},${cy + r * 0.18} ${cx - r},${cy} ` +
+  `Q ${cx - r * 0.18},${cy - r * 0.18} ${cx},${cy - r} Z`;
+
+// Sparkles: [x, y, radius, delay seconds]
+const SPARKLES: Array<[number, number, number, number]> = [
+  [68, 126, 6, 0],
+  [102, 104, 5, 1.1],
+  [44, 160, 4, 3.1],
+  [300, 44, 5, 1.7],
+  [488, 50, 4, 2.8],
+  [602, 62, 4, 2.2],
+];
+
+const WordChip: React.FC<{ x: number; y: number; width: number; bright?: boolean }> = ({
+  x,
+  y,
+  width,
+  bright = false,
+}) => (
+  <g>
+    <rect
+      x={x}
+      y={y - CHIP_H / 2}
+      width={width}
+      height={CHIP_H}
+      rx="4"
+      fill="rgba(245, 158, 11, 0.18)"
+      stroke="#f59e0b"
+      strokeWidth={bright ? 2 : 1.5}
+    />
+    <rect x={x + 7} y={y - 2.5} width={width - 14} height="5" rx="2.5" fill="#fcd34d" />
+  </g>
+);
+
 const CapstoneArt: React.FC = () => {
   return (
     <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
@@ -10,204 +108,291 @@ const CapstoneArt: React.FC = () => {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="capGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#7950f2" />
-            <stop offset="50%" stopColor="#00ffc8" />
-            <stop offset="100%" stopColor="#38bdf8" />
-          </linearGradient>
-
-          <linearGradient id="capStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="50%" stopColor="#7950f2" />
-            <stop offset="100%" stopColor="#00ffc8" />
-          </linearGradient>
-
-          <radialGradient id="capBg" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stopColor="#0f172a" />
-            <stop offset="60%" stopColor="#070919" />
+          <radialGradient id="capstoneproject-bg" cx="50%" cy="45%" r="80%">
+            <stop offset="0%" stopColor="#0b1328" />
+            <stop offset="55%" stopColor="#060a18" />
             <stop offset="100%" stopColor="#020308" />
           </radialGradient>
 
-          <filter id="capGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
+          <pattern id="capstoneproject-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#4474ff" strokeWidth="0.6" />
+          </pattern>
+
+          <linearGradient id="capstoneproject-pageL" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#111d44" />
+            <stop offset="85%" stopColor="#0d1736" />
+            <stop offset="100%" stopColor="#070d22" />
+          </linearGradient>
+
+          <linearGradient id="capstoneproject-pageR" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#111d44" />
+            <stop offset="85%" stopColor="#0d1736" />
+            <stop offset="100%" stopColor="#070d22" />
+          </linearGradient>
+
+          <radialGradient id="capstoneproject-aura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#4474ff" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#4474ff" stopOpacity="0" />
+          </radialGradient>
+
+          <linearGradient id="capstoneproject-wand" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#13204a" />
+            <stop offset="100%" stopColor="#4474ff" />
+          </linearGradient>
+
+          <filter id="capstoneproject-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
 
-          <clipPath id="capFillClip">
-            <rect x="0" y="0" width="640" height="320" className="cap-fill-rect" />
-          </clipPath>
+          <filter id="capstoneproject-softGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         <style>{`
-          @keyframes capRise {
-            0% { y: 320px; height: 0px; }
-            100% { y: 0px; height: 320px; }
+          @keyframes capstoneprojectFly {
+            0% { transform: translate(${FLY_DX}px, ${FLY_DY}px); opacity: 0; }
+            8%, 22% { transform: translate(${FLY_DX}px, ${FLY_DY}px); opacity: 1; }
+            50%, 86% { transform: translate(0px, 0px); opacity: 1; }
+            96%, 100% { transform: translate(0px, 0px); opacity: 0; }
           }
-          @keyframes capDraw {
-            0% { stroke-dashoffset: 1400; opacity: 0; }
-            20% { opacity: 1; }
-            100% { stroke-dashoffset: 0; opacity: 1; }
+          @keyframes capstoneprojectField {
+            0%, 22% { opacity: 0; }
+            30%, 92% { opacity: 1; }
+            100% { opacity: 0; }
           }
-          @keyframes floatMsg {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+          @keyframes capstoneprojectTwinkle {
+            0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+            40% { transform: scale(1.15) rotate(45deg); opacity: 1; }
+            70% { transform: scale(0.8) rotate(60deg); opacity: 0.6; }
           }
-          @keyframes cursorBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+          .capstoneproject-fly {
+            animation: capstoneprojectFly 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
           }
-          .cap-fill-rect {
-            animation: capRise 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-            y: 320px;
-            height: 0px;
+          .capstoneproject-field {
+            animation: capstoneprojectField 8s linear infinite;
           }
-          .cap-outline {
-            stroke-dasharray: 1400;
-            stroke-dashoffset: 1400;
-            animation: capDraw 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          .capstoneproject-spark {
+            transform-box: fill-box;
+            transform-origin: 50% 50%;
+            animation: capstoneprojectTwinkle 4.5s ease-in-out infinite;
           }
-          .msg-1 { animation: floatMsg 4s infinite ease-in-out 0.2s; }
-          .msg-2 { animation: floatMsg 4.5s infinite ease-in-out 1.2s; }
-          .cursor-tag { animation: cursorBlink 1s infinite; }
+          @media (prefers-reduced-motion: reduce) {
+            .capstoneproject-fly,
+            .capstoneproject-field,
+            .capstoneproject-spark { animation: none; }
+            .capstoneproject-field { opacity: 0; }
+          }
         `}</style>
 
         {/* Background */}
-        <rect width="640" height="320" fill="url(#capBg)" />
+        <rect width="640" height="320" fill="url(#capstoneproject-bg)" />
+        <rect width="640" height="320" fill="url(#capstoneproject-grid)" opacity="0.07" />
+        <ellipse cx="320" cy="160" rx="250" ry="120" fill="url(#capstoneproject-aura)" />
 
-        {/* Cyber Matrix Terminal Grid */}
-        <g opacity="0.12" stroke="#00ffc8" strokeWidth="1">
-          <line x1="80" y1="40" x2="560" y2="40" />
-          <line x1="80" y1="120" x2="560" y2="120" />
-          <line x1="80" y1="200" x2="560" y2="200" />
-          <line x1="80" y1="280" x2="560" y2="280" />
-          <line x1="160" y1="40" x2="160" y2="280" />
-          <line x1="320" y1="40" x2="320" y2="280" />
-          <line x1="480" y1="40" x2="480" y2="280" />
+        {/* ===== Open storybook ===== */}
+        <g transform={`translate(0, ${BOOK_DY})`}>
+          {/* Cover */}
+          <path
+            d="M 320,246 C 270,230 190,230 116,240 L 116,52 C 190,42 270,44 320,60 C 370,44 450,42 524,52 L 524,240 C 450,230 370,230 320,246 Z"
+            fill="#060b1d"
+            stroke="#0d59ff"
+            strokeWidth="2.5"
+          />
+          {/* Page edges (stacked leaves) */}
+          <g fill="none" stroke="#4474ff" strokeWidth="1" opacity="0.45">
+            <path d="M 124,234 C 196,224 272,224 320,240 C 368,224 444,224 516,234" />
+            <path d="M 127,230 C 198,220 274,220 320,236 C 366,220 442,220 513,230" />
+          </g>
+          {/* Pages */}
+          <path
+            d="M 320,232 C 274,216 200,214 130,224 L 130,58 C 200,48 274,50 320,66 Z"
+            fill="url(#capstoneproject-pageL)"
+            stroke="#60a5fa"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M 320,232 C 366,216 440,214 510,224 L 510,58 C 440,48 366,50 320,66 Z"
+            fill="url(#capstoneproject-pageR)"
+            stroke="#60a5fa"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          {/* Spine */}
+          <line
+            x1="320"
+            y1="66"
+            x2="320"
+            y2="232"
+            stroke="#93c5fd"
+            strokeWidth="1.5"
+            opacity="0.6"
+          />
         </g>
 
-        {/* Central Terminal Window & Interactive Word Elements */}
-        <g transform="translate(70, 30)">
-          {/* FILL LAYER (Bottom-to-Top) */}
-          <g clipPath="url(#capFillClip)">
-            {/* Terminal Main Card */}
-            <rect
-              x="50"
-              y="20"
-              width="400"
-              height="220"
-              rx="16"
-              fill="url(#capGrad)"
-              opacity="0.85"
+        {/* Story copy, blanks and filled words */}
+        {PLACED.map((t) => {
+          const key = `${t.x}-${t.y}`;
+          if (t.kind === "word") {
+            return (
+              <rect
+                key={key}
+                x={t.x}
+                y={t.y - 2.5}
+                width={t.w}
+                height="5"
+                rx="2.5"
+                fill="#60a5fa"
+                opacity="0.5"
+              />
+            );
+          }
+          if (t.kind === "fill") {
+            return (
+              <g key={key} filter="url(#capstoneproject-softGlow)">
+                <WordChip x={t.x} y={t.y} width={t.w} />
+              </g>
+            );
+          }
+          // Blank slots (the drop target is a blank until its word lands).
+          return (
+            <g key={key}>
+              <rect
+                x={t.x}
+                y={t.y - CHIP_H / 2}
+                width={t.w}
+                height={CHIP_H}
+                rx="4"
+                fill="#050916"
+                stroke="#93c5fd"
+                strokeWidth="1.2"
+                strokeDasharray="3 3"
+                opacity="0.8"
+              />
+              <line
+                x1={t.x + 4}
+                y1={t.y + 4}
+                x2={t.x + t.w - 4}
+                y2={t.y + 4}
+                stroke="#93c5fd"
+                strokeWidth="1.5"
+                opacity="0.6"
+              />
+            </g>
+          );
+        })}
+
+        {/* ===== Word form: the player's words waiting to be dropped in ===== */}
+        <rect
+          x={FORM_X - 8}
+          y={FIELDS[0] - 26}
+          width={FIELD_W + 16}
+          height={FIELDS[2] - FIELDS[0] + 50}
+          rx="10"
+          fill="#0a1230"
+          stroke="#4474ff"
+          strokeWidth="1.5"
+        />
+        <rect
+          x={FORM_X}
+          y={FIELDS[0] - 19}
+          width="34"
+          height="4"
+          rx="2"
+          fill="#93c5fd"
+          opacity="0.6"
+        />
+        {FIELDS.map((fy) => (
+          <rect
+            key={`f${fy}`}
+            x={FORM_X}
+            y={fy - 11}
+            width={FIELD_W}
+            height="22"
+            rx="5"
+            fill="#050916"
+            stroke="#4474ff"
+            strokeWidth="1"
+            opacity="0.9"
+          />
+        ))}
+        <WordChip x={FORM_X + 7} y={FIELDS[1]} width={42} />
+        <WordChip x={FORM_X + 7} y={FIELDS[2]} width={48} />
+        {/* First field refills after its word leaves */}
+        <g className="capstoneproject-field">
+          <WordChip x={FORM_X + 7} y={FIELDS[0]} width={DROP.w} />
+        </g>
+
+        {/* The flying word, drawn at its blank and animated in from the form */}
+        <g className="capstoneproject-fly" filter="url(#capstoneproject-glow)">
+          <WordChip x={DROP.x} y={DROP.y} width={DROP.w} bright />
+        </g>
+
+        {/* ===== Magic wand ===== */}
+        <g>
+          <line
+            x1="34"
+            y1="238"
+            x2="88"
+            y2="162"
+            stroke="url(#capstoneproject-wand)"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <line
+            x1="34"
+            y1="238"
+            x2="45"
+            y2="222"
+            stroke="#93c5fd"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <path d={sparkle(92, 156, 13)} fill="#eaf2ff" filter="url(#capstoneproject-glow)" />
+        </g>
+        <g fill="#93c5fd" filter="url(#capstoneproject-softGlow)">
+          {SPARKLES.map(([x, y, r, delay]) => (
+            <path
+              key={`sp${x}`}
+              className="capstoneproject-spark"
+              d={sparkle(x, y, r)}
+              style={{ animationDelay: `${delay}s` }}
             />
+          ))}
+        </g>
 
-            {/* User Profile Avatar Silhouette */}
-            <circle cx="120" cy="90" r="32" fill="#070919" opacity="0.9" />
-            <path d="M 95,150 C 95,125 145,125 145,150 Z" fill="#070919" opacity="0.9" />
-
-            {/* Chat Bubble 1 */}
-            <rect x="180" y="65" width="230" height="42" rx="10" fill="#070919" opacity="0.9" />
-            <rect x="200" y="78" width="120" height="6" rx="3" fill="#00ffc8" opacity="0.8" />
-            <rect x="200" y="90" width="80" height="6" rx="3" fill="#38bdf8" opacity="0.7" />
-
-            {/* Chat Bubble 2 / Word Game Tag */}
-            <rect x="180" y="125" width="200" height="42" rx="10" fill="#070919" opacity="0.9" />
-            <rect x="200" y="138" width="140" height="6" rx="3" fill="#7950f2" opacity="0.8" />
-            <rect x="200" y="150" width="95" height="6" rx="3" fill="#00ffc8" opacity="0.7" />
-
-            {/* Shopping Cart / Interactive Checkout Tag */}
-            <rect x="180" y="185" width="150" height="35" rx="8" fill="#070919" opacity="0.9" />
-            <circle cx="210" cy="202" r="6" fill="#00ffc8" />
-            <rect x="225" y="198" width="85" height="7" rx="3.5" fill="#ffffff" />
-          </g>
-
-          {/* OUTLINE LAYER */}
+        {/* Caption */}
+        <g transform="translate(205, 272)">
           <rect
-            x="50"
-            y="20"
-            width="400"
-            height="220"
-            rx="16"
-            fill="none"
-            stroke="url(#capStroke)"
-            strokeWidth="3"
-            filter="url(#capGlow)"
-            className="cap-outline"
-          />
-
-          {/* Terminal Header Dots */}
-          <circle cx="75" cy="40" r="5" fill="#ff5f56" />
-          <circle cx="92" cy="40" r="5" fill="#ffbd2e" />
-          <circle cx="109" cy="40" r="5" fill="#27c93f" />
-
-          {/* Avatar Outline */}
-          <circle cx="120" cy="90" r="32" fill="none" stroke="#00ffc8" strokeWidth="2" />
-          <path
-            d="M 95,150 C 95,125 145,125 145,150"
-            fill="none"
-            stroke="#00ffc8"
-            strokeWidth="2"
-          />
-
-          {/* Chat Bubble Outlines */}
-          <rect
-            x="180"
-            y="65"
             width="230"
-            height="42"
-            rx="10"
-            fill="none"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
-            className="msg-1"
+            height="28"
+            rx="6"
+            fill="rgba(13, 89, 255, 0.12)"
+            stroke="#4474ff"
+            strokeWidth="1.2"
           />
-          <rect
-            x="180"
-            y="125"
-            width="200"
-            height="42"
-            rx="10"
-            fill="none"
-            stroke="#7950f2"
-            strokeWidth="1.5"
-            className="msg-2"
-          />
-          <rect
-            x="180"
-            y="185"
-            width="150"
-            height="35"
-            rx="8"
-            fill="none"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
-          />
-
-          {/* Floating Mad Libs Tags */}
-          <g transform="translate(360, 175)">
-            <rect
-              width="80"
-              height="26"
-              rx="13"
-              fill="rgba(0, 255, 200, 0.15)"
-              stroke="#00ffc8"
-              strokeWidth="1.2"
-            />
-            <text
-              x="40"
-              y="13"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#00ffc8"
-              fontSize="10"
-              fontFamily="monospace"
-              fontWeight="bold"
-            >
-              &lt;PLAY/&gt;
-            </text>
-          </g>
+          <text
+            x="115"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#93c5fd"
+            fontSize="10"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontWeight="bold"
+            letterSpacing="1"
+          >
+            CAPSTONE // MAD LIBS
+          </text>
         </g>
       </svg>
     </div>

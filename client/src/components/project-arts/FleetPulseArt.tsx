@@ -440,7 +440,7 @@ const FleetPulseArt: React.FC = () => {
             dominantBaseline="central"
             fill="#93c5fd"
             fontSize="10"
-            fontFamily="monospace"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
             fontWeight="bold"
             letterSpacing="1"
           >

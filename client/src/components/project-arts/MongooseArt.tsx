@@ -1,5 +1,66 @@
 import React from "react";
 
+/*
+ * Soda Diner: a retro fountain soda float sits on the diner counter and is
+ * referenced by a stack of diner documents, each holding its favourite sodas;
+ * the glass is one record in the sodas collection, the cards are diners.
+ */
+
+// Tulip fountain glass: bowl from the rim down to the stem, then the foot.
+const GLASS_PATH =
+  "M 116,66 C 118,124 140,172 166,198 L 169,222 C 152,225 140,229 138,236 " +
+  "L 222,236 C 220,229 208,225 191,222 L 194,198 C 220,172 242,124 244,66 Z";
+const BOWL_PATH = "M 119,66 C 121,122 142,170 167,195 L 193,195 C 218,170 239,122 241,66 Z";
+
+// Whipped foam crown that spills over the rim.
+const FOAM_PATH =
+  "M 110,70 C 100,62 106,48 120,50 C 120,36 138,32 146,40 C 150,26 172,22 180,34 " +
+  "C 188,22 210,26 212,40 C 222,32 240,38 238,50 C 252,48 258,62 248,70 " +
+  "C 236,78 124,78 110,70 Z";
+
+const BUBBLES = [
+  { cx: 150, cy: 176, r: 3, delay: 0 },
+  { cx: 172, cy: 186, r: 2.4, delay: -1.1 },
+  { cx: 196, cy: 172, r: 3.4, delay: -2.3 },
+  { cx: 210, cy: 150, r: 2.2, delay: -0.6 },
+  { cx: 140, cy: 140, r: 2.6, delay: -3.1 },
+  { cx: 184, cy: 156, r: 2, delay: -1.8 },
+  { cx: 224, cy: 120, r: 2.8, delay: -2.7 },
+  { cx: 162, cy: 124, r: 2.2, delay: -3.6 },
+];
+
+const CARD_X = 392;
+const CARD_W = 214;
+const CARD_H = 56;
+const CARDS = [
+  { y: 40, favourites: [true, false, false] },
+  { y: 112, favourites: [false, true, false] },
+  { y: 184, favourites: [true, false, true] },
+];
+
+const JOIN_X = 318;
+// Right wall of the scaled glass at the join height.
+const GLASS_EDGE_X = 230;
+const JOIN_Y = 136;
+
+// Small tulip glass glyph used for the soda chips on each diner card.
+const miniGlass = (x: number, y: number, active: boolean) => (
+  <g transform={`translate(${x} ${y})`}>
+    <circle
+      r="11"
+      fill={active ? "#0d59ff" : "#0b1328"}
+      stroke={active ? "#93c5fd" : "#4474ff"}
+      strokeWidth="1.4"
+      opacity={active ? 1 : 0.6}
+    />
+    <path
+      d="M -5,-6 C -5,-1 -3,2 -1,3 L -1,5 L -3,6 L 3,6 L 1,5 L 1,3 C 3,2 5,-1 5,-6 Z"
+      fill={active ? "#eaf2ff" : "#4474ff"}
+      opacity={active ? 1 : 0.7}
+    />
+  </g>
+);
+
 const MongooseArt: React.FC = () => {
   return (
     <div className="w-full h-full relative flex items-center justify-center overflow-hidden">
@@ -10,309 +71,303 @@ const MongooseArt: React.FC = () => {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Cyberpunk Neon Gradients */}
-          <linearGradient id="mongoGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#00ed64" />
-            <stop offset="50%" stopColor="#00ffc8" />
-            <stop offset="100%" stopColor="#7950f2" />
-          </linearGradient>
-
-          <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="50%" stopColor="#00ed64" />
-            <stop offset="100%" stopColor="#00ffc8" />
-          </linearGradient>
-
-          <radialGradient id="bgArtGrad" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stopColor="#0f172a" />
-            <stop offset="60%" stopColor="#060914" />
+          <radialGradient id="sodadiner-bg" cx="40%" cy="42%" r="80%">
+            <stop offset="0%" stopColor="#0b1328" />
+            <stop offset="55%" stopColor="#060a18" />
             <stop offset="100%" stopColor="#020308" />
           </radialGradient>
 
-          <radialGradient id="bubbleGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#00ffc8" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#00ffc8" stopOpacity="0" />
+          <pattern id="sodadiner-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#4474ff" strokeWidth="0.6" />
+          </pattern>
+
+          <pattern id="sodadiner-checker" width="24" height="24" patternUnits="userSpaceOnUse">
+            <rect width="12" height="12" fill="#4474ff" />
+            <rect x="12" y="12" width="12" height="12" fill="#4474ff" />
+          </pattern>
+
+          <pattern
+            id="sodadiner-straw"
+            width="14"
+            height="14"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(35)"
+          >
+            <rect width="14" height="14" fill="#eaf2ff" />
+            <rect width="7" height="14" fill="#f43f5e" />
+          </pattern>
+
+          <radialGradient id="sodadiner-aura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#4474ff" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#4474ff" stopOpacity="0" />
           </radialGradient>
 
-          {/* Glow Filters */}
-          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
+          <linearGradient id="sodadiner-soda" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#60a5fa" />
+            <stop offset="45%" stopColor="#0d59ff" />
+            <stop offset="100%" stopColor="#0a2a8a" />
+          </linearGradient>
+
+          <linearGradient id="sodadiner-glass" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.22" />
+            <stop offset="45%" stopColor="#93c5fd" stopOpacity="0.04" />
+            <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.16" />
+          </linearGradient>
+
+          <linearGradient id="sodadiner-foam" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#c7dcff" />
+          </linearGradient>
+
+          <linearGradient id="sodadiner-card" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#13204a" />
+            <stop offset="100%" stopColor="#0a1230" />
+          </linearGradient>
+
+          <linearGradient id="sodadiner-counter" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4474ff" stopOpacity="0" />
+            <stop offset="50%" stopColor="#93c5fd" />
+            <stop offset="100%" stopColor="#4474ff" stopOpacity="0" />
+          </linearGradient>
+
+          <radialGradient id="sodadiner-floor-fade" cx="50%" cy="0%" r="55%">
+            <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+
+          <mask id="sodadiner-floor-mask">
+            <rect x="40" y="241" width="280" height="28" fill="url(#sodadiner-floor-fade)" />
+          </mask>
+
+          <clipPath id="sodadiner-bowl-clip">
+            <path d={BOWL_PATH} />
+          </clipPath>
+
+          <filter id="sodadiner-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          <filter id="intenseGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="10" result="blur1" />
-            <feGaussianBlur stdDeviation="4" result="blur2" />
-            <feMerge>
-              <feMergeNode in="blur1" />
-              <feMergeNode in="blur2" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Bottom-to-Top Fill Clip Path Animation */}
-          <clipPath id="bottomToTopClip">
-            <rect x="0" y="0" width="640" height="320" className="animated-fill-rect" />
-          </clipPath>
         </defs>
 
         <style>{`
-          /* Animated rising fill rectangle (bottom-to-top) */
-          @keyframes riseFromBottom {
-            0% {
-              y: 320px;
-              height: 0px;
-            }
-            100% {
-              y: 0px;
-              height: 320px;
-            }
+          @keyframes sodadinerRise {
+            0% { transform: translateY(0px); opacity: 0; }
+            15% { opacity: 0.9; }
+            85% { opacity: 0.7; }
+            100% { transform: translateY(-96px); opacity: 0; }
           }
-
-          /* Outline stroke drawing animation */
-          @keyframes drawStroke {
-            0% {
-              stroke-dashoffset: 1200;
-              opacity: 0;
-            }
-            20% {
-              opacity: 1;
-            }
-            100% {
-              stroke-dashoffset: 0;
-              opacity: 1;
-            }
+          @keyframes sodadinerLink {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 1; }
           }
-
-          /* Neon breathing pulse */
-          @keyframes pulseGlow {
-            0%, 100% {
-              filter: drop-shadow(0 0 6px rgba(0, 255, 200, 0.4));
-            }
-            50% {
-              filter: drop-shadow(0 0 16px rgba(0, 237, 100, 0.8));
-            }
+          @keyframes sodadinerFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
           }
-
-          /* Floating Soda Diner bubbles */
-          @keyframes floatBubble {
-            0% {
-              transform: translateY(0px) scale(0.8);
-              opacity: 0.2;
-            }
-            50% {
-              transform: translateY(-25px) scale(1.1);
-              opacity: 0.8;
-            }
-            100% {
-              transform: translateY(-50px) scale(0.9);
-              opacity: 0;
-            }
+          .sodadiner-bubble {
+            animation: sodadinerRise 4.2s ease-in infinite;
           }
-
-          .animated-fill-rect {
-            animation: riseFromBottom 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-            y: 320px;
-            height: 0px;
+          .sodadiner-link {
+            animation: sodadinerLink 4s ease-in-out infinite;
           }
-
-          .mongoose-outline {
-            stroke-dasharray: 1200;
-            stroke-dashoffset: 1200;
-            animation: drawStroke 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          .sodadiner-crown {
+            animation: sodadinerFloat 6s ease-in-out infinite;
           }
-
-          .mongoose-group {
-            animation: pulseGlow 3.5s infinite ease-in-out 1.8s;
+          @media (prefers-reduced-motion: reduce) {
+            .sodadiner-bubble,
+            .sodadiner-link,
+            .sodadiner-crown { animation: none; }
           }
-
-          .bubble-1 { animation: floatBubble 4s infinite ease-in-out 0.2s; }
-          .bubble-2 { animation: floatBubble 5s infinite ease-in-out 1.2s; }
-          .bubble-3 { animation: floatBubble 4.5s infinite ease-in-out 2.2s; }
-          .bubble-4 { animation: floatBubble 5.5s infinite ease-in-out 0.8s; }
-          .bubble-5 { animation: floatBubble 3.8s infinite ease-in-out 1.7s; }
         `}</style>
 
-        {/* 1. Background Grid & Space Vignette */}
-        <rect width="640" height="320" fill="url(#bgArtGrad)" />
+        {/* Background */}
+        <rect width="640" height="320" fill="url(#sodadiner-bg)" />
+        <rect width="640" height="320" fill="url(#sodadiner-grid)" opacity="0.07" />
+        <ellipse cx="182" cy="150" rx="150" ry="120" fill="url(#sodadiner-aura)" />
 
-        {/* Retro-Diner Cyber Perspective Floor */}
-        <g opacity="0.12">
-          <line x1="0" y1="270" x2="640" y2="270" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="0" y1="290" x2="640" y2="290" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="0" y1="310" x2="640" y2="310" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="40" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="160" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="280" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="360" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="480" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-          <line x1="320" y1="250" x2="600" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
-        </g>
+        {/* Diner counter and checker floor */}
+        <rect
+          x="40"
+          y="241"
+          width="280"
+          height="28"
+          fill="url(#sodadiner-checker)"
+          opacity="0.4"
+          mask="url(#sodadiner-floor-mask)"
+        />
+        <line x1="30" y1="240" x2="330" y2="240" stroke="url(#sodadiner-counter)" strokeWidth="2" />
+        <ellipse cx="182" cy="241" rx="48" ry="5" fill="#0d59ff" opacity="0.35" />
 
-        {/* Floating Neon Soda Carbonation Bubbles */}
-        <g>
-          <circle cx="120" cy="220" r="8" fill="url(#bubbleGlow)" className="bubble-1" />
-          <circle cx="160" cy="170" r="12" fill="url(#bubbleGlow)" className="bubble-2" />
-          <circle cx="480" cy="210" r="10" fill="url(#bubbleGlow)" className="bubble-3" />
-          <circle cx="530" cy="150" r="7" fill="url(#bubbleGlow)" className="bubble-4" />
-          <circle cx="500" cy="260" r="14" fill="url(#bubbleGlow)" className="bubble-5" />
-        </g>
-
-        {/* MongoDB Glowing Leaf Accent in Background */}
-        <g transform="translate(320, 155) scale(0.65)" opacity="0.15">
-          <path
-            d="M0 -140 C50 -90 90 -20 90 60 C90 120 50 160 0 180 C-50 160 -90 120 -90 60 C-90 -20 -50 -90 0 -140 Z"
-            fill="#00ed64"
-          />
-          <path d="M0 -140 L0 180" stroke="#ffffff" strokeWidth="6" />
-        </g>
-
-        {/* 2. THE MONGOOSE (Vigilant, Sleek Silhouette & Outline) */}
-        <g className="mongoose-group" transform="translate(40, -10)">
-          {/* A. BOTTOM-TO-TOP ANIMATED FILL LAYER */}
-          <g clipPath="url(#bottomToTopClip)">
-            {/* Main Mongoose Body Fill */}
+        {/* Relation links: the soda is referenced by every diner's favourites */}
+        <g fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round">
+          <path d={`M ${GLASS_EDGE_X},${JOIN_Y} L ${JOIN_X},${JOIN_Y}`} opacity="0.8" />
+          {CARDS.map((c, i) => (
             <path
-              d="M 430,135
-                 C 445,130 460,118 472,122
-                 C 480,125 488,135 480,142
-                 C 468,150 445,158 435,165
-                 C 415,182 390,195 360,205
-                 C 330,215 300,218 270,216
-                 C 255,225 240,245 245,268
-                 C 248,276 260,280 270,280
-                 L 230,280
-                 C 220,280 215,268 218,252
-                 C 222,236 230,224 240,214
-                 C 215,210 190,200 170,185
-                 C 150,170 135,148 128,125
-                 C 120,95 125,60 145,35
-                 C 155,22 172,16 185,25
-                 C 192,31 190,45 182,55
-                 C 168,75 162,100 170,126
-                 C 178,152 195,172 220,184
-                 C 250,198 285,200 320,194
-                 C 345,190 370,178 390,165
-                 C 405,155 418,142 430,135 Z"
-              fill="url(#mongoGrad)"
-              opacity="0.9"
+              key={c.y}
+              className="sodadiner-link"
+              style={{ animationDelay: `${-i * 1.3}s` }}
+              d={`M ${JOIN_X},${JOIN_Y} C ${JOIN_X + 40},${JOIN_Y} ${CARD_X - 40},${c.y + CARD_H / 2} ${CARD_X - 6},${c.y + CARD_H / 2}`}
             />
+          ))}
+        </g>
+        <circle cx={GLASS_EDGE_X} cy={JOIN_Y} r="4" fill="#eaf2ff" />
+        <circle cx={JOIN_X} cy={JOIN_Y} r="7" fill="#0b1328" stroke="#93c5fd" strokeWidth="2" />
+        <circle cx={JOIN_X} cy={JOIN_Y} r="2.6" fill="#93c5fd" />
 
-            {/* Mongoose Head, Ears, & Jaw Fill */}
-            <path
-              d="M 430,135
-                 C 438,125 442,108 440,95
-                 C 439,88 448,82 455,88
-                 C 462,94 460,105 455,114
-                 C 468,110 485,108 502,118
-                 C 515,126 525,138 520,146
-                 C 514,154 498,152 485,148
-                 C 470,144 455,146 445,152
-                 Z"
-              fill="url(#mongoGrad)"
-              opacity="0.9"
+        {/* Soda float, scaled down to keep clear of the card's category pill */}
+        <g transform="translate(34 46) scale(0.82)">
+          {/* Straw, behind the glass, leaning away from the top-left corner */}
+          <g transform="rotate(20 172 170)">
+            <rect x="166" y="-20" width="12" height="198" rx="3" fill="url(#sodadiner-straw)" />
+            <rect
+              x="166"
+              y="-20"
+              width="12"
+              height="198"
+              rx="3"
+              fill="none"
+              stroke="#eaf2ff"
+              strokeWidth="1"
+              opacity="0.6"
             />
-
-            {/* Forepaws Fill */}
-            <path
-              d="M 390,190
-                 C 395,210 402,240 410,265
-                 C 413,275 425,280 435,280
-                 L 395,280
-                 C 385,280 380,268 378,250
-                 C 375,232 372,212 370,195 Z"
-              fill="url(#mongoGrad)"
-              opacity="0.9"
-            />
-
-            {/* Glowing Eye */}
-            <circle cx="488" cy="128" r="4.5" fill="#ffffff" />
           </g>
 
-          {/* B. LUMINOUS NEON OUTLINE DRAWING LAYER */}
+          {/* Soda glass */}
+          <g clipPath="url(#sodadiner-bowl-clip)">
+            <rect
+              x="110"
+              y="72"
+              width="140"
+              height="130"
+              fill="url(#sodadiner-soda)"
+              opacity="0.92"
+            />
+            <rect x="110" y="72" width="140" height="5" fill="#93c5fd" opacity="0.7" />
+            {BUBBLES.map((b, i) => (
+              <circle
+                key={i}
+                className="sodadiner-bubble"
+                style={{ animationDelay: `${b.delay}s` }}
+                cx={b.cx}
+                cy={b.cy}
+                r={b.r}
+                fill="none"
+                stroke="#eaf2ff"
+                strokeWidth="1.2"
+              />
+            ))}
+          </g>
           <path
-            d="M 145,35
-               C 155,22 172,16 185,25
-               C 192,31 190,45 182,55
-               C 168,75 162,100 170,126
-               C 178,152 195,172 220,184
-               C 250,198 285,200 320,194
-               C 345,190 370,178 390,165
-               C 405,155 418,142 430,135
-               C 438,125 442,108 440,95
-               C 439,88 448,82 455,88
-               C 462,94 460,105 455,114
-               C 468,110 485,108 502,118
-               C 515,126 525,138 520,146
-               C 514,154 498,152 485,148
-               C 468,150 445,158 435,165
-               C 415,182 390,195 360,205
-               C 330,215 300,218 270,216
-               C 255,225 240,245 245,268
-               C 248,276 260,280 270,280
-               L 230,280
-               C 220,280 215,268 218,252
-               C 222,236 230,224 240,214
-               C 215,210 190,200 170,185
-               C 150,170 135,148 128,125
-               C 120,95 125,60 145,35 Z"
-            fill="none"
-            stroke="url(#strokeGrad)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
+            d={GLASS_PATH}
+            fill="url(#sodadiner-glass)"
+            stroke="#93c5fd"
+            strokeWidth="2.4"
             strokeLinejoin="round"
-            filter="url(#neonGlow)"
-            className="mongoose-outline"
+            filter="url(#sodadiner-glow)"
           />
-
-          {/* Forepaw Outline */}
+          {/* Glass highlight and stem rings */}
           <path
-            d="M 385,185
-               C 392,208 402,240 410,265
-               C 413,275 425,280 435,280
-               L 395,280
-               C 385,280 380,268 378,250
-               C 375,232 372,212 370,195"
+            d="M 128,82 C 130,120 142,152 158,174"
             fill="none"
-            stroke="url(#strokeGrad)"
-            strokeWidth="3.5"
+            stroke="#eaf2ff"
+            strokeWidth="3"
             strokeLinecap="round"
-            strokeLinejoin="round"
-            filter="url(#neonGlow)"
-            className="mongoose-outline"
+            opacity="0.55"
           />
+          <g stroke="#93c5fd" strokeWidth="1.6" opacity="0.7">
+            <line x1="168" y1="206" x2="192" y2="206" />
+            <line x1="168" y1="212" x2="192" y2="212" />
+          </g>
 
-          {/* Sleek Whiskers / Tech Detail Accent */}
-          <line
-            x1="500"
-            y1="138"
-            x2="535"
-            y2="134"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
-            opacity="0.8"
+          {/* Foam crown and cherry */}
+          <g className="sodadiner-crown">
+            <path
+              d={FOAM_PATH}
+              fill="url(#sodadiner-foam)"
+              stroke="#93c5fd"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M 132,62 C 150,68 210,68 228,62"
+              fill="none"
+              stroke="#93c5fd"
+              strokeWidth="1.4"
+              opacity="0.6"
+            />
+            <path
+              d="M 198,24 C 200,14 208,8 216,6"
+              fill="none"
+              stroke="#eaf2ff"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="196" cy="30" r="10" fill="#f43f5e" stroke="#ffd1d9" strokeWidth="1.4" />
+            <circle cx="192" cy="26" r="2.6" fill="#ffe4e9" opacity="0.85" />
+          </g>
+        </g>
+
+        {/* Diner documents */}
+        {CARDS.map((c) => (
+          <g key={c.y} transform={`translate(${CARD_X} ${c.y})`}>
+            <rect
+              width={CARD_W}
+              height={CARD_H}
+              rx="10"
+              fill="url(#sodadiner-card)"
+              stroke="#4474ff"
+              strokeWidth="1.6"
+            />
+            {/* Port where the soda reference lands */}
+            <circle cx="0" cy={CARD_H / 2} r="5" fill="#0b1328" stroke="#93c5fd" strokeWidth="2" />
+
+            {/* Diner storefront glyph: scalloped awning over a door */}
+            <rect x="14" y="10" width="36" height="36" rx="8" fill="#0d59ff" opacity="0.9" />
+            <g fill="none" stroke="#eaf2ff" strokeWidth="1.8" strokeLinejoin="round">
+              <path d="M 19,20 H 45 V 23 A 3.25,3.25 0 0 1 38.5,23 A 3.25,3.25 0 0 1 32,23 A 3.25,3.25 0 0 1 25.5,23 A 3.25,3.25 0 0 1 19,23 Z" />
+              <path d="M 21,27 V 40 H 43 V 27" />
+              <rect x="29" y="31" width="6" height="9" />
+            </g>
+
+            {/* Name and location */}
+            <rect x="62" y="14" width="74" height="8" rx="4" fill="#dbeafe" opacity="0.9" />
+            <rect x="62" y="30" width="50" height="6" rx="3" fill="#60a5fa" opacity="0.6" />
+
+            {/* Favourite sodas array */}
+            <g>
+              {c.favourites.map((on, j) => (
+                <React.Fragment key={j}>{miniGlass(152 + j * 22, CARD_H / 2, on)}</React.Fragment>
+              ))}
+            </g>
+          </g>
+        ))}
+
+        {/* Caption */}
+        <g transform="translate(212, 276)">
+          <rect
+            width="216"
+            height="28"
+            rx="6"
+            fill="rgba(13, 89, 255, 0.12)"
+            stroke="#4474ff"
+            strokeWidth="1.2"
           />
-          <line
-            x1="500"
-            y1="142"
-            x2="538"
-            y2="144"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
-            opacity="0.8"
-          />
-          <line
-            x1="498"
-            y1="146"
-            x2="530"
-            y2="152"
-            stroke="#00ffc8"
-            strokeWidth="1.5"
-            opacity="0.8"
-          />
+          <text
+            x="108"
+            y="14"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#93c5fd"
+            fontSize="10"
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+            fontWeight="bold"
+            letterSpacing="1"
+          >
+            SODA-DINER // MONGOOSE REFS
+          </text>
         </g>
       </svg>
     </div>
