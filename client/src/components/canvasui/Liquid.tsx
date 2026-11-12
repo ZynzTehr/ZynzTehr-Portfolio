@@ -278,9 +278,9 @@ void main () {
       ? clamp(fluid / max(mag, 1e-3), 0.0, 1.0)
       : uColor;
     // Portfolio cap: the overlay path cannot distort, and at the spec's
-    // intensity 7.6 it would cover text at 82%. 0.5 keeps the trail vivid
-    // while text under it stays readable.
-    float overlay = (1.0 - exp(-mag * uIntensity * 0.5)) * 0.5;
+    // intensity 7.6 it would cover text at 82%. 0.32 keeps the trail visible
+    // while text under it stays readable (4.5:1 gate).
+    float overlay = (1.0 - exp(-mag * uIntensity * 0.5)) * 0.32;
     outColor = vec4(toSrgb(clamp(tint, 0.0, 1.0)) * overlay, overlay);
     return;
   }

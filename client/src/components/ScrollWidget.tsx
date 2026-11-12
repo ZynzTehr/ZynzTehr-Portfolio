@@ -113,8 +113,10 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
       );
       // Phones: tuck away while scrolling down, return on the way back up.
       if (window.innerWidth <= 768) {
-        if (y > lastY + 4 && y > 200) widget.classList.add("is-tucked");
-        else if (y < lastY - 4 || y < 200) widget.classList.remove("is-tucked");
+        // Rests out of the way at the top (the filters live there) and while
+        // scrolling down; returns on the way back up.
+        if (y < 200 || y > lastY + 4) widget.classList.add("is-tucked");
+        else if (y < lastY - 4) widget.classList.remove("is-tucked");
       } else {
         widget.classList.remove("is-tucked");
       }

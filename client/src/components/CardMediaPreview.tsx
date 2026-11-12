@@ -25,6 +25,7 @@ interface CardMediaPreviewProps {
 
 const OPEN_MS = 640;
 const CLOSE_MS = 320;
+const HOVER_INTENT_MS = 110;
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
@@ -54,9 +55,19 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
     // a plain pointer exit gets the visible re-encrypt.
     const duration = wantShader ? OPEN_MS : isActive ? 0 : CLOSE_MS;
     let mountFrame = 0;
-    if (wantShader) mountFrame = requestAnimationFrame(() => setShaderMounted(true));
-    const start = performance.now();
+    // Hover intent: a pointer just passing over a card while the page scrolls
+    // never mounts a shader (each one is a WebGL context).
+    const intent = wantShader ? HOVER_INTENT_MS : 0;
+    const startAfter = performance.now() + intent;
+    if (wantShader) {
+      mountFrame = window.setTimeout(() => setShaderMounted(true), intent);
+    }
+    const start = startAfter;
     const tick = (now: number) => {
+      if (now < start) {
+        frameRef.current = requestAnimationFrame(tick);
+        return;
+      }
       const t = duration <= 0 ? 1 : Math.min(1, (now - start) / duration);
       const r = from + (to - from) * easeOut(t);
       radiusRef.current = r;
@@ -67,7 +78,7 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
     frameRef.current = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frameRef.current);
-      cancelAnimationFrame(mountFrame);
+      window.clearTimeout(mountFrame);
     };
     // isActive only matters at the moment wantShader flips.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -809,7 +809,18 @@ function createParticleScroll(
   content.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  const contentObserver = htmlInCanvas ? null : new MutationObserver(() => markFallbackStale());
+  // Hover-only changes inside card media (shader mounts, clip playback) do not
+  // change what the sand looks like, so they never force a full-grid capture.
+  const IGNORED_MUTATION_SCOPE = ".card-media-surface, .card-snapshot-reveal, video, canvas";
+  const contentObserver = htmlInCanvas
+    ? null
+    : new MutationObserver((records) => {
+        const relevant = records.some((r) => {
+          const el = r.target instanceof Element ? r.target : r.target.parentElement;
+          return !el || !el.closest(IGNORED_MUTATION_SCOPE);
+        });
+        if (relevant) markFallbackStale();
+      });
   contentObserver?.observe(content, {
     attributes: true,
     attributeFilter: ["class", "hidden", "src", "srcset", "style"],

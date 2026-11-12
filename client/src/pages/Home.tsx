@@ -186,6 +186,34 @@ const Home: React.FC = () => {
 
   const revealIndex = useCallback(() => setIsGridRevealed(true), []);
 
+  /** Scroll once the filtered grid has committed and been re-measured; focus when it settles. */
+  const scrollToIndexThenFocus = useCallback(() => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        const smooth = !prefersReducedMotion();
+        catalogRef.current?.scrollIntoView({
+          behavior: smooth ? "smooth" : "auto",
+          block: "start",
+        });
+        const focusSearch = () => searchInputRef.current?.focus({ preventScroll: true });
+        if (!smooth) {
+          focusSearch();
+          return;
+        }
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          window.removeEventListener("scrollend", finish);
+          focusSearch();
+        };
+        window.addEventListener("scrollend", finish, { once: true });
+        window.setTimeout(finish, DUR.hero * 1000 + 400);
+      }),
+    );
+  }, []);
+
   const handleSelectTopic = useCallback(
     (topic: string) => {
       captureFlip();
@@ -194,15 +222,9 @@ const Home: React.FC = () => {
       setSearchQuery("");
       setStage(null);
       setIsGridRevealed(true);
-      requestAnimationFrame(() => {
-        catalogRef.current?.scrollIntoView({
-          behavior: prefersReducedMotion() ? "auto" : "smooth",
-          block: "start",
-        });
-        searchInputRef.current?.focus({ preventScroll: true });
-      });
+      scrollToIndexThenFocus();
     },
-    [captureFlip],
+    [captureFlip, scrollToIndexThenFocus],
   );
 
   const resetFilters = useCallback(() => {
@@ -527,6 +549,13 @@ const Home: React.FC = () => {
                           and source links sit above it, so nothing is nested. */}
                         <article
                           className={`project-grid-card h-full ${isSelected ? "is-selected" : ""}`}
+                          onClick={(e) => {
+                            // Pointer clicks anywhere on the card (media included) open it; the
+                            // full-card button serves the keyboard, and links act as links.
+                            const t = e.target as HTMLElement;
+                            if (t.closest("a, button")) return;
+                            activateCard(project, e.currentTarget);
+                          }}
                           onMouseEnter={() => setHoveredGridId(project.id)}
                           onMouseLeave={() =>
                             setHoveredGridId((prev) => (prev === project.id ? null : prev))
@@ -705,8 +734,8 @@ const Home: React.FC = () => {
       </section>
 
       {/* upgrades.md: Laser at the bottom of the page while the index is open */}
-      {/* Mounted only while it burns and no project covers the page (WebGL budget). */}
-      {isGridRevealed && laserOn && !stageProject && (
+      {/* Mounted only while it burns: the index is open and on screen. */}
+      {isGridRevealed && laserOn && (
         <div className="archive-laser is-on" aria-hidden="true">
           <Laser className="w-full h-full" native={false} {...LASER_SPEC}>
             <div className="w-full h-full" />

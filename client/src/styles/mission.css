@@ -787,8 +787,9 @@
   cursor: pointer;
 }
 .card-hit:focus-visible {
+  /* Inside the card's overflow clip, so the ring is never cut off. */
   outline: 2px solid var(--accent-bright);
-  outline-offset: 3px;
+  outline-offset: -3px;
 }
 .project-grid-card .card-icon-link {
   position: relative;
@@ -1002,6 +1003,11 @@
   translate: 0 18px;
   pointer-events: none;
 }
+.scroll-widget.is-tucked:focus-visible {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
 .scroll-widget {
   transition:
     border-color var(--dur-micro) var(--ease-out),
@@ -1034,5 +1040,36 @@
     animation-duration: 0.01ms !important;
     animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prologue-beat-pill.is-active .prologue-beat-pill__fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* Phones: a faint orbit ring ties the globe to the swipe strip. */
+@media (max-width: 768px) {
+  .banner {
+    position: relative;
+  }
+  .banner::before {
+    content: "";
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    top: 46%;
+    height: 72px;
+    border: 1px solid rgba(96, 165, 250, 0.32);
+    border-radius: 50%;
+    transform: rotate(-7deg);
+    pointer-events: none;
+    z-index: 1;
+    box-shadow: 0 0 24px rgba(68, 116, 255, 0.18);
+  }
+  .banner .earth-container {
+    pointer-events: none;
   }
 }

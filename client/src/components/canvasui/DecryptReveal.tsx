@@ -1064,6 +1064,14 @@ function createDecryptReveal(
 
   const rectCache = createRectCache(output);
 
+  // Portfolio addition: a card shown by keyboard focus has no pointer yet, so
+  // seed the decode at its center; the first real pointermove takes over.
+  if (pointer.target === 0) {
+    pointer.x = pointer.tx = output.clientWidth / 2;
+    pointer.y = pointer.ty = output.clientHeight / 2;
+    pointer.target = 1;
+  }
+
   function onPointerMove(event: PointerEvent) {
     // Read the rect per move and map screen pixels to layout pixels: cards
     // scale and lift on hover, and carousel tiles sit in a 3D transform, so a

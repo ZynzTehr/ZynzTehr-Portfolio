@@ -40,21 +40,21 @@ const BEATS: Beat[] = [
     kicker: "Signal",
     headline: "Zynz Tehr",
     line: "Jorge Bucio, full-stack and creative systems engineer",
-    size: "clamp(3rem, 9vw, 6.4rem)",
+    size: "clamp(3.4rem, 9vw, 6.4rem)",
   },
   {
     code: "02",
     kicker: "Craft",
     headline: "Built from a blank file",
     line: "Hand-written WebGL shaders, real-time systems and interfaces that answer back",
-    size: "clamp(1.8rem, 4.6vw, 3.4rem)",
+    size: "clamp(1.6rem, 4.6vw, 3.4rem)",
   },
   {
     code: "03",
     kicker: "Launch",
     headline: `${projects.length} systems in orbit`,
     line: `${LIVE_COUNT} running live. All of them open source.`,
-    size: "clamp(2rem, 5vw, 3.8rem)",
+    size: "clamp(1.8rem, 5vw, 3.8rem)",
   },
 ];
 
@@ -173,14 +173,17 @@ const Landing: React.FC = () => {
 
   const jumpTo = (beat: number) => {
     if (launchingRef.current) return;
-    const shown = slotsRef.current[slotIndexRef.current];
-    if (beat === shown) return;
-    clearTimers();
+    // Reduced motion shows the active beat directly (no slots involved).
     if (reducedMotion) {
+      if (beat === activeBeat) return;
+      clearTimers();
       setActiveBeat(beat);
       setShowCta(true);
       return;
     }
+    const shown = slotsRef.current[slotIndexRef.current];
+    if (beat === shown) return;
+    clearTimers();
     swapTo(beat);
   };
 
@@ -258,18 +261,29 @@ const Landing: React.FC = () => {
       clearTimers();
       markSeen();
       if (reducedMotion) {
-        void navigate("/home");
+        // A short crossfade instead of the cover (motion-free, never a hard cut).
+        const fade = sectionRef.current?.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: 180,
+          easing: "linear",
+          fill: "forwards",
+        });
+        const go = () => {
+          if (mountedRef.current) void navigate("/home");
+        };
+        if (fade) fade.onfinish = go;
+        else go();
         return;
       }
       const origin = from ?? { x: window.innerWidth / 2, y: window.innerHeight * 0.45 };
       rippleRef.current?.splashAtClient(origin.x, origin.y, 1.2);
       setLaunching(true);
       setRainBoost(true);
+      // Let the orbit visibly spiral inward before the cover opens over it.
       later(() => {
         void launchCover(origin).then(() => {
           if (mountedRef.current) void navigate("/home");
         });
-      }, 160);
+      }, 340);
     },
     [clearTimers, later, navigate, reducedMotion],
   );

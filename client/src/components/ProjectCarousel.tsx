@@ -183,11 +183,17 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
       }
-      if (stepTimeoutRef.current) {
-        clearTimeout(stepTimeoutRef.current);
-      }
+      // The step timer is not cleared here: this effect re-runs whenever a step
+      // starts, and clearing it would leave the orbit stuck in "stepping".
     };
   }, [isRotating, isHovered, isStepping, isMobile, idle]);
+
+  useEffect(
+    () => () => {
+      if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+    },
+    [],
+  );
 
   const handleSliderScroll = () => {
     if (!sliderRef.current || window.innerWidth > 768) return;
@@ -448,7 +454,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
             variant="secondary"
             size="sm"
             onClick={togglePlayPause}
-            aria-label={isRotating ? "Pause the orbit" : "Resume the orbit"}
+
             title={isRotating ? "Pause the orbit" : "Resume the orbit"}
           >
             <span className={`play-morph ${isRotating ? "is-playing" : ""}`} aria-hidden="true">
