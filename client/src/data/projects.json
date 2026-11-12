@@ -13,8 +13,8 @@
     "githubUrl": "https://github.com/ZynzTehr/MusicPort",
     "liveUrl": null,
     "mediaType": "video",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/MusicPort/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/MusicPort/main/portfolio.webp",
+    "mediaUrl": "/media/musicport/portfolio.webp",
+    "previewImage": "/media/musicport/portfolio.webp",
     "videoUrl": "https://raw.githubusercontent.com/ZynzTehr/MusicPort/main/portfolio.mp4",
     "updatedAt": "2026-11-11T23:17:04Z"
   },
@@ -32,8 +32,8 @@
     "githubUrl": "https://github.com/ZynzTehr/vscode-fx",
     "liveUrl": "https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx",
     "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/vscode-fx/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/vscode-fx/main/portfolio.webp",
+    "mediaUrl": "/media/vscode-fx/portfolio.webp",
+    "previewImage": "/media/vscode-fx/portfolio.webp",
     "videoUrl": null,
     "updatedAt": "2026-11-05T22:47:32Z"
   },
@@ -203,8 +203,8 @@
     "githubUrl": "https://github.com/ZynzTehr/super-quiz",
     "liveUrl": "https://zynztehr.github.io/super-quiz/",
     "mediaType": "video",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/portfolio.webp",
+    "mediaUrl": "/media/super-quiz/portfolio.webp",
+    "previewImage": "/media/super-quiz/portfolio.webp",
     "videoUrl": "https://raw.githubusercontent.com/ZynzTehr/super-quiz/main/portfolio.mp4",
     "updatedAt": "2026-08-25T22:07:57Z"
   },
@@ -279,8 +279,8 @@
     "githubUrl": "https://github.com/ZynzTehr/tic-tac-toe-withAi",
     "liveUrl": "https://zynztehr.github.io/tic-tac-toe-withAi/",
     "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/tic-tac-toe-withAi/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/tic-tac-toe-withAi/main/portfolio.webp",
+    "mediaUrl": "/media/tic-tac-toe-withai/portfolio.webp",
+    "previewImage": "/media/tic-tac-toe-withai/portfolio.webp",
     "videoUrl": null,
     "updatedAt": "2026-08-21T17:54:09Z"
   },
@@ -336,8 +336,8 @@
     "githubUrl": "https://github.com/ZynzTehr/school-directory",
     "liveUrl": null,
     "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/school-directory/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/school-directory/main/portfolio.webp",
+    "mediaUrl": "/media/school-directory/portfolio.webp",
+    "previewImage": "/media/school-directory/portfolio.webp",
     "videoUrl": null,
     "updatedAt": "2026-08-19T19:43:01Z"
   },
@@ -488,8 +488,8 @@
     "githubUrl": "https://github.com/ZynzTehr/python-rock-paper-scissors",
     "liveUrl": null,
     "mediaType": "image",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/python-rock-paper-scissors/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/python-rock-paper-scissors/main/portfolio.webp",
+    "mediaUrl": "/media/python-rock-paper-scissors/portfolio.webp",
+    "previewImage": "/media/python-rock-paper-scissors/portfolio.webp",
     "videoUrl": null,
     "updatedAt": "2026-03-10T02:11:13Z"
   }

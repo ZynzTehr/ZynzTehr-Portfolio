@@ -26,6 +26,39 @@ const KNOWN_HOMEPAGES = {
 
 const DISABLED_HOMEPAGES = new Set(["MusicPort"]);
 
+/**
+ * Media that lives in this repo (client/public/media/<id>/) instead of the
+ * project repo root. Used for screens authored in Google Flow for projects with
+ * no web UI, and for recaptures that replace a broken root snapshot. Applied on
+ * every sync, including the offline fallback, so an override is never lost.
+ */
+const MEDIA_OVERRIDES = {
+  "school-directory": { previewImage: "/media/school-directory/portfolio.webp" },
+  "python-rock-paper-scissors": {
+    previewImage: "/media/python-rock-paper-scissors/portfolio.webp",
+  },
+  "vscode-fx": { previewImage: "/media/vscode-fx/portfolio.webp" },
+  musicport: { previewImage: "/media/musicport/portfolio.webp" },
+  "super-quiz": { previewImage: "/media/super-quiz/portfolio.webp" },
+  "tic-tac-toe-withai": { previewImage: "/media/tic-tac-toe-withai/portfolio.webp" },
+};
+
+/** Only point at override files that actually exist, so a missing file never ships a 404. */
+function applyMediaOverrides(projects) {
+  const publicDir = path.resolve(__dirname, "../public");
+  return projects.map((project) => {
+    const override = MEDIA_OVERRIDES[project.id];
+    if (!override) return project;
+    const next = { ...project };
+    for (const [key, url] of Object.entries(override)) {
+      if (url && fs.existsSync(path.join(publicDir, url))) next[key] = url;
+    }
+    if (next.previewImage !== project.previewImage) next.mediaUrl = next.previewImage;
+    if (next.videoUrl) next.mediaType = "video";
+    return next;
+  });
+}
+
 const TITLE_OVERRIDES = {
   musicport: "MusicPort",
   "vscode-fx": "VSCode FX",
@@ -396,12 +429,28 @@ async function syncRepositories() {
 
   projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  const outputPath = path.resolve(__dirname, "../src/data/projects.json");
-  fs.writeFileSync(outputPath, `${JSON.stringify(projects, null, 2)}\n`);
-  console.log(`Successfully synced ${projects.length} projects to: ${outputPath}`);
+  writeProjects(applyMediaOverrides(projects));
 }
 
+const OUTPUT_PATH = path.resolve(__dirname, "../src/data/projects.json");
+
+function writeProjects(projects) {
+  fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(projects, null, 2)}\n`);
+  console.log(`Successfully synced ${projects.length} projects to: ${OUTPUT_PATH}`);
+}
+
+/**
+ * prebuild runs this script, so a GitHub outage or rate limit must not fail a
+ * deploy. On any error, keep the checked-in projects.json (with overrides
+ * re-applied) and continue.
+ */
 syncRepositories().catch((error) => {
-  console.error("Failed to sync repositories:", error);
-  process.exit(1);
+  console.warn(`Sync skipped, keeping the checked-in projects.json: ${error.message || error}`);
+  try {
+    const existing = JSON.parse(fs.readFileSync(OUTPUT_PATH, "utf8"));
+    writeProjects(applyMediaOverrides(existing));
+  } catch (readError) {
+    console.error("No usable projects.json to fall back to:", readError);
+    process.exit(1);
+  }
 });

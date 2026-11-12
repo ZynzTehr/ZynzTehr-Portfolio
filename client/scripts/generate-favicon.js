@@ -1,189 +1,173 @@
-import puppeteer from "puppeteer";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+/**
+ * Builds the favicon set from the hex-orbit mark (the same geometry as
+ * src/components/BrandMark.tsx, chosen from the owner's Flow concept mark-b-1).
+ *
+ *   node scripts/generate-favicon.js
+ *
+ * Outputs to public/assets: favicon.svg (adaptive), favicon.ico (16/32/48 from a
+ * bolder small-size glyph), apple-touch-icon.png (180, opaque), icon-192.png,
+ * icon-512.png, icon-maskable-512.png, and public/site.webmanifest.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PUBLIC = path.resolve(__dirname, "../public");
+const OUT = path.join(PUBLIC, "assets");
+const NAVY = "#03060f";
 
-const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <!-- Background Radial Gradient -->
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="65%">
-      <stop offset="0%" stop-color="#12142a"/>
-      <stop offset="60%" stop-color="#090a14"/>
-      <stop offset="100%" stop-color="#04040a"/>
-    </radialGradient>
-
-    <!-- Neon Cyan to Violet Gradient -->
-    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffc8"/>
-      <stop offset="50%" stop-color="#00d9ff"/>
-      <stop offset="100%" stop-color="#7950f2"/>
-    </linearGradient>
-
-    <!-- Globe Sphere Gradient -->
-    <radialGradient id="globeGrad" cx="35%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#00ffc8" stop-opacity="0.95"/>
-      <stop offset="35%" stop-color="#00a896" stop-opacity="0.8"/>
-      <stop offset="70%" stop-color="#023e8a" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#011627" stop-opacity="1"/>
-    </radialGradient>
-
-    <!-- Star Glint Gradient -->
-    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="30%" stop-color="#00ffc8"/>
-      <stop offset="100%" stop-color="#00ffc8" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Glow Filters -->
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    
-    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-
-  <!-- Base Rounded Container with Neon Border (padded to avoid filter clipping) -->
-  <rect x="28" y="28" width="456" height="456" rx="100" fill="url(#bgGrad)" stroke="url(#neonGrad)" stroke-width="8" />
-  
-  <!-- Subtle Grid Accent -->
-  <circle cx="256" cy="256" r="170" fill="none" stroke="rgba(0, 255, 200, 0.08)" stroke-width="2" stroke-dasharray="6 6"/>
-
-  <!-- Glowing Planetary Orbit Ring (Tilted Oval) -->
-  <g transform="rotate(-28 256 256)">
-    <!-- Back of Orbit Ring -->
-    <ellipse cx="256" cy="256" rx="195" ry="64" fill="none" stroke="url(#neonGrad)" stroke-width="6" opacity="0.4" stroke-dasharray="16 8"/>
-    
-    <!-- Central 3D Globe -->
-    <circle cx="256" cy="256" r="115" fill="url(#globeGrad)" filter="url(#softGlow)"/>
-
-    <!-- Globe Grid Lines (Equator & Meridians) -->
-    <ellipse cx="256" cy="218" rx="95" ry="30" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="3"/>
-    <ellipse cx="256" cy="256" rx="115" ry="36" fill="none" stroke="rgba(255, 255, 255, 0.65)" stroke-width="3.5"/>
-    <ellipse cx="256" cy="294" rx="95" ry="30" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="3"/>
-    <ellipse cx="256" cy="256" rx="44" ry="115" fill="none" stroke="rgba(255, 255, 255, 0.55)" stroke-width="3"/>
-
-    <!-- Cybernetic "Z" Core Emblem Overlay -->
-    <path d="M 205 192 L 307 192 L 225 320 L 307 320" 
-          fill="none" 
-          stroke="#ffffff" 
-          stroke-width="20" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"
-          filter="url(#glow)"/>
-
-    <path d="M 205 192 L 307 192 L 225 320 L 307 320" 
-          fill="none" 
-          stroke="#00ffc8" 
-          stroke-width="12" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"/>
-
-    <!-- Front of Orbit Ring (Foreground) -->
-    <path d="M 61 256 A 195 64 0 0 0 451 256" fill="none" stroke="url(#neonGrad)" stroke-width="8" filter="url(#glow)"/>
-    <path d="M 61 256 A 195 64 0 0 0 451 256" fill="none" stroke="#ffffff" stroke-width="3"/>
-  </g>
-
-  <!-- Sparkling 8-Point Star Flare on Orbit (Top Right) -->
-  <g transform="translate(390, 135)">
-    <circle cx="0" cy="0" r="30" fill="url(#starGlow)"/>
-    
-    <!-- Primary Vertical / Horizontal Cross -->
-    <path d="M 0 -38 Q 0 0 5 0 Q 0 0 0 38 Q 0 0 -5 0 Q 0 0 0 -38" fill="#ffffff" filter="url(#glow)"/>
-    <path d="M -38 0 Q 0 0 0 5 Q 0 0 38 0 Q 0 0 0 -5 Q 0 0 -38 0" fill="#ffffff" filter="url(#glow)"/>
-    
-    <!-- Diagonal Glints -->
-    <g transform="rotate(45)">
-      <path d="M 0 -20 Q 0 0 2.5 0 Q 0 0 0 20 Q 0 0 -2.5 0 Q 0 0 0 -20" fill="#00ffc8"/>
-      <path d="M -20 0 Q 0 0 0 2.5 Q 0 0 20 0 Q 0 0 0 -2.5 Q 0 0 -20 0" fill="#00ffc8"/>
-    </g>
-    
-    <!-- Star Center -->
-    <circle cx="0" cy="0" r="4.5" fill="#ffffff"/>
-  </g>
-</svg>`;
-
-async function generateFavicons() {
-  const publicDir = path.resolve(__dirname, "../public");
-  const assetsDir = path.resolve(publicDir, "assets");
-
-  if (!fs.existsSync(assetsDir)) {
-    fs.mkdirSync(assetsDir, { recursive: true });
-  }
-
-  // 1. Write the modern vector SVG favicon
-  fs.writeFileSync(path.resolve(assetsDir, "favicon.svg"), svgIcon.trim());
-  console.log("✅ Generated favicon.svg in public/assets/");
-
-  // 2. Launch Puppeteer to render crisp high-DPI PNGs
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  const page = await browser.newPage();
-
-  const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  ${svgIcon}
-</body>
-</html>`;
-
-  await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-
-  const sizes = [
-    { name: "favicon.png", dir: assetsDir, width: 192, height: 192, scale: 2 },
-    { name: "apple-touch-icon.png", dir: assetsDir, width: 180, height: 180, scale: 2 },
-  ];
-
-  for (const s of sizes) {
-    await page.setViewport({ width: s.width, height: s.height, deviceScaleFactor: s.scale || 2 });
-    const targetPath = path.resolve(s.dir, s.name);
-    await page.screenshot({
-      path: targetPath,
-      omitBackground: true,
-    });
-    console.log(`✅ Generated ${s.name} (${s.width}x${s.height}) at ${targetPath}`);
-  }
-
-  await browser.close();
-  console.log("🎉 3 essential favicon assets generated in public/assets/!");
+function hex(cx, cy, r) {
+  return [-90, -30, 30, 90, 150, 210]
+    .map((deg) => {
+      const a = (deg * Math.PI) / 180;
+      return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
+    })
+    .join(" ");
 }
 
-generateFavicons().catch((err) => {
-  console.error("❌ Failed to generate favicons:", err);
+function corePoints(cx, cy, r) {
+  return [-90, -30, 30, 90, 150, 210].map((deg) => {
+    const a = (deg * Math.PI) / 180;
+    return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
+  });
+}
+
+const RING = { cx: 60, cy: 60, rx: 47, ry: 11.5, rotate: -31 };
+
+function ringPoint(t) {
+  const a = t * Math.PI * 2;
+  const x0 = RING.rx * Math.cos(a);
+  const y0 = -RING.ry * Math.sin(a);
+  const r = (RING.rotate * Math.PI) / 180;
+  return {
+    x: RING.cx + x0 * Math.cos(r) - y0 * Math.sin(r),
+    y: RING.cy + x0 * Math.sin(r) + y0 * Math.cos(r),
+  };
+}
+
+/** The full mark in a 120 x 120 box (mirrors MarkArt variant="full"). */
+function markBody({ ringStroke = 3.2, haloStroke = 7 } = {}) {
+  const p = corePoints(60, 60, 20);
+  const sat = ringPoint(0.13);
+  const t = `rotate(${RING.rotate} ${RING.cx} ${RING.cy})`;
+  return [
+    `<polygon points="${hex(60, 60, 39)}" fill="#1c49d4"/>`,
+    `<polygon points="${hex(60, 60, 35)}" fill="#2c62ef"/>`,
+    `<polygon points="${hex(60, 60, 26)}" fill="${NAVY}"/>`,
+    `<polygon points="${p[0]} ${p[1]} ${p[4]} ${p[5]}" fill="#4a80f8"/>`,
+    `<polygon points="${p[1]} ${p[2]} ${p[3]} ${p[4]}" fill="#2563eb"/>`,
+    `<ellipse cx="60" cy="60" rx="${RING.rx}" ry="${RING.ry}" transform="${t}" fill="none" stroke="${NAVY}" stroke-width="${haloStroke}"/>`,
+    `<ellipse cx="60" cy="60" rx="${RING.rx}" ry="${RING.ry}" transform="${t}" fill="none" stroke="#7cc4f5" stroke-width="${ringStroke}"/>`,
+    `<circle cx="${sat.x.toFixed(2)}" cy="${sat.y.toFixed(2)}" r="7.2" fill="${NAVY}"/>`,
+    `<circle cx="${sat.x.toFixed(2)}" cy="${sat.y.toFixed(2)}" r="4.6" fill="#93d2fb"/>`,
+  ].join("");
+}
+
+/** Bolder glyph for 16 to 48 px: thicker band and ring, no navy gap detail. */
+function smallBody() {
+  const sat = ringPoint(0.13);
+  const t = `rotate(${RING.rotate} ${RING.cx} ${RING.cy})`;
+  return [
+    `<polygon points="${hex(60, 60, 44)}" fill="#2c62ef"/>`,
+    `<polygon points="${hex(60, 60, 26)}" fill="${NAVY}"/>`,
+    `<polygon points="${hex(60, 60, 17)}" fill="#4a80f8"/>`,
+    `<ellipse cx="60" cy="60" rx="54" ry="13" transform="${t}" fill="none" stroke="${NAVY}" stroke-width="12"/>`,
+    `<ellipse cx="60" cy="60" rx="54" ry="13" transform="${t}" fill="none" stroke="#93d2fb" stroke-width="7"/>`,
+    `<circle cx="${(sat.x + 4).toFixed(2)}" cy="${(sat.y - 2).toFixed(2)}" r="9" fill="#eaf2ff"/>`,
+  ].join("");
+}
+
+/**
+ * @param {string} body
+ * @param {{ bg?: string, pad?: number }} [options]
+ */
+const svg = (body, { bg = "", pad = 0 } = {}) => {
+  const box = 120 + pad * 2;
+  const back = bg ? `<rect width="${box}" height="${box}" fill="${bg}"/>` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-pad} ${-pad} ${box} ${box}">${back}${body}</svg>`;
+};
+
+async function png(svgString, size, file) {
+  await sharp(Buffer.from(svgString), { density: 384 })
+    .resize(size, size)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(OUT, file));
+}
+
+/** Minimal ICO writer: PNG-compressed entries (supported by every current browser). */
+async function ico(svgString, sizes, file) {
+  const images = await Promise.all(
+    sizes.map((s) => sharp(Buffer.from(svgString), { density: 384 }).resize(s, s).png().toBuffer()),
+  );
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(images.length, 4);
+  const dir = Buffer.alloc(16 * images.length);
+  let offset = 6 + dir.length;
+  images.forEach((img, i) => {
+    const s = sizes[i];
+    dir.writeUInt8(s >= 256 ? 0 : s, i * 16);
+    dir.writeUInt8(s >= 256 ? 0 : s, i * 16 + 1);
+    dir.writeUInt8(0, i * 16 + 2);
+    dir.writeUInt8(0, i * 16 + 3);
+    dir.writeUInt16LE(1, i * 16 + 4);
+    dir.writeUInt16LE(32, i * 16 + 6);
+    dir.writeUInt32LE(img.length, i * 16 + 8);
+    dir.writeUInt32LE(offset, i * 16 + 12);
+    offset += img.length;
+  });
+  fs.writeFileSync(path.join(OUT, file), Buffer.concat([header, dir, ...images]));
+}
+
+async function main() {
+  fs.mkdirSync(OUT, { recursive: true });
+
+  // Adaptive SVG: the full mark normally, the bold glyph where the tab icon is tiny.
+  fs.writeFileSync(path.join(OUT, "favicon.svg"), `${svg(markBody(), { pad: 2 })}\n`);
+
+  await ico(svg(smallBody(), { pad: 2 }), [16, 32, 48], "favicon.ico");
+  await png(svg(smallBody(), { pad: 2 }), 32, "favicon-32.png");
+  await png(svg(markBody(), { bg: NAVY, pad: 14 }), 180, "apple-touch-icon.png");
+  await png(svg(markBody(), { bg: NAVY, pad: 8 }), 192, "icon-192.png");
+  await png(svg(markBody(), { bg: NAVY, pad: 8 }), 512, "icon-512.png");
+  // Maskable: the mark inside the central 80% safe zone.
+  await png(svg(markBody(), { bg: NAVY, pad: 30 }), 512, "icon-maskable-512.png");
+
+  for (const stale of ["favicon.png"]) {
+    const f = path.join(OUT, stale);
+    if (fs.existsSync(f)) fs.rmSync(f);
+  }
+
+  const manifest = {
+    name: "Jorge Bucio | Creative systems portfolio",
+    short_name: "ZynzTehr",
+    description: "Full-stack and creative systems work by Jorge Bucio (@ZynzTehr).",
+    start_url: "/",
+    display: "standalone",
+    background_color: NAVY,
+    theme_color: NAVY,
+    icons: [
+      { src: "/assets/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/assets/icon-512.png", sizes: "512x512", type: "image/png" },
+      {
+        src: "/assets/icon-maskable-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+  };
+  fs.writeFileSync(path.join(PUBLIC, "site.webmanifest"), `${JSON.stringify(manifest, null, 2)}\n`);
+
+  for (const f of fs.readdirSync(OUT)) {
+    console.log(`${f.padEnd(26)} ${fs.statSync(path.join(OUT, f)).size} bytes`);
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
   process.exit(1);
 });
