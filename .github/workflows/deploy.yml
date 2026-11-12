@@ -30,6 +30,8 @@ jobs:
 
       - name: Sync GitHub Repositories
         working-directory: ./client
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/sync-repos.js
 
       - name: Generate SVG Art for New Projects
@@ -38,6 +40,8 @@ jobs:
 
       - name: Build static site
         working-directory: ./client
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
@@ -45,4 +49,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./client/dist
-          cname: work.jorgebucio.com
