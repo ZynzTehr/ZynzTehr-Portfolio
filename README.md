@@ -13,9 +13,6 @@
   <a href="https://github.com/ZynzTehr">
     <img src="https://img.shields.io/badge/GitHub-@ZynzTehr-0a1124?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
   </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=VSCodeFX.vscode-fx">
-    <img src="https://img.shields.io/badge/VS_Code_FX-Extension-0d59ff?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code FX" />
-  </a>
 </p>
 
 ---
