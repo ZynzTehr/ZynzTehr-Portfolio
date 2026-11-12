@@ -34,8 +34,10 @@ const DISABLED_HOMEPAGES = new Set(["MusicPort"]);
  */
 const MEDIA_OVERRIDES = {
   "school-directory": { previewImage: "/media/school-directory/portfolio.webp" },
+  // Flow (Veo 3.1 Quality) loop from the approved still; its first frame is the still.
   "python-rock-paper-scissors": {
     previewImage: "/media/python-rock-paper-scissors/portfolio.webp",
+    videoUrl: "/media/python-rock-paper-scissors/portfolio.mp4",
   },
   // The owner's real Motion Lab recording from the extension's README (static/demos/motion-lab.mp4).
   "vscode-fx": {

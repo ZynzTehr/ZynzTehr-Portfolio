@@ -487,10 +487,10 @@
     "forks": 0,
     "githubUrl": "https://github.com/ZynzTehr/python-rock-paper-scissors",
     "liveUrl": null,
-    "mediaType": "image",
+    "mediaType": "video",
     "mediaUrl": "/media/python-rock-paper-scissors/portfolio.webp",
     "previewImage": "/media/python-rock-paper-scissors/portfolio.webp",
-    "videoUrl": null,
+    "videoUrl": "/media/python-rock-paper-scissors/portfolio.mp4",
     "updatedAt": "2026-03-10T02:11:13Z"
   }
 ]
