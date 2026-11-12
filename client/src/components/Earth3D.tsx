@@ -55,35 +55,31 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
         Math.cos(sunAngle),
       ).normalize();
 
-      let atmosphereColor = new THREE.Color(0x00ffc8); // Default cyan
-      let sunColor = new THREE.Color(1.0, 1.0, 0.95);
-      let ambientIntensity = 0.15;
+      let atmosphereColor = new THREE.Color(0x4474ff);
+      let sunColor = new THREE.Color(0.96, 0.98, 1.0);
+      let ambientIntensity = 0.16;
       let label = "Day";
 
       if (hours >= 5.5 && hours < 8.0) {
-        // Sunrise: Warm golden / orange-pink glow
-        atmosphereColor = new THREE.Color(0xff8c42);
-        sunColor = new THREE.Color(1.0, 0.65, 0.35);
-        ambientIntensity = 0.18;
+        atmosphereColor = new THREE.Color(0x60a5fa);
+        sunColor = new THREE.Color(0.88, 0.93, 1.0);
+        ambientIntensity = 0.19;
         label = "Sunrise";
       } else if (hours >= 8.0 && hours < 17.0) {
-        // Day: Crisp cyan & electric blue
-        atmosphereColor = new THREE.Color(0x00ffc8);
-        sunColor = new THREE.Color(1.0, 1.0, 0.98);
+        atmosphereColor = new THREE.Color(0x60a5fa);
+        sunColor = new THREE.Color(0.98, 0.99, 1.0);
         ambientIntensity = 0.22;
         label = "Day";
       } else if (hours >= 17.0 && hours < 20.0) {
-        // Sunset: Fiery amber & violet twilight
-        atmosphereColor = new THREE.Color(0xff5533);
-        sunColor = new THREE.Color(1.0, 0.45, 0.2);
-        ambientIntensity = 0.16;
+        atmosphereColor = new THREE.Color(0x4474ff);
+        sunColor = new THREE.Color(0.75, 0.85, 1.0);
+        ambientIntensity = 0.17;
         label = "Sunset";
       } else {
-        // Night: Deep electric indigo with brilliant city lights
-        atmosphereColor = new THREE.Color(0x3a7bd5);
-        sunColor = new THREE.Color(0.2, 0.25, 0.45);
+        atmosphereColor = new THREE.Color(0x2b6aff);
+        sunColor = new THREE.Color(0.22, 0.32, 0.58);
         label = "Night";
-        ambientIntensity = 0.12;
+        ambientIntensity = 0.13;
       }
 
       return { sunDir, atmosphereColor, sunColor, ambientIntensity, label };
@@ -171,9 +167,9 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
           // Smooth transition between daylit side and nighttime side
           float dayFactor = smoothstep(-0.2, 0.25, dProd);
 
-          // Atmospheric sunset / sunrise scattering along the terminator line
+          // Atmospheric horizon scattering along the terminator line
           float terminator = smoothstep(0.3, 0.0, abs(dProd)) * (1.0 - abs(dProd));
-          vec3 twilightGlow = vec3(1.0, 0.42, 0.15) * terminator * 0.6;
+          vec3 twilightGlow = vec3(0.267, 0.455, 1.0) * terminator * 0.55;
 
           // Glowing night city lights on the dark hemisphere
           vec3 nightLights = nightColor * 2.4 * (1.0 - dayFactor);

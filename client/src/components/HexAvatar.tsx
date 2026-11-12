@@ -8,6 +8,7 @@ const HexAvatar: React.FC = () => {
       rel="noopener noreferrer"
       className="hex-avatar-link"
       title="Visit Interactive Profile"
+      aria-label="Jorge Bucio interactive profile"
     >
       <svg
         viewBox="0 0 120 140"
@@ -15,17 +16,18 @@ const HexAvatar: React.FC = () => {
         height="64"
         xmlns="http://www.w3.org/2000/svg"
         className="hex-avatar-svg"
+        aria-hidden="true"
       >
         <defs>
           <linearGradient id="hexFill" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="50%" stopColor="#38bdf8" />
-            <stop offset="100%" stopColor="#7950f2" />
+            <stop offset="0%" stopColor="#0d59ff" />
+            <stop offset="52%" stopColor="#4474ff" />
+            <stop offset="100%" stopColor="#60a5fa" />
           </linearGradient>
 
           <linearGradient id="hexStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="100%" stopColor="#7950f2" />
+            <stop offset="0%" stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#0d59ff" />
           </linearGradient>
 
           <filter id="hexGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -37,14 +39,12 @@ const HexAvatar: React.FC = () => {
           </filter>
         </defs>
 
-        {/* Hexagon Fill */}
         <polygon
           points="60,8 110,35 110,95 60,122 10,95 10,35"
           fill="url(#hexFill)"
-          opacity="0.85"
+          opacity="0.88"
         />
 
-        {/* Hexagon Glowing Border */}
         <polygon
           points="60,8 110,35 110,95 60,122 10,95 10,35"
           fill="none"
@@ -54,18 +54,13 @@ const HexAvatar: React.FC = () => {
           className="hex-border"
         />
 
-        {/* Avatar Silhouette - Head */}
-        <circle cx="60" cy="55" r="18" fill="#060914" opacity="0.9" />
-
-        {/* Avatar Silhouette - Body */}
-        <path d="M 37,100 C 37,78 83,78 83,100 Z" fill="#060914" opacity="0.9" />
-
-        {/* Chevron Detail */}
+        <circle cx="60" cy="55" r="18" fill="#060b19" opacity="0.92" />
+        <path d="M 37,100 C 37,78 83,78 83,100 Z" fill="#060b19" opacity="0.92" />
         <path
           d="M 50,52 L 60,62 L 70,52"
           fill="none"
-          stroke="#00ffc8"
-          strokeWidth="2"
+          stroke="#60a5fa"
+          strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
