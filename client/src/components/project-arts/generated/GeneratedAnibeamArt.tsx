@@ -140,7 +140,7 @@ const GeneratedAnibeamArt: React.FC = () => {
           fontFamily="monospace"
           opacity="0.7"
         >
-          ANI BEAM
+          ANIBEAM
         </text>
       </svg>
     </div>

@@ -12,6 +12,7 @@ export interface Project {
     | "3D & Creative UI"
     | "Web Application";
   language: string;
+  techStack: string[];
   topics: string[];
   stars: number;
   forks: number;
@@ -19,19 +20,29 @@ export interface Project {
   liveUrl?: string | null;
   mediaType: "video" | "gif" | "image";
   mediaUrl: string;
-  previewImage?: string;
+  previewImage: string;
+  videoUrl?: string | null;
   updatedAt?: string;
   featured?: boolean;
 }
 
-// Explicit curated title casing dictionary
 const TITLE_OVERRIDES: Record<string, string> = {
+  musicport: "MusicPort",
+  "vscode-fx": "VSCode FX",
+  anibeam: "AniBeam",
+  jobseance: "JobSeance",
+  "torque-line": "TorqueLine",
+  "campfire-of-the-damned": "Campfire of the Damned",
+  "fleet-pulse": "Fleet Pulse",
+  "countdown-timer": "Countdown Timer",
+  "next-chapter-week-one": "Next Chapter Week One",
+  "new-age-chess": "New Age Chess",
   "super-quiz": "Super Quiz",
   "soda-diner": "Soda Diner",
   "match-maker": "Match Maker",
   "school-directory": "School Directory",
   loancalculator: "Loan Calculator",
-  "auralist-web": "Auralist Web",
+  "auralist-web": "AuraList Web",
   "tic-tac-toe-withai": "Tic Tac Toe with AI",
   "tic-tac-toe": "Tic Tac Toe",
   "tlm-website-redesign": "TLM Website Redesign",
@@ -43,7 +54,6 @@ const TITLE_OVERRIDES: Record<string, string> = {
   "python-rock-paper-scissors": "Python Rock Paper Scissors",
 };
 
-// Generic Title Case converter fallback
 export function formatToTitleCase(str: string): string {
   const smallWords = new Set([
     "a",
@@ -70,6 +80,7 @@ export function formatToTitleCase(str: string): string {
     web3: "Web3",
     icp: "ICP",
     api: "API",
+    fx: "FX",
   };
 
   const words = str
@@ -92,10 +103,28 @@ export function formatToTitleCase(str: string): string {
     .join(" ");
 }
 
-// Category mappings
+export function formatProjectDate(isoDate?: string): string {
+  if (!isoDate) return "2026";
+  const parsed = new Date(isoDate);
+  if (Number.isNaN(parsed.getTime())) return "2026";
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 const CATEGORY_MAP: Record<string, Project["category"]> = {
-  "new-age-chess": "3D & Creative UI",
+  musicport: "Full-Stack",
+  "vscode-fx": "3D & Creative UI",
+  anibeam: "Full-Stack",
+  jobseance: "Full-Stack",
+  "torque-line": "Full-Stack",
+  "campfire-of-the-damned": "Full-Stack",
+  "fleet-pulse": "Web Application",
   "countdown-timer": "3D & Creative UI",
+  "next-chapter-week-one": "Frontend",
+  "new-age-chess": "3D & Creative UI",
   "super-quiz": "3D & Creative UI",
   "soda-diner": "Full-Stack",
   "match-maker": "Full-Stack",
@@ -113,20 +142,28 @@ const CATEGORY_MAP: Record<string, Project["category"]> = {
   "python-rock-paper-scissors": "Full-Stack",
 };
 
-export const projects: Project[] = (rawProjects as Project[])
+type RawProjectRecord = Omit<Project, "previewImage" | "techStack"> & {
+  previewImage?: string;
+  techStack?: string[];
+};
+
+export const projects: Project[] = (rawProjects as RawProjectRecord[])
   .map((p, index) => {
     const titleCasedName = TITLE_OVERRIDES[p.id] || formatToTitleCase(p.name || p.rawName);
+    const fallbackPreview = `https://raw.githubusercontent.com/ZynzTehr/${p.rawName}/main/portfolio.webp`;
 
     return {
       ...p,
       name: titleCasedName,
-      category: CATEGORY_MAP[p.id] || (p.category as Project["category"]) || "Web Application",
-      mediaType: "image" as const,
+      category: CATEGORY_MAP[p.id] || p.category || "Web Application",
+      techStack: p.techStack && p.techStack.length > 0 ? p.techStack : [p.language],
+      previewImage: p.previewImage || fallbackPreview,
+      videoUrl: p.videoUrl ?? null,
+      mediaType: p.videoUrl ? ("video" as const) : ("image" as const),
       featured: index < 6,
     };
   })
   .sort((a, b) => {
-    // Sort by updatedAt descending (most recently updated first)
     const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
     const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
     return dateB - dateA;
@@ -136,6 +173,6 @@ export const categories = [
   "Recent",
   "Full-Stack",
   "Frontend",
-  "Web3 & Blockchain",
   "3D & Creative UI",
+  "Web Application",
 ] as const;

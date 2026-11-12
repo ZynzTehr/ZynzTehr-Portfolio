@@ -35,6 +35,7 @@ coverage/
 
 # Local Untracked Workspaces & Agent Telemetry
 MyNewAgent/
+/upgrades.md
 prompt-log.md
 .prompt-log.lock
 .prompt-log.flock

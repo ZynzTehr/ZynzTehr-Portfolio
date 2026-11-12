@@ -132,7 +132,7 @@ const GeneratedJobseanceArt: React.FC = () => {
           fontFamily="monospace"
           opacity="0.7"
         >
-          JOB SEANCE
+          JOBSEANCE
         </text>
       </svg>
     </div>

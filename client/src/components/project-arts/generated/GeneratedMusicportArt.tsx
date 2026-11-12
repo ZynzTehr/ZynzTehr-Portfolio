@@ -140,7 +140,7 @@ const GeneratedMusicportArt: React.FC = () => {
           fontFamily="monospace"
           opacity="0.7"
         >
-          MUSIC PORT
+          MUSICPORT
         </text>
       </svg>
     </div>

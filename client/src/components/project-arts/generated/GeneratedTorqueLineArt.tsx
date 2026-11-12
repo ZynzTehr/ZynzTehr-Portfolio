@@ -132,7 +132,7 @@ const GeneratedTorqueLineArt: React.FC = () => {
           fontFamily="monospace"
           opacity="0.7"
         >
-          TORQUE LINE
+          TORQUELINE
         </text>
       </svg>
     </div>
