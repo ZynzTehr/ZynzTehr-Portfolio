@@ -11,14 +11,24 @@ const GITHUB_USERNAME = "ZynzTehr";
 // hub (ZynzTehr-Profile, jorgebucio.com) is, and is listed like any other.
 const EXCLUDED_REPOS = ["ZynzTehr-Portfolio", "ZynzTehr"];
 
-const VIDEO_REPOS = new Set([
-  "MusicPort",
-  "aniBeam",
-  "campfire-of-the-damned",
-  "countdown-timer",
-  "new-age-chess",
-  "super-quiz",
-]);
+/**
+ * A project's media lives in its own repo root: portfolio.webp (the still) and,
+ * when present, portfolio.mp4 (the motion clip). The clip is detected per repo,
+ * so adding or replacing it in the project repo is all it takes; nothing here
+ * lists which repos have one. Raw file checks do not count against the API
+ * rate limit.
+ */
+async function rootFileExists(repoName, branch, file) {
+  try {
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${repoName}/${branch}/${file}`,
+      { method: "HEAD", signal: AbortSignal.timeout(8000) },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 const KNOWN_HOMEPAGES = {
   "tic-tac-toe-withAi": "https://zynztehr.github.io/tic-tac-toe-withAi/",
@@ -36,17 +46,11 @@ const DISABLED_HOMEPAGES = new Set(["MusicPort"]);
  */
 const MEDIA_OVERRIDES = {
   "school-directory": { previewImage: "/media/school-directory/portfolio.webp" },
-  // Flow (Veo 3.1 Quality) loop from the approved still; its first frame is the still.
-  "python-rock-paper-scissors": {
-    previewImage: "/media/python-rock-paper-scissors/portfolio.webp",
-    videoUrl: "/media/python-rock-paper-scissors/portfolio.mp4",
-  },
   // The owner's real Motion Lab recording from the extension's README (static/demos/motion-lab.mp4).
   "vscode-fx": {
     previewImage: "/media/vscode-fx/portfolio.webp",
     videoUrl: "/media/vscode-fx/portfolio.mp4",
   },
-  musicport: { previewImage: "/media/musicport/portfolio.webp" },
   // The repo ships no portfolio.webp: a capture of the live site, and a short
   // recording of its opening act.
   "zynztehr-profile": {
@@ -54,7 +58,6 @@ const MEDIA_OVERRIDES = {
     videoUrl: "/media/zynztehr-profile/portfolio.mp4",
   },
   "super-quiz": { previewImage: "/media/super-quiz/portfolio.webp" },
-  "tic-tac-toe-withai": { previewImage: "/media/tic-tac-toe-withai/portfolio.webp" },
 };
 
 /** Only point at override files that actually exist, so a missing file never ships a 404. */
@@ -412,7 +415,7 @@ async function syncRepositories() {
     }
 
     const previewImage = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${repo.name}/${branch}/portfolio.webp`;
-    const hasVideo = VIDEO_REPOS.has(repo.name);
+    const hasVideo = await rootFileExists(repo.name, branch, "portfolio.mp4");
     const videoUrl = hasVideo
       ? `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${repo.name}/${branch}/portfolio.mp4`
       : null;
