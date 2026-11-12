@@ -26,6 +26,7 @@ import FleetPulseArt from "./FleetPulseArt";
 import TorqueLineArt from "./TorqueLineArt";
 import NextChapterWeekOneArt from "./NextChapterWeekOneArt";
 import VscodeFxArt from "./VscodeFxArt";
+import ZynzTehrProfileArt from "./ZynzTehrProfileArt";
 
 interface ProjectArtProps {
   projectId: string;
@@ -73,7 +74,8 @@ const ProjectArt: React.FC<ProjectArtProps> = ({
     case "capstone-project":
       return <CapstoneArt />;
 
-    // zynztehr-profile removed: the HUD hex button links to the profile
+    case "zynztehr-profile":
+      return <ZynzTehrProfileArt />;
 
     case "tic-tac-toe-withai":
     case "tic-tac-toe-with-ai":

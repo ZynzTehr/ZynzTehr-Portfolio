@@ -7,7 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const GITHUB_USERNAME = "ZynzTehr";
-const EXCLUDED_REPOS = ["ZynzTehr-Portfolio", "ZynzTehr", "ZynzTehr-Profile"];
+// This portfolio and the GitHub profile README are not projects. The profile
+// hub (ZynzTehr-Profile, jorgebucio.com) is, and is listed like any other.
+const EXCLUDED_REPOS = ["ZynzTehr-Portfolio", "ZynzTehr"];
 
 const VIDEO_REPOS = new Set([
   "MusicPort",
@@ -45,6 +47,12 @@ const MEDIA_OVERRIDES = {
     videoUrl: "/media/vscode-fx/portfolio.mp4",
   },
   musicport: { previewImage: "/media/musicport/portfolio.webp" },
+  // The repo ships no portfolio.webp: a capture of the live site, and a short
+  // recording of its opening act.
+  "zynztehr-profile": {
+    previewImage: "/media/zynztehr-profile/portfolio.webp",
+    videoUrl: "/media/zynztehr-profile/portfolio.mp4",
+  },
   "super-quiz": { previewImage: "/media/super-quiz/portfolio.webp" },
   "tic-tac-toe-withai": { previewImage: "/media/tic-tac-toe-withai/portfolio.webp" },
 };
@@ -66,6 +74,7 @@ function applyMediaOverrides(projects) {
 }
 
 const TITLE_OVERRIDES = {
+  "zynztehr-profile": "Profile Hub",
   musicport: "MusicPort",
   "vscode-fx": "VSCode FX",
   anibeam: "AniBeam",
@@ -94,6 +103,8 @@ const TITLE_OVERRIDES = {
 };
 
 const DESCRIPTION_OVERRIDES = {
+  "zynztehr-profile":
+    "Profile Hub (jorgebucio.com) is a six-act interactive engineering folio in React 19 and TypeScript: scroll-pinned card choreography in GSAP and Motion, custom Three.js GLSL shaders, live tool-pairing splines, automated GitHub build sync, a serverless SVG API, and Playwright plus Axe quality gates.",
   "torque-line":
     "TorqueLine is a commercial fleet maintenance platform built with Next.js and TypeScript for DOT and OEM PM-A, PM-B, and PM-C inspection schedules, unit-based engine rebuild tracking across chassis, multi-device sync, and probable-cause diagnostics.",
 };
@@ -128,6 +139,11 @@ const BASELINE_MILESTONE_DATES = {
 };
 
 const CURATED_REPO_METADATA = {
+  "zynztehr-profile": {
+    category: "3D & Creative UI",
+    techStack: ["React", "TypeScript", "Three.js", "GSAP"],
+    topics: ["portfolio", "glsl", "scroll-choreography", "github-sync", "playwright"],
+  },
   musicport: {
     category: "Full-Stack",
     techStack: ["React", "TypeScript", "Express", "PostgreSQL"],

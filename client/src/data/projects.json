@@ -1,5 +1,24 @@
 [
   {
+    "id": "zynztehr-profile",
+    "name": "Profile Hub",
+    "rawName": "ZynzTehr-Profile",
+    "description": "Profile Hub (jorgebucio.com) is a six-act interactive engineering folio in React 19 and TypeScript: scroll-pinned card choreography in GSAP and Motion, custom Three.js GLSL shaders, live tool-pairing splines, automated GitHub build sync, a serverless SVG API, and Playwright plus Axe quality gates.",
+    "category": "3D & Creative UI",
+    "language": "TypeScript",
+    "techStack": ["React", "TypeScript", "Three.js", "GSAP"],
+    "topics": ["portfolio", "glsl", "scroll-choreography", "github-sync", "playwright"],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/ZynzTehr-Profile",
+    "liveUrl": "https://jorgebucio.com",
+    "mediaType": "video",
+    "mediaUrl": "/media/zynztehr-profile/portfolio.webp",
+    "previewImage": "/media/zynztehr-profile/portfolio.webp",
+    "videoUrl": "/media/zynztehr-profile/portfolio.mp4",
+    "updatedAt": "2026-11-12T05:51:19Z"
+  },
+  {
     "id": "musicport",
     "name": "MusicPort",
     "rawName": "MusicPort",
