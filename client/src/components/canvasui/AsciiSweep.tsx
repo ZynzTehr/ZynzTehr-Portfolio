@@ -8,6 +8,10 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -527,8 +531,7 @@ void main () {
 }`;
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 interface FallbackRect {
@@ -1644,11 +1647,14 @@ function initializeAsciiSweep(
       gl!.deleteShader(vertexShader);
       gl!.deleteShader(fragmentShader);
       gl!.deleteBuffer(quad);
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface AsciiSweepProps extends AsciiSweepOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   /** The first panel. */
   children: ReactNode;
   /** The second panel, swapped in when index is 1. */
@@ -1672,6 +1678,7 @@ const panelStyle: CSSProperties = {
 };
 
 export function AsciiSweep({
+  native: allowNative = true,
   children,
   alternate,
   index = 0,
@@ -1692,7 +1699,7 @@ export function AsciiSweep({
   const [ready, setReady] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const output = outputRef.current;

@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { paintFallbackSnapshot } from "./domSnapshot";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -346,8 +350,7 @@ void main () {
 }`;
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 function createParticleScroll(
@@ -541,6 +544,7 @@ function createParticleScroll(
   let introWait = 0;
   let introReady = false;
   let scrollSmooth = content.scrollTop;
+  let winScrollSmooth = window.scrollY;
   syncCanvasSize();
   syncBgColor();
 
@@ -556,15 +560,18 @@ function createParticleScroll(
     } catch {}
   }
 
+  let rowFrame: { rect: DOMRect; winH: number; docMax: number } | null = null;
+
   function rowTargetFor(docRowY: number) {
     if (reducedMotion || !hasCapturedContent) return 1;
     const h = Math.max(output.clientHeight, 1);
     const band = Math.max(config.band, 1);
     const max = content.scrollHeight - content.clientHeight;
     if (max <= 1) {
-      const rect = output.getBoundingClientRect();
-      const winH = Math.max(window.innerHeight || h, 1);
-      const docMax = Math.max(0, document.documentElement.scrollHeight - winH);
+      // Layout reads are hoisted: updateRows fills rowFrame once per frame.
+      const rect = rowFrame?.rect ?? output.getBoundingClientRect();
+      const winH = rowFrame?.winH ?? Math.max(window.innerHeight || h, 1);
+      const docMax = rowFrame?.docMax ?? Math.max(0, document.documentElement.scrollHeight - winH);
       let line = Math.min(Math.max(config.point, 0), 1) * winH;
       if (docMax > 1) {
         const endP = Math.min(
@@ -575,7 +582,9 @@ function createParticleScroll(
       } else {
         line = winH + band;
       }
-      const vy = rect.top + docRowY;
+      // Follow window scroll through the same smoothing as element scroll so the
+      // configured \`smoothing\` applies in window mode too.
+      const vy = rect.top + (window.scrollY - winScrollSmooth) + docRowY;
       return Math.min(Math.max((line + band - vy) / band, 0), 1);
     }
     if (!introDone) return 1;
@@ -587,11 +596,25 @@ function createParticleScroll(
   }
 
   function updateRows(dt: number, density: number, winStart: number, winLen: number) {
+    const frameWinH = Math.max(window.innerHeight || output.clientHeight, 1);
+    rowFrame = {
+      rect: output.getBoundingClientRect(),
+      winH: frameWinH,
+      docMax: Math.max(0, document.documentElement.scrollHeight - frameWinH),
+    };
+    try {
+      updateRowsInner(dt, density, winStart, winLen);
+    } finally {
+      rowFrame = null;
+    }
+  }
+
+  function updateRowsInner(dt: number, density: number, winStart: number, winLen: number) {
     const docRows = Math.max(1, Math.ceil(content.scrollHeight / density));
     if (rowProgress.length !== docRows) {
       const next = new Float32Array(docRows);
       for (let i = 0; i < docRows; i++) {
-        next[i] = reducedMotion ? 1 : 0;
+        next[i] = reducedMotion ? 1 : rowTargetFor((i + 0.5) * density);
       }
       rowProgress = next;
     }
@@ -665,7 +688,19 @@ function createParticleScroll(
     gl!.uniform3f(base.uniforms.uBg, bg[0], bg[1], bg[2]);
     gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
 
-    gl!.blendFuncSeparate(gl!.SRC_ALPHA, gl!.ONE_MINUS_SRC_ALPHA, gl!.ZERO, gl!.ONE);
+    // Native: the base pass is opaque, so grains keep its alpha. Fallback: the
+    // base pass is transparent over assembled rows, so grains must write alpha
+    // or they vanish wherever a row has already reassembled.
+    if (htmlInCanvas) {
+      gl!.blendFuncSeparate(gl!.SRC_ALPHA, gl!.ONE_MINUS_SRC_ALPHA, gl!.ZERO, gl!.ONE);
+    } else {
+      gl!.blendFuncSeparate(
+        gl!.SRC_ALPHA,
+        gl!.ONE_MINUS_SRC_ALPHA,
+        gl!.ONE,
+        gl!.ONE_MINUS_SRC_ALPHA,
+      );
+    }
     gl!.useProgram(points.program);
     gl!.bindVertexArray(pointVao);
     gl!.uniform1i(points.uniforms.uRowTex, 1);
@@ -725,10 +760,13 @@ function createParticleScroll(
     const k = reducedMotion || tau <= 0 ? 1 : 1 - Math.exp(-delta / Math.max(tau, 1e-4));
     scrollSmooth += (scrollTop - scrollSmooth) * k;
     if (Math.abs(scrollTop - scrollSmooth) < 0.5) scrollSmooth = scrollTop;
+    winScrollSmooth += (window.scrollY - winScrollSmooth) * k;
+    if (Math.abs(window.scrollY - winScrollSmooth) < 0.5) winScrollSmooth = window.scrollY;
     render(delta);
     if (
       !contentDirty &&
       scrollSmooth === scrollTop &&
+      winScrollSmooth === window.scrollY &&
       !rowsAnimating &&
       rowsAssembled &&
       introDone &&
@@ -832,11 +870,14 @@ function createParticleScroll(
       gl!.deleteVertexArray(quadVao);
       gl!.deleteVertexArray(pointVao);
       if (htmlInCanvas) paintable.onpaint = null;
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface ParticleScrollProps extends ParticleScrollOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -844,7 +885,13 @@ export interface ParticleScrollProps extends ParticleScrollOptions {
 
 const emptySubscribe = () => () => {};
 
-export function ParticleScroll({ children, className, style, ...options }: ParticleScrollProps) {
+export function ParticleScroll({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: ParticleScrollProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -853,7 +900,7 @@ export function ParticleScroll({ children, className, style, ...options }: Parti
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;

@@ -1,11 +1,26 @@
-import React, { useEffect, useState, type ReactNode } from "react";
+import React, { useEffect, useRef, useState, type ReactNode } from "react";
 import { AsciiSweep, type AsciiSweepOptions } from "./AsciiSweep";
+import { ASCII_SWEEP_SPEC } from "./spec";
+import { prefersReducedMotion } from "../../lib/useReducedMotion";
+
+/**
+ * upgrades.md: "implement this for text when pages loads". A one-shot
+ * AsciiSweep from a blank panel to the real content, at the owner's configured
+ * props. The engine unmounts once its own fade-out has finished (FADE_OUT_S
+ * 0.45s plus settle frames), so the sweep is never cut short, and the live DOM
+ * takes over.
+ */
+
+const FADE_TAIL_MS = 520;
 
 interface PageLoadSweepProps extends Omit<AsciiSweepOptions, "onSweepEnd"> {
   children: ReactNode;
   delayMs?: number;
   className?: string;
   style?: React.CSSProperties;
+  /** Fires when the sweep has landed (or immediately under reduced motion). */
+  onComplete?: () => void;
+  native?: boolean;
 }
 
 export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
@@ -13,35 +28,48 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
   delayMs = 90,
   className,
   style,
-  duration = 1.25,
-  color = "#60a5fa",
-  background = "#0a1124",
-  glow = 1.85,
-  band = 0.3,
-  scale = 2,
-  ...rest
+  onComplete,
+  native,
+  ...overrides
 }) => {
+  const options = { ...ASCII_SWEEP_SPEC, ...overrides };
+  const duration = options.duration ?? 2;
   const [slotIndex, setSlotIndex] = useState<number>(0);
-  const [completed, setCompleted] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [completed, setCompleted] = useState<boolean>(() => prefersReducedMotion());
+  const onCompleteRef = useRef(onComplete);
+  const firedRef = useRef(false);
 
   useEffect(() => {
-    if (completed) return;
-    const sweepTimer = window.setTimeout(() => {
-      setSlotIndex(1);
-    }, delayMs);
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  const finish = () => {
+    if (!firedRef.current) {
+      firedRef.current = true;
+      onCompleteRef.current?.();
+    }
+  };
+
+  useEffect(() => {
+    if (completed) {
+      finish();
+      return;
+    }
+    const sweepTimer = window.setTimeout(() => setSlotIndex(1), delayMs);
+    // Safety net: if WebGL2 is unavailable the engine never reports an end.
     const cleanupTimer = window.setTimeout(
       () => {
+        finish();
         setCompleted(true);
       },
-      delayMs + duration * 1000 + 550,
+      delayMs + duration * 1000 + FADE_TAIL_MS + 400,
     );
     return () => {
       window.clearTimeout(sweepTimer);
       window.clearTimeout(cleanupTimer);
     };
+    // finish only reads refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed, delayMs, duration]);
 
   if (completed) {
@@ -58,17 +86,15 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
         {children}
       </div>
       <AsciiSweep
+        {...options}
+        native={native}
         index={slotIndex}
-        duration={duration}
-        color={color}
-        background={background}
-        glow={glow}
-        band={band}
-        scale={scale}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        onSweepEnd={() => setCompleted(true)}
+        onSweepEnd={() => {
+          finish();
+          window.setTimeout(() => setCompleted(true), FADE_TAIL_MS);
+        }}
         alternate={children}
-        {...rest}
       >
         <div className="w-full h-full" />
       </AsciiSweep>

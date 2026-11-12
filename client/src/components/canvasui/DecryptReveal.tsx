@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { paintFallbackSnapshot } from "./domSnapshot";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -615,8 +619,7 @@ function clampAspect(aspect: number) {
 }
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 function createDecryptReveal(
@@ -1062,9 +1065,15 @@ function createDecryptReveal(
   const rectCache = createRectCache(output);
 
   function onPointerMove(event: PointerEvent) {
-    const rect = rectCache.current;
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    // Read the rect per move and map screen pixels to layout pixels: cards
+    // scale and lift on hover, and carousel tiles sit in a 3D transform, so a
+    // cached, untransformed rect puts the decode circle off the cursor.
+    void rectCache;
+    const rect = output.getBoundingClientRect();
+    const sx = output.clientWidth / Math.max(rect.width, 1);
+    const sy = output.clientHeight / Math.max(rect.height, 1);
+    const x = (event.clientX - rect.left) * sx;
+    const y = (event.clientY - rect.top) * sy;
     if (pointer.target === 0 && pointer.active < 1e-3) {
       pointer.x = x;
       pointer.y = y;
@@ -1167,11 +1176,14 @@ function createDecryptReveal(
       gl!.deleteShader(mainPass.fs);
       gl!.deleteBuffer(quad);
       if (htmlInCanvas) paintable.onpaint = null;
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface DecryptRevealProps extends DecryptRevealOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -1179,7 +1191,13 @@ export interface DecryptRevealProps extends DecryptRevealOptions {
 
 const emptySubscribe = () => () => {};
 
-export function DecryptReveal({ children, className, style, ...options }: DecryptRevealProps) {
+export function DecryptReveal({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: DecryptRevealProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -1188,7 +1206,7 @@ export function DecryptReveal({ children, className, style, ...options }: Decryp
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;

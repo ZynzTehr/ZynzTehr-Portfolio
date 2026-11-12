@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -389,8 +393,7 @@ void main () {
 }`;
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 function createLaser(elements: LaserElements, options: LaserOptions = {}): LaserInstance | null {
@@ -665,7 +668,7 @@ function createLaser(elements: LaserElements, options: LaserOptions = {}): Laser
   function onScroll() {
     const top = content.scrollTop + window.scrollY;
     if (!reducedMotion) {
-      activity = Math.min(1, activity + Math.abs(top - lastScrollTop) / 500);
+      activity = Math.min(1, activity + Math.abs(top - lastScrollTop) / 600);
     }
     lastScrollTop = top;
     start();
@@ -718,11 +721,14 @@ function createLaser(elements: LaserElements, options: LaserOptions = {}): Laser
       gl!.deleteShader(fragmentShader);
       gl!.deleteBuffer(quad);
       if (htmlInCanvas) paintable.onpaint = null;
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface LaserProps extends LaserOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -730,7 +736,13 @@ export interface LaserProps extends LaserOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Laser({ children, className, style, ...options }: LaserProps) {
+export function Laser({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: LaserProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -739,7 +751,7 @@ export function Laser({ children, className, style, ...options }: LaserProps) {
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;

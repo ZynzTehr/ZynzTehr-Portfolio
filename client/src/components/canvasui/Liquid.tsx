@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -458,8 +462,7 @@ interface FluidTargets {
 }
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 function createLiquid(
@@ -1075,11 +1078,14 @@ function createLiquid(
       listenTarget.removeEventListener("pointerup", onPointerLeave as EventListener);
       listenTarget.removeEventListener("pointerleave", onPointerLeave as EventListener);
       listenTarget.removeEventListener("pointercancel", onPointerLeave as EventListener);
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface LiquidProps extends LiquidOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -1087,7 +1093,13 @@ export interface LiquidProps extends LiquidOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Liquid({ children, className, style, ...options }: LiquidProps) {
+export function Liquid({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: LiquidProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -1096,7 +1108,7 @@ export function Liquid({ children, className, style, ...options }: LiquidProps) 
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;

@@ -155,6 +155,8 @@ function paintFallbackSvg(
   const shapes = svg.querySelectorAll("rect, circle, ellipse, polygon, path, line");
   for (let i = 0; i < shapes.length; i++) {
     const shape = shapes[i];
+    // Definitions, masks and patterns are never rendered directly.
+    if (shape.closest("defs, clipPath, mask, pattern, symbol, marker")) continue;
     const computed = getComputedStyle(shape);
     if (computed.display === "none" || computed.visibility === "hidden") continue;
     const fill = shape.getAttribute("fill") || computed.fill;
@@ -211,11 +213,11 @@ function paintFallbackSvg(
 
     if (path2d) {
       if (fill && fill !== "none") {
-        ctx.fillStyle = fill.startsWith("url(") ? "#1d4ed8" : fill;
+        ctx.fillStyle = fill.startsWith("url(") ? resolvePaintServer(svg, fill, ctx) : fill;
         ctx.fill(path2d);
       }
       if (stroke && stroke !== "none" && strokeW > 0) {
-        ctx.strokeStyle = stroke.startsWith("url(") ? "#60a5fa" : stroke;
+        ctx.strokeStyle = stroke.startsWith("url(") ? resolvePaintServer(svg, stroke, ctx) : stroke;
         ctx.lineWidth = strokeW;
         ctx.stroke(path2d);
       }
@@ -223,6 +225,57 @@ function paintFallbackSvg(
     ctx.restore();
   }
   ctx.restore();
+}
+
+/**
+ * Approximate a url(#gradient) paint with the average of its stops (alpha
+ * included), so gradient fills keep their real tone instead of a flat accent.
+ */
+function resolvePaintServer(
+  svg: SVGSVGElement,
+  value: string,
+  ctx: CanvasRenderingContext2D,
+): string {
+  const id = /url\(\s*["']?#([^"')\s]+)/.exec(value)?.[1];
+  const server = id
+    ? (svg.querySelector(`[id="${id}"]`) ?? svg.ownerDocument.getElementById(id))
+    : null;
+  const stops = server ? Array.from(server.querySelectorAll("stop")) : [];
+  if (!stops.length) return "rgba(0,0,0,0)";
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let a = 0;
+  for (const stop of stops) {
+    const cs = getComputedStyle(stop);
+    ctx.fillStyle = "#000";
+    ctx.fillStyle = cs.stopColor || stop.getAttribute("stop-color") || "#000";
+    const hex = String(ctx.fillStyle);
+    const m = /^#([0-9a-f]{6})$/i.exec(hex);
+    const rgba = /rgba?\(([^)]+)\)/.exec(hex);
+    let cr = 0;
+    let cg = 0;
+    let cb = 0;
+    let ca = 1;
+    if (m) {
+      const n = Number.parseInt(m[1], 16);
+      cr = (n >> 16) & 255;
+      cg = (n >> 8) & 255;
+      cb = n & 255;
+    } else if (rgba) {
+      const parts = rgba[1].split(",").map((v) => Number.parseFloat(v));
+      [cr, cg, cb] = parts;
+      ca = parts[3] ?? 1;
+    }
+    const so = Number.parseFloat(cs.stopOpacity || stop.getAttribute("stop-opacity") || "1");
+    ca *= Number.isFinite(so) ? so : 1;
+    r += cr;
+    g += cg;
+    b += cb;
+    a += ca;
+  }
+  const n = stops.length;
+  return `rgba(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)},${(a / n).toFixed(3)})`;
 }
 
 function paintFallbackMedia(

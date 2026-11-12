@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -336,33 +340,36 @@ void main () {
   }
   g = max(g, 0.0);
 
-  if (uHasContent < 0.5) {
-    vec3 rainCol = mix(uColor, uHeadColor, clamp(headG, 0.0, 1.0));
-    float a = clamp(g, 0.0, 1.0);
-    outColor = vec4(rainCol * a, a);
-    return;
+  // Portfolio addition: without native capture there is no content texture,
+  // so the fallback treats the page as dark and flat, computes the same light
+  // pools, and draws the dim and the pools as an overlay over the live DOM.
+  bool fallback = uHasContent < 0.5;
+  vec4 content = vec4(0.0);
+  float lC = 0.0;
+  vec3 N = vec3(0.0, 0.0, 1.0);
+  float bright = 0.0;
+  if (!fallback) {
+    vec2 e = vec2(3.0, 0.0) / uResolution;
+    content = texture(uContent, cuv);
+    lC = lum(content.rgb);
+    float lX1 = lum(texture(uContent, clamp(cuv - e.xy, 0.0, 1.0)).rgb);
+    float lX2 = lum(texture(uContent, clamp(cuv + e.xy, 0.0, 1.0)).rgb);
+    float lY1 = lum(texture(uContent, clamp(cuv - e.yx, 0.0, 1.0)).rgb);
+    float lY2 = lum(texture(uContent, clamp(cuv + e.yx, 0.0, 1.0)).rgb);
+    N = normalize(vec3(
+      -(lX2 - lX1) * uRelief * 4.0,
+      -(lY2 - lY1) * uRelief * 4.0,
+      1.0
+    ));
+    vec2 e2 = vec2(30.0, 0.0) / uResolution;
+    float bgL = (lC
+      + lum(texture(uContent, clamp(cuv - e2.xy, 0.0, 1.0)).rgb)
+      + lum(texture(uContent, clamp(cuv + e2.xy, 0.0, 1.0)).rgb)
+      + lum(texture(uContent, clamp(cuv - e2.yx, 0.0, 1.0)).rgb)
+      + lum(texture(uContent, clamp(cuv + e2.yx, 0.0, 1.0)).rgb)) * 0.2;
+    bright = smoothstep(0.55, 0.8, uPageLum) * smoothstep(0.2, 0.45, bgL);
   }
-
-  vec2 e = vec2(3.0, 0.0) / uResolution;
-  vec4 content = texture(uContent, cuv);
-  float lC = lum(content.rgb);
-  float lX1 = lum(texture(uContent, clamp(cuv - e.xy, 0.0, 1.0)).rgb);
-  float lX2 = lum(texture(uContent, clamp(cuv + e.xy, 0.0, 1.0)).rgb);
-  float lY1 = lum(texture(uContent, clamp(cuv - e.yx, 0.0, 1.0)).rgb);
-  float lY2 = lum(texture(uContent, clamp(cuv + e.yx, 0.0, 1.0)).rgb);
-  vec3 N = normalize(vec3(
-    -(lX2 - lX1) * uRelief * 4.0,
-    -(lY2 - lY1) * uRelief * 4.0,
-    1.0
-  ));
   float reliefMix = clamp(uRelief, 0.0, 1.0);
-  vec2 e2 = vec2(30.0, 0.0) / uResolution;
-  float bgL = (lC
-    + lum(texture(uContent, clamp(cuv - e2.xy, 0.0, 1.0)).rgb)
-    + lum(texture(uContent, clamp(cuv + e2.xy, 0.0, 1.0)).rgb)
-    + lum(texture(uContent, clamp(cuv - e2.yx, 0.0, 1.0)).rgb)
-    + lum(texture(uContent, clamp(cuv + e2.yx, 0.0, 1.0)).rgb)) * 0.2;
-  float bright = smoothstep(0.55, 0.8, uPageLum) * smoothstep(0.2, 0.45, bgL);
 
   float lightSum = 0.0;
   float sigma2 = uLightRadius * uLightRadius * 0.5;
@@ -400,6 +407,16 @@ void main () {
   float lit = 2.2 * ls / (ls + 1.1);
 
   float dimEff = uDim * (1.0 - bright);
+  if (fallback) {
+    vec3 rainCol = mix(uColor, uHeadColor, clamp(headG, 0.0, 1.0));
+    float gA0 = clamp(g, 0.0, 1.0);
+    float dark = dimEff * (1.0 - smoothstep(0.0, 1.0, lit));
+    vec3 emit = uColor * lit * 0.14 + uColor * clamp(lit - 1.0, 0.0, 1.0) * 0.1;
+    float a = clamp(dark + gA0 * (1.0 - dark), 0.0, 1.0);
+    vec3 fcol = emit * (1.0 - gA0) + rainCol * gA0;
+    outColor = vec4(min(fcol, vec3(1.0)), a);
+    return;
+  }
   float shade = mix(
     clamp(1.0 - dimEff, 0.0, 1.0),
     1.0,
@@ -423,8 +440,7 @@ void main () {
 }`;
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 function buildAtlas(charset: string): {
@@ -882,11 +898,14 @@ function createGlyphRain(
       gl!.deleteShader(fragmentShader);
       gl!.deleteBuffer(quad);
       if (htmlInCanvas) paintable.onpaint = null;
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface GlyphRainProps extends GlyphRainOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -894,7 +913,13 @@ export interface GlyphRainProps extends GlyphRainOptions {
 
 const emptySubscribe = () => () => {};
 
-export function GlyphRain({ children, className, style, ...options }: GlyphRainProps) {
+export function GlyphRain({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: GlyphRainProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -903,7 +928,7 @@ export function GlyphRain({ children, className, style, ...options }: GlyphRainP
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;

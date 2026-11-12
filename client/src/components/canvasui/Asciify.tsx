@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  loseWebGLContext,
+  supportsHtmlInCanvas as sharedSupportsHtmlInCanvas,
+} from "./htmlInCanvas";
 
 const canvasDimensionLimits = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, number>();
 
@@ -366,8 +370,7 @@ void main () {
 }`;
 
 function supportsHtmlInCanvas(): boolean {
-  void isHtmlInCanvasBlocked;
-  return false;
+  return sharedSupportsHtmlInCanvas();
 }
 
 interface FallbackRect {
@@ -1368,11 +1371,14 @@ function initializeAsciify(
       gl!.deleteShader(fragmentShader);
       gl!.deleteBuffer(quad);
       if (htmlInCanvas) paintable.onpaint = null;
+      loseWebGLContext(gl);
     },
   };
 }
 
 export interface AsciifyProps extends AsciifyOptions {
+  /** Allow the native HTML-in-canvas path when the browser supports it. Default true. */
+  native?: boolean;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -1380,7 +1386,13 @@ export interface AsciifyProps extends AsciifyOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Asciify({ children, className, style, ...options }: AsciifyProps) {
+export function Asciify({
+  native: allowNative = true,
+  children,
+  className,
+  style,
+  ...options
+}: AsciifyProps) {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);
@@ -1389,7 +1401,7 @@ export function Asciify({ children, className, style, ...options }: AsciifyProps
   const [failed, setFailed] = useState(false);
 
   const supported = useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false);
-  const native = supported && !failed;
+  const native = supported && !failed && allowNative;
 
   useEffect(() => {
     const source = sourceRef.current;
