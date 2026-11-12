@@ -1024,63 +1024,38 @@
 }
 
 /* The black hole: fixed between Act I and Act II, faded in by BlackHole.tsx
-   as Act III arrives. A CSS hole sits under the Flow video as its stand-in. */
+   as Act III arrives. BlackHole.tsx places the frame (--bh-w/h/left/top):
+   landscape covers the screen as composed, portrait centres the hole. */
 .blackhole {
   position: fixed;
   inset: 0;
   z-index: 2;
   pointer-events: none;
   overflow: hidden;
-  background: #02040a;
+  background: #03060f;
 }
-/* The hole rests smaller than the frame so the words above and below stay
-   clear of the photon ring; --bh-grow is the arrival zoom from BlackHole.tsx. */
-/* Landscape: the hole rests smaller and a little low, so the paragraph above
-   clears the photon ring and its jets. */
-.blackhole {
-  --bh-rest: 0.6;
-  --bh-drop: 4vh;
-}
-@media (min-aspect-ratio: 4/5) and (max-aspect-ratio: 5/4) {
-  .blackhole {
-    --bh-rest: 0.6;
-    --bh-drop: 0px;
-  }
-}
-.blackhole__stage {
-  position: absolute;
-  inset: 0;
-  transform: translateY(var(--bh-drop, 0px)) scale(calc(var(--bh-rest) * var(--bh-grow, 1)));
-  transform-origin: 50% 50%;
-}
-/* Soft edges: the shrunken frame fades into the void instead of a hard box. */
 .blackhole__video {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
-  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+  left: var(--bh-left, 0px);
+  top: var(--bh-top, 0px);
+  width: var(--bh-w, 100vw);
+  height: var(--bh-h, 56.25vw);
+  max-width: none;
+  /* The arrival zoom settles onto the hole itself. */
+  transform: scale(var(--bh-grow, 1));
+  transform-origin: 76.56% 43.52%;
 }
-/* Portrait: the frame is laid out as its own wide 16:9 box (the disk runs
-   off both edges) rather than cropped to the screen, so the soft mask follows
-   the real frame and the hole lands between the words and the numbers. */
-@media (max-aspect-ratio: 4/5) {
-  .blackhole {
-    --bh-rest: 1;
-    --bh-drop: 0px;
-  }
-  .blackhole__video {
-    inset: auto;
-    left: 50%;
-    top: 50%;
-    width: 280vw;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    translate: -50% -50%;
-    object-fit: contain;
-  }
+/* Portrait: the frame is narrower than tall screens, so its edges dissolve
+   into the void. */
+.blackhole[data-frame="portrait"] .blackhole__video {
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(270deg, transparent 0%, #000 7%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(270deg, transparent 0%, #000 7%);
+  mask-composite: intersect;
 }
 .blackhole__css {
   position: absolute;
@@ -1147,19 +1122,30 @@
   animation-play-state: paused;
 }
 /* Edges and the text bands go dark so the words read over the hole. */
+/* Keeps the words legible: landscape darkens the left, where Act III's words
+   sit; portrait darkens the bands above and below the hole. */
 .blackhole__scrim {
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(90deg, rgba(3, 6, 15, 0.9) 0%, rgba(3, 6, 15, 0.72) 30%, transparent 52%),
     linear-gradient(
       180deg,
-      rgba(3, 6, 15, 0.86) 0%,
-      rgba(3, 6, 15, 0.7) 30%,
-      transparent 42%,
-      transparent 68%,
-      rgba(3, 6, 15, 0.86) 100%
-    ),
-    radial-gradient(ellipse 80% 70% at 50% 50%, transparent 45%, rgba(3, 6, 15, 0.7) 100%);
+      rgba(3, 6, 15, 0.55) 0%,
+      transparent 22%,
+      transparent 80%,
+      rgba(3, 6, 15, 0.7) 100%
+    );
+}
+.blackhole[data-frame="portrait"] .blackhole__scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(3, 6, 15, 0.92) 0%,
+    rgba(3, 6, 15, 0.8) 34%,
+    transparent 44%,
+    transparent 70%,
+    rgba(3, 6, 15, 0.9) 82%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1382,6 +1368,11 @@
   overflow-x: clip;
   /* Scrubbed exits (sink, swirl) pivot on the middle of the viewport. */
   transform-origin: 50% calc(100% - 50svh);
+}
+/* Act II swirls into the black hole wherever it lands on screen (BlackHole.tsx
+   publishes its position; the act is pinned with its bottom on the viewport's). */
+.act[data-exit="swirl"] {
+  transform-origin: var(--bh-x, 50%) calc(100% - var(--bh-y-from-bottom, 50svh));
 }
 .act--1 {
   z-index: 1;
@@ -1767,5 +1758,27 @@ body::-webkit-scrollbar {
   }
   .transmission__foot {
     gap: 0.75rem;
+  }
+}
+
+/* Landscape: the hole sits on the right as composed, so Act III's words take
+   the dark left side, head at the top and numbers at the bottom. */
+@media (min-aspect-ratio: 1/1) {
+  .transmission__layout {
+    align-items: flex-start;
+    text-align: left;
+    max-width: min(560px, 46vw);
+  }
+  .transmission__head > div:first-child {
+    justify-content: flex-start;
+  }
+  .transmission__foot {
+    align-items: flex-start;
+  }
+  .transmission__foot > div:last-child {
+    justify-content: flex-start;
+  }
+  .transmission__horizon {
+    min-height: 2rem;
   }
 }
