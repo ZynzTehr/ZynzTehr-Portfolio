@@ -459,8 +459,10 @@ const Home: React.FC = () => {
         currentIndex={stageIndex}
         totalCount={stageList.length}
         onClose={handleCloseStage}
-        onPrev={() => handleStepStage(-1)}
-        onNext={() => handleStepStage(1)}
+        // The index stage sits inline in the grid, so a step would move it to
+        // another row (often off screen); only the orbit's stage steps.
+        onPrev={source === "carousel" ? () => handleStepStage(-1) : undefined}
+        onNext={source === "carousel" ? () => handleStepStage(1) : undefined}
         onSelectTopic={handleSelectTopic}
         closeRequest={closeRequest}
         initialFocus={stage.focus}
@@ -699,6 +701,7 @@ const Home: React.FC = () => {
                                 project={project}
                                 isActive={isHovered || isSelected}
                                 enableShader={isHovered && !stageProject}
+                                restingArt={false}
                               />
                               <span className="grid-category-badge">{project.category}</span>
                             </div>

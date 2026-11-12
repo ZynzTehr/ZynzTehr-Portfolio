@@ -52,7 +52,7 @@ One accent family (cobalt to ice) works as a moving system: the laser, the rain,
 
 ### Voice and vocabulary
 
-Mission vocabulary used sparingly and consistently: signal, craft, launch, orbit, index, event horizon. Actions are named for what they do ("Launch", "Open live build", "View source", "Inspect"). The project stage closes with its X (or Esc); it has no separate Back button. No "decrypt", "dossier", "materialize" or "command deck". No invented statistics: every number on the site is computed from `projects.json`.
+Mission vocabulary used sparingly and consistently: signal, craft, launch, orbit, index, event horizon. Actions are named for what they do ("Launch", "Open live build", "View source", "Inspect"). The project stage closes with its X (or Esc); it has no separate Back button. The orbit's stage steps between projects (prev / next, arrow keys); the index's inline stage does not, since a step would move it to another row. Orbit cards rest on their SVG art and crossfade to media; index cards rest on the live snapshot and decode through the glyph shader into the clip on hover. No "decrypt", "dossier", "materialize" or "command deck". No invented statistics: every number on the site is computed from `projects.json`.
 
 ### Copy (prologue beats)
 

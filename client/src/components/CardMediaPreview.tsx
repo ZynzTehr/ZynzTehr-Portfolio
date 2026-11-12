@@ -21,6 +21,12 @@ interface CardMediaPreviewProps {
   isActive: boolean;
   enableShader?: boolean;
   compact?: boolean;
+  /**
+   * Rest on the project's SVG art (the orbit). Without it the card rests on the
+   * live snapshot and hover decodes it through the glyph shader into the clip
+   * (the index); the art then only stands in when the snapshot fails to load.
+   */
+  restingArt?: boolean;
 }
 
 const OPEN_MS = 640;
@@ -33,6 +39,7 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   isActive,
   enableShader = isActive,
   compact = false,
+  restingArt = true,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reducedMotion = useReducedMotion();
@@ -130,18 +137,21 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   );
 
   // Missing media: the SVG art stays as the card's face instead of a broken image.
-  const revealed = isActive && !mediaFailed;
+  const revealed = (isActive || !restingArt) && !mediaFailed;
+  const showArt = restingArt || mediaFailed;
 
   return (
     <div className={`card-media-surface ${revealed ? "is-revealed" : ""}`}>
-      <div className="card-svg-resting">
-        <ProjectArt
-          projectId={project.id}
-          projectName={project.name}
-          previewImage={project.previewImage}
-          mediaUrl={project.mediaUrl}
-        />
-      </div>
+      {showArt && (
+        <div className="card-svg-resting">
+          <ProjectArt
+            projectId={project.id}
+            projectName={project.name}
+            previewImage={project.previewImage}
+            mediaUrl={project.mediaUrl}
+          />
+        </div>
+      )}
 
       <div className="card-snapshot-reveal" aria-hidden={!revealed}>
         {shaderMounted && !mediaFailed ? (

@@ -24,8 +24,9 @@ interface ProjectStageProps {
   currentIndex: number;
   totalCount: number;
   onClose: () => void;
-  onPrev: () => void;
-  onNext: () => void;
+  /** Stepping between projects; omitted where a step would move the stage away (the index). */
+  onPrev?: () => void;
+  onNext?: () => void;
   onSelectTopic?: (topic: string) => void;
   /** Increment to close with the exit motion from outside (for example, re-clicking the card). */
   closeRequest?: number;
@@ -91,14 +92,16 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     [onClose, reducedMotion],
   );
 
+  const canStep = Boolean(onPrev && onNext);
+
   const handleStepPrev = useCallback(() => {
-    if (isClosingRef.current) return;
+    if (isClosingRef.current || !onPrev) return;
     stepDirectionRef.current = -1;
     onPrev();
   }, [onPrev]);
 
   const handleStepNext = useCallback(() => {
-    if (isClosingRef.current) return;
+    if (isClosingRef.current || !onNext) return;
     stepDirectionRef.current = 1;
     onNext();
   }, [onNext]);
@@ -117,17 +120,17 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
       if (event.key === "Escape") {
         event.preventDefault();
         requestClose();
-      } else if (event.key === "ArrowLeft") {
+      } else if (canStep && event.key === "ArrowLeft") {
         event.preventDefault();
         handleStepPrev();
-      } else if (event.key === "ArrowRight") {
+      } else if (canStep && event.key === "ArrowRight") {
         event.preventDefault();
         handleStepNext();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [requestClose, handleStepPrev, handleStepNext]);
+  }, [requestClose, handleStepPrev, handleStepNext, canStep]);
 
   // Focus lands on the close X when the stage opens. Stepping keeps focus where
   // it is; if a step remounts the stage, focus returns to the step control.
@@ -399,34 +402,38 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                 </span>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <PixelButton
-                    ref={prevBtnRef}
-                    variant="secondary"
-                    size="icon"
-                    onClick={handleStepPrev}
-                    aria-label="Previous project"
-                    title="Previous project"
-                  >
-                    <ChevronLeft
-                      size={18}
-                      className="pixel-btn__chevron pixel-btn__chevron--prev"
-                      aria-hidden="true"
-                    />
-                  </PixelButton>
-                  <PixelButton
-                    ref={nextBtnRef}
-                    variant="secondary"
-                    size="icon"
-                    onClick={handleStepNext}
-                    aria-label="Next project"
-                    title="Next project"
-                  >
-                    <ChevronRight
-                      size={18}
-                      className="pixel-btn__chevron pixel-btn__chevron--next"
-                      aria-hidden="true"
-                    />
-                  </PixelButton>
+                  {canStep && (
+                    <>
+                      <PixelButton
+                        ref={prevBtnRef}
+                        variant="secondary"
+                        size="icon"
+                        onClick={handleStepPrev}
+                        aria-label="Previous project"
+                        title="Previous project"
+                      >
+                        <ChevronLeft
+                          size={18}
+                          className="pixel-btn__chevron pixel-btn__chevron--prev"
+                          aria-hidden="true"
+                        />
+                      </PixelButton>
+                      <PixelButton
+                        ref={nextBtnRef}
+                        variant="secondary"
+                        size="icon"
+                        onClick={handleStepNext}
+                        aria-label="Next project"
+                        title="Next project"
+                      >
+                        <ChevronRight
+                          size={18}
+                          className="pixel-btn__chevron pixel-btn__chevron--next"
+                          aria-hidden="true"
+                        />
+                      </PixelButton>
+                    </>
+                  )}
                   <PixelButton
                     ref={closeBtnRef}
                     variant="secondary"
