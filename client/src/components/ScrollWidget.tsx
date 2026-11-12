@@ -61,6 +61,8 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
           ? 220
           : 160;
       startTop = Math.min(startTop, window.innerHeight - bottomMargin - 40);
+      // Phones: no travel. It rests in the thumb zone and never crosses content.
+      if (mobile) startTop = window.innerHeight - bottomMargin;
     };
 
     const frame = () => {

@@ -3,6 +3,7 @@ import { gsap } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion } from "../lib/useReducedMotion";
 import PixelButton from "./fx/PixelButton";
+import { useMediaQuery } from "../lib/useReducedMotion";
 import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Orbit, Sparkles } from "lucide-react";
 import { categories, type Project } from "../data/projects";
 import Earth3D from "./Earth3D";
@@ -24,6 +25,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   onSelectCategory,
   paused = false,
 }) => {
+  const canHover = useMediaQuery("(hover: hover)");
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -257,7 +259,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           <span className="chapter-kicker">ACT I // ORBIT</span>
         </div>
         <p className="chapter-orbital-hint m-0 text-xs text-[var(--text-muted)] text-center sm:text-left">
-          Hover a system to see it running. Select it for the full view.
+          {canHover
+            ? "Hover a system to see it running. Select it for the full view."
+            : "Tap a system to open it. Swipe to move through the orbit."}
         </p>
       </div>
 
