@@ -1,95 +1,141 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { projects, type Project } from "../data/projects";
+import { formatProjectDate, projects, type Project } from "../data/projects";
 import DevHud from "../components/DevHud";
 import ProjectCarousel from "../components/ProjectCarousel";
-import ProjectModal from "../components/ProjectModal";
-import MatrixRain from "../components/MatrixRain";
-import ProjectArt from "../components/project-arts/ProjectArt";
+import ProjectStage from "../components/ProjectStage";
+import CardMediaPreview from "../components/CardMediaPreview";
 import ScrollWidget from "../components/ScrollWidget";
+import Laser from "../components/canvasui/Laser";
+import ParticleScroll from "../components/canvasui/ParticleScroll";
 import { ExternalLink, Terminal, ArrowUpRight, Search } from "lucide-react";
 import { GithubIcon } from "../components/Icon";
 
-// Register GSAP ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
+
+interface SelectedStageState {
+  project: Project;
+  source: "carousel" | "grid";
+  originRect: DOMRect | null;
+}
 
 const Home: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Recent");
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedStage, setSelectedStage] = useState<SelectedStageState | null>(null);
+  const [hoveredGridId, setHoveredGridId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isGridRevealed, setIsGridRevealed] = useState<boolean>(false);
+  const [gridColumns, setGridColumns] = useState<number>(() =>
+    typeof window !== "undefined" && window.innerWidth >= 1024 ? 3 : 2,
+  );
+
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const archiveTitleRef = useRef<HTMLDivElement>(null);
   const archiveSearchRef = useRef<HTMLDivElement>(null);
   const archivePromptRef = useRef<HTMLDivElement>(null);
 
-  // Filter projects by active category and search query
+  useEffect(() => {
+    const syncCols = () => setGridColumns(window.innerWidth >= 1024 ? 3 : 2);
+    window.addEventListener("resize", syncCols);
+    return () => window.removeEventListener("resize", syncCols);
+  }, []);
+
   const filteredProjects = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return projects.filter((p) => {
       const matchesCategory = activeCategory === "Recent" || p.category === activeCategory;
+      if (!q) return matchesCategory;
       const matchesSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.language.toLowerCase().includes(q) ||
+        p.techStack.some((t) => t.toLowerCase().includes(q)) ||
+        p.topics.some((t) => t.toLowerCase().includes(q));
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery]);
 
-  // Archive Section Scroll-Triggered Entrance Animations
+  // Keep selected stage synchronized when filters change
+  const activeStageProject = useMemo(() => {
+    if (!selectedStage) return null;
+    const exists = filteredProjects.find((p) => p.id === selectedStage.project.id);
+    return exists ?? null;
+  }, [filteredProjects, selectedStage]);
+
+  const activeStageIndex = useMemo(() => {
+    if (!activeStageProject) return 0;
+    return Math.max(
+      0,
+      filteredProjects.findIndex((p) => p.id === activeStageProject.id),
+    );
+  }, [activeStageProject, filteredProjects]);
+
+  const handleCloseStage = useCallback(() => {
+    setSelectedStage(null);
+  }, []);
+
+  const handleStepStage = useCallback(
+    (direction: -1 | 1) => {
+      if (!selectedStage || filteredProjects.length === 0) return;
+      const idx = filteredProjects.findIndex((p) => p.id === selectedStage.project.id);
+      const nextIdx = (idx + direction + filteredProjects.length) % filteredProjects.length;
+      setSelectedStage({
+        project: filteredProjects[nextIdx],
+        source: selectedStage.source,
+        originRect: null,
+      });
+    },
+    [filteredProjects, selectedStage],
+  );
+
+  // Archive Header Entrance Choreography
   useEffect(() => {
     const section = document.querySelector(".portfolio-catalog-section");
     if (!section) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Immediately hide the elements before paint
     if (archiveTitleRef.current) {
       archiveTitleRef.current.style.opacity = "0";
-      archiveTitleRef.current.style.transform = "translateX(-80px)";
+      archiveTitleRef.current.style.transform = "translateX(-60px)";
     }
     if (archiveSearchRef.current) {
       archiveSearchRef.current.style.opacity = "0";
-      archiveSearchRef.current.style.transform = "translateX(80px)";
+      archiveSearchRef.current.style.transform = "translateX(60px)";
     }
     if (archivePromptRef.current) {
       archivePromptRef.current.style.opacity = "0";
-      archivePromptRef.current.style.transform = "translateY(50px)";
+      archivePromptRef.current.style.transform = "translateY(36px)";
     }
 
-    // Use IntersectionObserver for reliable viewport detection
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             observer.disconnect();
-
-            // Title: slide in from left
             if (archiveTitleRef.current) {
               gsap.to(archiveTitleRef.current, {
                 x: 0,
                 opacity: 1,
-                duration: 0.9,
+                duration: 0.8,
                 ease: "power3.out",
               });
             }
-
-            // Search bar: slide in from right (staggered)
             if (archiveSearchRef.current) {
               gsap.to(archiveSearchRef.current, {
                 x: 0,
                 opacity: 1,
-                duration: 0.9,
-                delay: 0.15,
+                duration: 0.8,
+                delay: 0.12,
                 ease: "power3.out",
               });
             }
-
-            // Locked prompt: fade up from bottom (staggered)
             if (archivePromptRef.current) {
               gsap.to(archivePromptRef.current, {
                 y: 0,
                 opacity: 1,
-                duration: 0.8,
-                delay: 0.35,
+                duration: 0.72,
+                delay: 0.25,
                 ease: "power3.out",
               });
             }
@@ -100,15 +146,14 @@ const Home: React.FC = () => {
     );
 
     observer.observe(section);
-
     return () => observer.disconnect();
   }, []);
 
-  // GSAP Stagger Animation Effect on Click-to-Reveal
+  // GSAP Card Reveal Choreography on Search Bar Unlock
   useEffect(() => {
     if (!isGridRevealed || !gridContainerRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Clean up stale ScrollTriggers
     ScrollTrigger.getAll().forEach((st) => st.kill());
 
     const ctx = gsap.context(() => {
@@ -117,29 +162,26 @@ const Home: React.FC = () => {
       if (!cardElements || cardElements.length === 0) return;
 
       const cardsArray = Array.from(cardElements);
-      const firstThree = cardsArray.slice(0, 3);
-      const remaining = cardsArray.slice(3);
+      const firstBatch = cardsArray.slice(0, gridColumns);
+      const remaining = cardsArray.slice(gridColumns);
 
-      // Set initial hidden transform on all remaining cards off-screen
       if (remaining.length > 0) {
-        gsap.set(remaining, { opacity: 0, y: 60, scale: 0.94 });
+        gsap.set(remaining, { opacity: 0, y: 44, scale: 0.96 });
       }
 
-      // Stagger animate the first three cards immediately into place
       gsap.fromTo(
-        firstThree,
-        { opacity: 0, y: 60, scale: 0.94 },
+        firstBatch,
+        { opacity: 0, y: 44, scale: 0.96 },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.7,
-          stagger: 0.15,
+          duration: 0.65,
+          stagger: 0.1,
           ease: "power3.out",
         },
       );
 
-      // Stagger remaining cards seamlessly as they scroll into viewport
       if (remaining.length > 0) {
         ScrollTrigger.batch(remaining, {
           onEnter: (batch) => {
@@ -147,13 +189,13 @@ const Home: React.FC = () => {
               opacity: 1,
               y: 0,
               scale: 1,
-              duration: 0.7,
-              stagger: 0.15,
+              duration: 0.65,
+              stagger: 0.1,
               ease: "power3.out",
               overwrite: "auto",
             });
           },
-          start: "top 90%",
+          start: "top 92%",
           once: true,
         });
       }
@@ -162,31 +204,23 @@ const Home: React.FC = () => {
     }, gridContainerRef);
 
     return () => ctx.revert();
-  }, [isGridRevealed, filteredProjects]);
+  }, [isGridRevealed, filteredProjects, gridColumns]);
 
-  // Handle Back to Top with Reverse Card Stagger Exit Animation
   const handleBackToTop = () => {
-    // Smoothly scroll window to top
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSelectedStage(null);
 
     if (isGridRevealed && gridContainerRef.current) {
       const cardElements =
         gridContainerRef.current.querySelectorAll<HTMLElement>(".project-card-col");
 
       if (cardElements && cardElements.length > 0) {
-        // Stagger away in reverse order (bottom to top / end to start)
         gsap.to(cardElements, {
           opacity: 0,
-          y: 40,
-          scale: 0.94,
-          duration: 0.35,
-          stagger: {
-            each: 0.03,
-            from: "end",
-          },
+          y: 32,
+          scale: 0.96,
+          duration: 0.3,
+          stagger: { each: 0.025, from: "end" },
           ease: "power2.in",
           onComplete: () => {
             setIsGridRevealed(false);
@@ -201,10 +235,7 @@ const Home: React.FC = () => {
   };
 
   const handleScrollDown = () => {
-    window.scrollTo({
-      top: 480,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 480, behavior: "smooth" });
   };
 
   const unlockArchive = () => {
@@ -212,34 +243,57 @@ const Home: React.FC = () => {
     document.getElementById("archive-search-input")?.focus();
   };
 
+  // Compute the row start index where the inline split-stage inserts in the archive grid
+  const inlineGridStageRowStart = useMemo(() => {
+    if (!activeStageProject || selectedStage?.source !== "grid") return -1;
+    return Math.floor(activeStageIndex / gridColumns) * gridColumns;
+  }, [activeStageIndex, activeStageProject, gridColumns, selectedStage?.source]);
+
   return (
     <section className="portfolio-home-container w-full flex flex-col items-center">
-      {/* Top Profile HUD */}
       <DevHud projectCount={projects.length} />
 
-      {/* Interactive Scroll Down & Back to Top Widget with React SVG */}
       <ScrollWidget onBackToTop={handleBackToTop} onScrollDown={handleScrollDown} />
 
-      {/* 3D Orbiting Earth & Interactive Carousel Showcase */}
+      {/* Top Showcase Slot: Inline Split-Stage when opened from Carousel, otherwise 3D Orbit */}
       <div className="w-full my-2">
-        <ProjectCarousel
-          projects={filteredProjects}
-          onSelectProject={setSelectedProject}
-          activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
-        />
+        {activeStageProject && selectedStage?.source === "carousel" ? (
+          <div className="mb-8">
+            <ProjectStage
+              project={activeStageProject}
+              originRect={selectedStage.originRect}
+              currentIndex={activeStageIndex}
+              totalCount={filteredProjects.length}
+              onClose={handleCloseStage}
+              onPrev={() => handleStepStage(-1)}
+              onNext={() => handleStepStage(1)}
+            />
+          </div>
+        ) : (
+          <ProjectCarousel
+            projects={filteredProjects}
+            onSelectProject={(project, originRect) =>
+              setSelectedStage({ project, source: "carousel", originRect })
+            }
+            activeCategory={activeCategory}
+            onSelectCategory={(cat) => {
+              setSelectedStage(null);
+              setActiveCategory(cat);
+            }}
+          />
+        )}
       </div>
 
-      {/* Complete Project Grid Showcase */}
-      <div className="portfolio-catalog-section w-full mt-12 pt-6">
+      {/* Repository Archive Section */}
+      <div className="portfolio-catalog-section w-full mt-10 pt-6 pb-16">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div ref={archiveTitleRef}>
-            <h2 className="text-xl md:text-2xl font-semibold leading-tight text-gradient font-orbitron m-0 flex items-center gap-2">
+            <h2 className="text-xl md:text-2xl font-bold leading-tight text-gradient font-display m-0 flex items-center gap-2">
               <Terminal size={20} className="text-accent" />
               Repository Archive
             </h2>
-            <p className="text-gradient text-sm m-0 mt-1 opacity-80">
-              Explore {filteredProjects.length} open-source repositories & live builds
+            <p className="text-[var(--text-secondary)] text-sm m-0 mt-1">
+              Browse {filteredProjects.length} open-source repositories and live deployments
             </p>
           </div>
 
@@ -264,14 +318,13 @@ const Home: React.FC = () => {
                 autoComplete="off"
               />
               <label htmlFor="archive-search-input" className="floating-search-label">
-                Search projects or tags...
+                Search projects, stack, or topics...
               </label>
               <Search size={15} className="search-icon-hint" />
             </div>
           </div>
         </div>
 
-        {/* Conditional Archive Cards View */}
         {!isGridRevealed ? (
           <div
             ref={archivePromptRef}
@@ -289,116 +342,197 @@ const Home: React.FC = () => {
             <div className="pulse-search-badge mb-4">
               <Search size={22} className="text-accent" />
             </div>
-            <h3 className="text-base font-semibold text-white font-orbitron mb-2">
-              Click Searchbar to Unlock Repository Archive
+            <h3 className="text-base md:text-lg font-semibold text-[var(--text-primary)] font-display mb-2">
+              Click Search Bar to Unlock Repository Archive
             </h3>
-            <p className="text-slate-400 text-sm m-0 max-w-[420px] leading-relaxed">
-              Select the searchbar above to initialize the matrix archive and reveal all{" "}
+            <p className="text-[var(--text-secondary)] text-sm m-0 max-w-[440px] leading-relaxed">
+              Focus the search input above to ignite the laser horizon and materialize all{" "}
               {projects.length} repositories.
             </p>
           </div>
         ) : (
-          <div
-            ref={gridContainerRef}
-            className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6 archive-cards-grid"
+          <ParticleScroll
+            className="w-full"
+            point={0.76}
+            band={340}
+            density={3}
+            size={1.35}
+            spread={175}
+            gravity={0.32}
+            drift={0.65}
+            swirl={46}
+            stagger={0.65}
+            fade={0.85}
+            settle={1.05}
+            smoothing={0.5}
           >
-            {filteredProjects.map((project) => (
-              <div key={project.id} className="project-card-col min-w-0">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className="project-grid-card h-full"
-                  onClick={() => setSelectedProject(project)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSelectedProject(project);
-                    }
-                  }}
-                >
-                  {/* Media Thumbnail with Default Matrix Digital Rain & Hover SVG Transition */}
-                  <div className="grid-card-media relative">
-                    <div className="grid-card-default-media">
-                      <MatrixRain color="#00ff41" fontSize={11} speed={30} />
-                    </div>
-                    <div className="grid-card-hover-art">
-                      <ProjectArt projectId={project.id} projectName={project.name} />
-                    </div>
-                    <span className="grid-category-badge">{project.category}</span>
-                  </div>
+            <div
+              ref={gridContainerRef}
+              className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 archive-cards-grid"
+            >
+              {filteredProjects.map((project, index) => {
+                const isCardHovered = hoveredGridId === project.id;
+                const isCardSelected =
+                  activeStageProject?.id === project.id && selectedStage?.source === "grid";
 
-                  {/* Card Body */}
-                  <div className="grid-card-body p-2.5 md:p-6 flex flex-col justify-between grow">
-                    <div>
-                      <div className="flex justify-between items-start mb-1.5 md:mb-2">
-                        <h3 className="text-xs md:text-xl font-semibold leading-snug text-white font-orbitron m-0 truncate">
-                          {project.name}
-                        </h3>
-                        <ArrowUpRight size={18} className="text-accent shrink-0 ml-2" />
+                return (
+                  <React.Fragment key={project.id}>
+                    {index === inlineGridStageRowStart && activeStageProject && (
+                      <div className="col-span-2 lg:col-span-3 my-1">
+                        <ProjectStage
+                          project={activeStageProject}
+                          originRect={selectedStage?.originRect}
+                          currentIndex={activeStageIndex}
+                          totalCount={filteredProjects.length}
+                          onClose={handleCloseStage}
+                          onPrev={() => handleStepStage(-1)}
+                          onNext={() => handleStepStage(1)}
+                        />
                       </div>
+                    )}
 
-                      <p className="hidden md:line-clamp-3 text-slate-400 text-sm mb-4 leading-relaxed project-card-desc">
-                        {project.description}
-                      </p>
-                    </div>
+                    <div className="project-card-col min-w-0">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-expanded={isCardSelected}
+                        className={`project-grid-card h-full ${isCardSelected ? "is-selected" : ""}`}
+                        onMouseEnter={() => setHoveredGridId(project.id)}
+                        onMouseLeave={() =>
+                          setHoveredGridId((prev) => (prev === project.id ? null : prev))
+                        }
+                        onFocus={() => setHoveredGridId(project.id)}
+                        onBlur={() =>
+                          setHoveredGridId((prev) => (prev === project.id ? null : prev))
+                        }
+                        onClick={(e) => {
+                          if (isCardSelected) {
+                            handleCloseStage();
+                            return;
+                          }
+                          const mediaBox = e.currentTarget.querySelector(
+                            ".grid-card-media",
+                          ) as HTMLElement | null;
+                          const rect =
+                            (mediaBox ?? e.currentTarget).getBoundingClientRect() ?? null;
+                          setSelectedStage({ project, source: "grid", originRect: rect });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            if (isCardSelected) {
+                              handleCloseStage();
+                              return;
+                            }
+                            const mediaBox = e.currentTarget.querySelector(
+                              ".grid-card-media",
+                            ) as HTMLElement | null;
+                            const rect =
+                              (mediaBox ?? e.currentTarget).getBoundingClientRect() ?? null;
+                            setSelectedStage({ project, source: "grid", originRect: rect });
+                          }
+                        }}
+                      >
+                        <div className="grid-card-media relative">
+                          <CardMediaPreview
+                            project={project}
+                            isActive={isCardHovered || isCardSelected}
+                            enableShader={isCardHovered && !activeStageProject}
+                          />
+                          <span className="grid-category-badge">{project.category}</span>
+                        </div>
 
-                    {/* Tech Tags */}
-                    <div>
-                      <div className="flex flex-wrap gap-1 mb-2 md:mb-4">
-                        {project.topics.slice(0, 3).map((topic, idx) => (
-                          <span key={idx} className="tech-pill-small">
-                            {topic}
-                          </span>
-                        ))}
-                      </div>
+                        <div className="grid-card-body p-3 md:p-6 flex flex-col justify-between grow">
+                          <div>
+                            <div className="flex justify-between items-start mb-1.5 md:mb-2">
+                              <h3 className="text-xs md:text-lg font-bold leading-snug text-[var(--text-primary)] font-display m-0 truncate">
+                                {project.name}
+                              </h3>
+                              <ArrowUpRight size={17} className="text-accent shrink-0 ml-2" />
+                            </div>
 
-                      {/* Quick Direct Links */}
-                      <div className="card-footer-meta flex justify-between items-center pt-1.5 md:pt-2 border-t border-white/15 text-[0.62rem] md:text-sm">
-                        <span className="text-gradient font-mono opacity-80">
-                          {project.language}
-                        </span>
-                        <div className="flex gap-2">
-                          {project.liveUrl && (
-                            <a
-                              href={project.liveUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-accent link-hover p-1"
-                              onClick={(e) => e.stopPropagation()}
-                              title="Live Demo"
-                              aria-label={`${project.name} live demo`}
-                            >
-                              <ExternalLink size={16} />
-                            </a>
-                          )}
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-white link-hover p-1"
-                            onClick={(e) => e.stopPropagation()}
-                            title="GitHub Source"
-                            aria-label={`${project.name} source code`}
-                          >
-                            <GithubIcon size={16} />
-                          </a>
+                            <p className="hidden md:line-clamp-3 text-[var(--text-secondary)] text-sm mb-4 leading-relaxed project-card-desc">
+                              {project.description}
+                            </p>
+                          </div>
+
+                          <div>
+                            <div className="flex flex-wrap gap-1.5 mb-2.5 md:mb-4">
+                              {project.techStack.slice(0, 3).map((tech) => (
+                                <span key={tech} className="tech-pill-small">
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+
+                            <div className="card-footer-meta flex justify-between items-center pt-2 border-t border-[var(--border-subtle)] text-[0.65rem] md:text-xs">
+                              <span className="text-[var(--text-muted)] font-telemetry">
+                                {project.language} · {formatProjectDate(project.updatedAt)}
+                              </span>
+                              <div className="flex gap-1.5">
+                                {project.liveUrl && (
+                                  <a
+                                    href={project.liveUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-accent link-hover p-1.5"
+                                    onClick={(e) => e.stopPropagation()}
+                                    title="Live Demo"
+                                    aria-label={`${project.name} live demo`}
+                                  >
+                                    <ExternalLink size={15} />
+                                  </a>
+                                )}
+                                <a
+                                  href={project.githubUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[var(--text-primary)] link-hover p-1.5"
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="GitHub Source"
+                                  aria-label={`${project.name} source code`}
+                                >
+                                  <GithubIcon size={15} />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </ParticleScroll>
         )}
       </div>
 
-      {/* Project Inspector Modal */}
-      <ProjectModal
-        project={selectedProject}
-        isOpen={!!selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
+      {/* Viewport-Bottom Cobalt Laser Horizon Active While Archive Cards Are Unlocked */}
+      {isGridRevealed && (
+        <div className="archive-laser-horizon" aria-hidden="true">
+          <Laser
+            className="w-full h-full"
+            offset={30}
+            wave={8}
+            width={0.92}
+            thickness={3}
+            core={1.45}
+            radius={48}
+            glow={1.65}
+            color={[0.051, 0.349, 1]}
+            speed={1.05}
+            flicker={0.28}
+            reactivity={0.85}
+            reveal={120}
+            heat={0.35}
+            shimmer={4}
+            sparkle={0.55}
+          >
+            <div className="max-w-[1320px] mx-auto w-full h-full px-4 md:px-6" />
+          </Laser>
+        </div>
+      )}
     </section>
   );
 };

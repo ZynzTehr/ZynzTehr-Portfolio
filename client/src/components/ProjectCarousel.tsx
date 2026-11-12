@@ -2,12 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Sparkles } from "lucide-react";
 import { categories, type Project } from "../data/projects";
 import Earth3D from "./Earth3D";
-import MatrixRain from "./MatrixRain";
-import ProjectArt from "./project-arts/ProjectArt";
+import CardMediaPreview from "./CardMediaPreview";
 
 interface ProjectCarouselProps {
   projects: Project[];
-  onSelectProject: (project: Project) => void;
+  onSelectProject: (project: Project, originRect: DOMRect | null) => void;
   activeCategory: string;
   onSelectCategory: (category: string) => void;
 }
@@ -20,10 +19,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 }) => {
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [isStepping, setIsStepping] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -33,20 +32,19 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
 
-  const displayProjects = projects.slice(0, 10); // Optimal quantity for the 3D cylinder
+  const displayProjects = projects.slice(0, 10);
   const quantity = displayProjects.length || 1;
   const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
-  // Track mobile breakpoint on resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Continuous 60fps auto-orbit loop (active on larger screens)
   useEffect(() => {
-    if (isMobile) return; // Skip orbit animation on mobile
+    if (isMobile) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let lastTimestamp = performance.now();
 
@@ -55,7 +53,6 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       lastTimestamp = timestamp;
 
       if (isRotating && !isHovered && !isStepping) {
-        // Full 360 rotation in 32 seconds = 11.25 deg/sec
         angleRef.current = (angleRef.current + 11.25 * delta) % 360;
         setRotationAngle(angleRef.current);
       }
@@ -75,14 +72,12 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     };
   }, [isRotating, isHovered, isStepping, isMobile]);
 
-  // Reset horizontal slider scroll position when category changes on mobile
   useEffect(() => {
     if (sliderRef.current && window.innerWidth <= 768) {
       sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
     }
   }, [activeCategory]);
 
-  // Track active item when user swipes horizontally on mobile
   const handleSliderScroll = () => {
     if (!sliderRef.current || window.innerWidth > 768) return;
     const container = sliderRef.current;
@@ -101,7 +96,6 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     setActiveMobileIndex(closestIdx);
   };
 
-  // Handle manual rotation stepping (or horizontal scroll on mobile)
   const handleRotate = useCallback(
     (direction: "left" | "right") => {
       if (sliderRef.current && window.innerWidth <= 768) {
@@ -167,22 +161,21 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }, 60);
   };
 
-  const handleCardClick = (project: Project, index: number) => {
+  const handleCardActivate = (project: Project, index: number, cardElement: HTMLElement | null) => {
     if (isDraggingRef.current) return;
     if (window.innerWidth <= 768) {
       setActiveMobileIndex(index);
     }
-    onSelectProject(project);
+    const mediaBox = cardElement?.querySelector(".tile-media-wrapper") as HTMLElement | null;
+    const rect = (mediaBox ?? cardElement)?.getBoundingClientRect() ?? null;
+    onSelectProject(project, rect);
   };
 
   return (
     <div className="project-showcase-wrapper w-full flex flex-col items-center">
-      {/* 3D Carousel Section */}
       <div className="banner" style={{ "--quantity": quantity } as React.CSSProperties}>
-        {/* Three.js 3D Earth in the Center */}
         <Earth3D reverse={true} size={650} />
 
-        {/* 3D Cylinder Slider / Mobile Horizontal Snap Slider */}
         <div
           ref={sliderRef}
           className="slider"
@@ -199,55 +192,82 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 }
           }
         >
-          {displayProjects.map((project, index) => (
-            <div
-              key={project.id}
-              className={`item ${index === safeMobileIndex ? "active-tile" : ""}`}
-              style={{ "--position": index + 1 } as React.CSSProperties}
-              onClick={() => handleCardClick(project, index)}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <div className="carousel-card project-tile-3d">
-                {/* Media Container: Default Matrix Code Rain with Hover SVG Cross-fade */}
-                <div className="tile-media-wrapper">
-                  <div className="tile-default-media">
-                    <MatrixRain color="#00ff41" fontSize={11} speed={30} />
-                  </div>
-                  <div className="tile-hover-art">
-                    <ProjectArt projectId={project.id} projectName={project.name} />
-                  </div>
-                  <div className="tile-overlay-glow"></div>
-                </div>
+          {displayProjects.map((project, index) => {
+            const isCardActive = isMobile ? index === safeMobileIndex : hoveredId === project.id;
 
-                {/* Info Bar */}
-                <div className="tile-info">
-                  <span className="tile-category-tag">{project.category}</span>
-                  <h3 className="tile-title truncate">{project.name}</h3>
-                  <div className="tile-inspect-hint">
-                    <Eye size={12} className="mr-1" />
-                    <span>Inspect</span>
+            return (
+              <div
+                key={project.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open ${project.name} showcase`}
+                className={`item ${index === safeMobileIndex ? "active-tile" : ""}`}
+                style={{ "--position": index + 1 } as React.CSSProperties}
+                onClick={(e) => handleCardActivate(project, index, e.currentTarget)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleCardActivate(project, index, e.currentTarget);
+                  }
+                }}
+                onMouseEnter={() => {
+                  setIsHovered(true);
+                  setHoveredId(project.id);
+                }}
+                onMouseLeave={() => {
+                  setIsHovered(false);
+                  setHoveredId((prev) => (prev === project.id ? null : prev));
+                }}
+                onFocus={() => {
+                  setIsHovered(true);
+                  setHoveredId(project.id);
+                }}
+                onBlur={() => {
+                  setIsHovered(false);
+                  setHoveredId((prev) => (prev === project.id ? null : prev));
+                }}
+              >
+                <div className="carousel-card project-tile-3d">
+                  <div className="tile-media-wrapper">
+                    <CardMediaPreview project={project} isActive={isCardActive} compact />
+                    <div className="tile-overlay-glow" />
+                  </div>
+
+                  <div className="tile-info">
+                    <span className="tile-category-tag">{project.category}</span>
+                    <h3 className="tile-title truncate">{project.name}</h3>
+                    <div className="tile-inspect-hint">
+                      <Eye size={12} className="mr-1" />
+                      <span>Expand View</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Category Filter Pills Directly Above Carousel Stage Controls */}
-      <div className="category-filter-container flex justify-center flex-wrap gap-2 mt-6">
+      {/* Category Filter Pills */}
+      <div
+        role="tablist"
+        aria-label="Filter projects by category"
+        className="category-filter-container flex justify-center flex-wrap gap-2 mt-6"
+      >
         {categories.map((cat) => (
           <button
             key={cat}
+            type="button"
+            role="tab"
+            aria-selected={activeCategory === cat}
             className={`btn-category-pill ${activeCategory === cat ? "active" : ""}`}
             onClick={() => {
               setActiveMobileIndex(0);
               onSelectCategory(cat);
             }}
           >
-            {cat === "Recent" && <Layers size={14} className="mr-1" />}
-            {cat === "3D & Creative UI" && <Sparkles size={14} className="mr-1" />}
+            {cat === "Recent" && <Layers size={14} className="mr-1.5" />}
+            {cat === "3D & Creative UI" && <Sparkles size={14} className="mr-1.5" />}
             {cat}
           </button>
         ))}
@@ -256,6 +276,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       {/* 3D Stage Controls */}
       <div className="carousel-controls flex items-center justify-center gap-4 mt-4 mb-6">
         <button
+          type="button"
           className="btn-carousel-ctrl"
           onClick={() => handleRotate("left")}
           title="Rotate Left"
@@ -266,17 +287,21 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
         {!isMobile && (
           <button
+            type="button"
             className="btn-carousel-ctrl btn-play-pause"
             onClick={togglePlayPause}
             title={isRotating ? "Pause Rotation" : "Resume Rotation"}
             aria-label={isRotating ? "Pause Rotation" : "Resume Rotation"}
           >
             {isRotating ? <Pause size={16} /> : <Play size={16} />}
-            <span className="ml-1 text-sm">{isRotating ? "Pause Orbit" : "Auto Orbit"}</span>
+            <span className="ml-1.5 text-sm font-medium">
+              {isRotating ? "Pause Orbit" : "Auto Orbit"}
+            </span>
           </button>
         )}
 
         <button
+          type="button"
           className="btn-carousel-ctrl"
           onClick={() => handleRotate("right")}
           title="Rotate Right"
