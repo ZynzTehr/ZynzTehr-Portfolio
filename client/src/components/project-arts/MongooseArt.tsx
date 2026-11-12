@@ -12,26 +12,26 @@ const MongooseArt: React.FC = () => {
         <defs>
           {/* Cyberpunk Neon Gradients */}
           <linearGradient id="mongoGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stop-color="#00ed64" />
-            <stop offset="50%" stop-color="#00ffc8" />
-            <stop offset="100%" stop-color="#7950f2" />
+            <stop offset="0%" stopColor="#00ed64" />
+            <stop offset="50%" stopColor="#00ffc8" />
+            <stop offset="100%" stopColor="#7950f2" />
           </linearGradient>
 
           <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#00ffc8" />
-            <stop offset="50%" stop-color="#00ed64" />
-            <stop offset="100%" stop-color="#00ffc8" />
+            <stop offset="0%" stopColor="#00ffc8" />
+            <stop offset="50%" stopColor="#00ed64" />
+            <stop offset="100%" stopColor="#00ffc8" />
           </linearGradient>
 
           <radialGradient id="bgArtGrad" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stop-color="#0f172a" />
-            <stop offset="60%" stop-color="#060914" />
-            <stop offset="100%" stop-color="#020308" />
+            <stop offset="0%" stopColor="#0f172a" />
+            <stop offset="60%" stopColor="#060914" />
+            <stop offset="100%" stopColor="#020308" />
           </radialGradient>
 
           <radialGradient id="bubbleGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#00ffc8" stop-opacity="0.8" />
-            <stop offset="100%" stop-color="#00ffc8" stop-opacity="0" />
+            <stop offset="0%" stopColor="#00ffc8" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#00ffc8" stopOpacity="0" />
           </radialGradient>
 
           {/* Glow Filters */}
@@ -141,15 +141,15 @@ const MongooseArt: React.FC = () => {
 
         {/* Retro-Diner Cyber Perspective Floor */}
         <g opacity="0.12">
-          <line x1="0" y1="270" x2="640" y2="270" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="0" y1="290" x2="640" y2="290" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="0" y1="310" x2="640" y2="310" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="40" y2="320" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="160" y2="320" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="280" y2="320" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="360" y2="320" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="480" y2="320" stroke="#00ffc8" stroke-width="1.5" />
-          <line x1="320" y1="250" x2="600" y2="320" stroke="#00ffc8" stroke-width="1.5" />
+          <line x1="0" y1="270" x2="640" y2="270" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="0" y1="290" x2="640" y2="290" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="0" y1="310" x2="640" y2="310" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="40" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="160" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="280" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="360" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="480" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
+          <line x1="320" y1="250" x2="600" y2="320" stroke="#00ffc8" strokeWidth="1.5" />
         </g>
 
         {/* Floating Neon Soda Carbonation Bubbles */}
@@ -167,7 +167,7 @@ const MongooseArt: React.FC = () => {
             d="M0 -140 C50 -90 90 -20 90 60 C90 120 50 160 0 180 C-50 160 -90 120 -90 60 C-90 -20 -50 -90 0 -140 Z"
             fill="#00ed64"
           />
-          <path d="M0 -140 L0 180" stroke="#ffffff" stroke-width="6" />
+          <path d="M0 -140 L0 180" stroke="#ffffff" strokeWidth="6" />
         </g>
 
         {/* 2. THE MONGOOSE (Vigilant, Sleek Silhouette & Outline) */}

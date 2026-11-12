@@ -1,11 +1,14 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { gsap } from "../lib/gsap";
+import PixelButton from "./fx/PixelButton";
+import { ASCIIFY_SPEC, GLYPH_RAIN_SPEC } from "./canvasui/spec";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
   GitFork,
+  Hash,
   Sparkles,
   Star,
   X,
@@ -23,6 +26,9 @@ interface ProjectStageProps {
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
+  onSelectTopic?: (topic: string) => void;
+  /** Increment to close with the exit motion from outside (for example, re-clicking the card). */
+  closeRequest?: number;
 }
 
 const ProjectStage: React.FC<ProjectStageProps> = ({
@@ -33,34 +39,80 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
   onClose,
   onPrev,
   onNext,
+  onSelectTopic,
+  closeRequest = 0,
 }) => {
   const stageRef = useRef<HTMLElement>(null);
   const mediaFrameRef = useRef<HTMLDivElement>(null);
   const dossierRef = useRef<HTMLDivElement>(null);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const closeBtnRef = useRef<HTMLElement>(null);
+  const prevProjectIdRef = useRef<string | null>(null);
+  const initialTornDownRef = useRef<boolean>(false);
+  const stepDirectionRef = useRef<1 | -1>(1);
+  const isClosingRef = useRef<boolean>(false);
 
   const [reducedMotion] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   });
 
-  // Keyboard navigation: Escape closes, Left/Right steps across projects
+  const requestClose = useCallback(() => {
+    if (isClosingRef.current) return;
+    if (reducedMotion || !stageRef.current) {
+      onClose();
+      return;
+    }
+    isClosingRef.current = true;
+    gsap.to(stageRef.current, {
+      opacity: 0,
+      y: -10,
+      scale: 0.98,
+      duration: 0.26,
+      ease: "power2.inOut",
+      onComplete: () => {
+        isClosingRef.current = false;
+        onClose();
+      },
+    });
+  }, [onClose, reducedMotion]);
+
+  const handleStepPrev = useCallback(() => {
+    if (isClosingRef.current) return;
+    stepDirectionRef.current = -1;
+    onPrev();
+  }, [onPrev]);
+
+  const handleStepNext = useCallback(() => {
+    if (isClosingRef.current) return;
+    stepDirectionRef.current = 1;
+    onNext();
+  }, [onNext]);
+
+  // Keyboard navigation: Escape closes smoothly, Left/Right steps across projects
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Never steal keys from text fields (the archive search sits beside the stage).
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+      ) {
+        return;
+      }
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        requestClose();
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        onPrev();
+        handleStepPrev();
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        onNext();
+        handleStepNext();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, onPrev, onNext]);
+  }, [requestClose, handleStepPrev, handleStepNext]);
 
   // Focus management and smooth viewport alignment when stage mounts
   useEffect(() => {
@@ -78,73 +130,177 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     }
   }, [project.id, reducedMotion]);
 
-  // FLIP-style growth from the clicked card thumbnail to the left notched frame
+  // FLIP growth on initial open + directional choreography when stepping projects
   useLayoutEffect(() => {
+    // The open FLIP plays once per mount. Under StrictMode the effect is torn
+    // down and re-run for the same project, which must still count as the open.
+    const isInitialOpen =
+      prevProjectIdRef.current === null ||
+      (initialTornDownRef.current && prevProjectIdRef.current === project.id);
+    prevProjectIdRef.current = project.id;
+    initialTornDownRef.current = false;
+
     if (reducedMotion) return;
     const mediaEl = mediaFrameRef.current;
     const dossierEl = dossierRef.current;
-    if (!mediaEl || !dossierEl) return;
+    const stageEl = stageRef.current;
+    if (!mediaEl || !dossierEl || !stageEl) return;
 
     const ctx = gsap.context(() => {
-      if (originRect && originRect.width > 20 && originRect.height > 20) {
-        const dest = mediaEl.getBoundingClientRect();
-        const dx = originRect.left + originRect.width / 2 - (dest.left + dest.width / 2);
-        const dy = originRect.top + originRect.height / 2 - (dest.top + dest.height / 2);
-        const sx = Math.min(1, Math.max(0.28, originRect.width / Math.max(dest.width, 1)));
-        const sy = Math.min(1, Math.max(0.28, originRect.height / Math.max(dest.height, 1)));
+      const topLeftNotch = mediaEl.querySelector(".notch-top-left");
+      const bottomRightNotch = mediaEl.querySelector(".notch-bottom-right");
+      const mediaAsset = mediaEl.querySelector(".notched-media-asset");
+      const items = dossierEl.querySelectorAll(".stage-stagger-item");
+
+      if (isInitialOpen) {
+        gsap.fromTo(stageEl, { opacity: 0.92 }, { opacity: 1, duration: 0.38, ease: "power2.out" });
+
+        if (originRect && originRect.width > 20 && originRect.height > 20) {
+          const dest = mediaEl.getBoundingClientRect();
+          const dx = originRect.left + originRect.width / 2 - (dest.left + dest.width / 2);
+          const dy = originRect.top + originRect.height / 2 - (dest.top + dest.height / 2);
+          const sx = Math.min(1, Math.max(0.28, originRect.width / Math.max(dest.width, 1)));
+          const sy = Math.min(1, Math.max(0.28, originRect.height / Math.max(dest.height, 1)));
+
+          gsap.fromTo(
+            mediaEl,
+            {
+              x: dx,
+              y: Math.max(-260, Math.min(260, dy)),
+              scaleX: sx,
+              scaleY: sy,
+              opacity: 0.72,
+            },
+            {
+              x: 0,
+              y: 0,
+              scaleX: 1,
+              scaleY: 1,
+              opacity: 1,
+              duration: 0.68,
+              ease: "expo.out",
+              clearProps: "transform",
+            },
+          );
+        } else {
+          gsap.fromTo(
+            mediaEl,
+            { x: -24, scale: 0.96, opacity: 0 },
+            {
+              x: 0,
+              scale: 1,
+              opacity: 1,
+              duration: 0.56,
+              ease: "expo.out",
+              clearProps: "transform",
+            },
+          );
+        }
+
+        if (topLeftNotch) {
+          gsap.fromTo(
+            topLeftNotch,
+            { x: -16, y: -16, opacity: 0 },
+            {
+              x: 0,
+              y: 0,
+              opacity: 1,
+              duration: 0.54,
+              delay: 0.14,
+              ease: "expo.out",
+              clearProps: "transform",
+            },
+          );
+        }
+
+        if (bottomRightNotch) {
+          gsap.fromTo(
+            bottomRightNotch,
+            { x: 16, y: 16, opacity: 0 },
+            {
+              x: 0,
+              y: 0,
+              opacity: 1,
+              duration: 0.54,
+              delay: 0.18,
+              ease: "expo.out",
+              clearProps: "transform",
+            },
+          );
+        }
 
         gsap.fromTo(
-          mediaEl,
+          items,
+          { opacity: 0, x: 22 },
           {
-            x: dx,
-            y: Math.max(-260, Math.min(260, dy)),
-            scaleX: sx,
-            scaleY: sy,
-            opacity: 0.72,
-          },
-          {
-            x: 0,
-            y: 0,
-            scaleX: 1,
-            scaleY: 1,
             opacity: 1,
-            duration: 0.68,
-            ease: "expo.out",
+            x: 0,
+            duration: 0.52,
+            stagger: 0.055,
+            delay: 0.12,
+            ease: "power3.out",
             clearProps: "transform",
           },
         );
       } else {
+        const dir = stepDirectionRef.current;
+
+        if (mediaAsset) {
+          gsap.fromTo(
+            mediaAsset,
+            { opacity: 0.32, scale: 1.04, x: dir * 20 },
+            {
+              opacity: 1,
+              scale: 1,
+              x: 0,
+              duration: 0.48,
+              ease: "expo.out",
+              clearProps: "transform",
+            },
+          );
+        }
+
+        if (topLeftNotch) {
+          gsap.fromTo(
+            topLeftNotch,
+            { x: -10, opacity: 0.45 },
+            { x: 0, opacity: 1, duration: 0.38, ease: "expo.out", clearProps: "transform" },
+          );
+        }
+
+        if (bottomRightNotch) {
+          gsap.fromTo(
+            bottomRightNotch,
+            { x: 10, opacity: 0.45 },
+            { x: 0, opacity: 1, duration: 0.38, ease: "expo.out", clearProps: "transform" },
+          );
+        }
+
         gsap.fromTo(
-          mediaEl,
-          { x: -24, scale: 0.96, opacity: 0 },
+          items,
+          { opacity: 0, x: dir * 20 },
           {
-            x: 0,
-            scale: 1,
             opacity: 1,
-            duration: 0.52,
+            x: 0,
+            duration: 0.42,
+            stagger: 0.04,
             ease: "power3.out",
             clearProps: "transform",
           },
         );
       }
-
-      const items = dossierEl.querySelectorAll(".stage-stagger-item");
-      gsap.fromTo(
-        items,
-        { opacity: 0, x: 22 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.06,
-          delay: 0.12,
-          ease: "power3.out",
-        },
-      );
     }, stageRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (isInitialOpen) initialTornDownRef.current = true;
+      ctx.revert();
+    };
   }, [project.id, originRect, reducedMotion]);
+
+  // An outside close request (re-clicking the open card) still gets the exit motion.
+  useEffect(() => {
+    if (closeRequest > 0) requestClose();
+  }, [closeRequest, requestClose]);
 
   const formattedDate = formatProjectDate(project.updatedAt);
 
@@ -152,34 +308,15 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     <article
       ref={stageRef}
       className="project-stage-shell"
-      aria-label={`${project.name} project showcase`}
+      aria-label={`${project.name} project details`}
     >
-      <GlyphRain
-        className="w-full"
-        color={[0.2667, 0.4549, 1]}
-        headColor={[0.3765, 0.647, 0.98]}
-        density={0.11}
-        glow={1.1}
-        dim={0.15}
-        trail={0.48}
-        speed={0.16}
-        cell={14}
-      >
+      {/* upgrades.md: GlyphRain "for when the user gets taken to the project info". The
+          stage has no fixed height, so this mount keeps the overlay path. */}
+      <GlyphRain className="w-full stage-rain" native={false} {...GLYPH_RAIN_SPEC}>
         <div className="project-stage-grid">
-          {/* Left Column: Expanded Media with Multi-Side Inverted-Radius Notches */}
+          {/* Left Column: Expanded Media with Diagonal Top-Left & Bottom-Right Notches */}
           <div ref={mediaFrameRef} className="notched-media-frame">
-            <Asciify
-              className="notched-media-canvas"
-              radius={0.34}
-              softness={0.85}
-              scale={2}
-              spacing={1}
-              contrast={1.18}
-              glow={0.8}
-              aberration={0.65}
-              background={[0.0235, 0.0431, 0.098]}
-              backgroundOpacity={0.82}
-            >
+            <Asciify className="notched-media-canvas" {...ASCIIFY_SPEC}>
               {project.videoUrl && !reducedMotion ? (
                 <video
                   key={project.videoUrl}
@@ -209,10 +346,10 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
               <h2 className="notch-project-title">{project.name}</h2>
             </div>
 
-            {/* Bottom-Left Notch: Tech Stack */}
-            <div className="media-notch notch-bottom-left">
-              <span className="notch-eyebrow">Tech Stack</span>
-              <div className="flex flex-wrap gap-1.5">
+            {/* Bottom-Right Notch: Tech Stack */}
+            <div className="media-notch notch-bottom-right">
+              <span className="notch-eyebrow text-right">Tech Stack</span>
+              <div className="flex flex-wrap justify-end gap-1.5">
                 {project.techStack.slice(0, 4).map((tech) => (
                   <span key={tech} className="notch-stack-chip">
                     {tech}
@@ -220,42 +357,33 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                 ))}
               </div>
             </div>
-
-            {/* Right-Side Notch: Topics */}
-            <div className="media-notch notch-right-side">
-              <span className="notch-eyebrow">Topics</span>
-              {project.topics.slice(0, 3).map((topic) => (
-                <span key={topic} className="notch-topic-chip">
-                  #{topic}
-                </span>
-              ))}
-            </div>
           </div>
 
-          {/* Right Column: Structured Metadata Tags, Description, and Controls */}
+          {/* Right Column: Structured Metadata Tags, Description, Relocated Topics, and Controls */}
           <div ref={dossierRef} className="stage-dossier">
             <div className="flex flex-col gap-4">
               {/* Top Stage Navigation Bar */}
               <div className="stage-stagger-item flex items-center justify-between gap-2">
-                <button
+                <PixelButton
                   ref={closeBtnRef}
-                  type="button"
-                  onClick={onClose}
-                  className="btn-stage-secondary !py-2 !px-3.5 !min-h-[38px] text-xs whitespace-nowrap"
+                  variant="secondary"
+                  size="sm"
+                  onClick={requestClose}
+                  className="whitespace-nowrap"
                 >
-                  <ArrowLeft size={15} />
-                  <span>Back to Cards</span>
-                </button>
+                  <ArrowLeft size={15} aria-hidden="true" />
+                  <span>Back</span>
+                </PixelButton>
 
-                <div className="flex items-center gap-1.5">
-                  <span className="font-telemetry text-xs text-[var(--text-muted)] mr-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-telemetry text-xs text-[var(--text-muted)] mr-1 whitespace-nowrap">
                     {String(currentIndex + 1).padStart(2, "0")} /{" "}
                     {String(totalCount).padStart(2, "0")}
                   </span>
                   <button
                     type="button"
-                    onClick={onPrev}
-                    className="btn-stage-icon !min-w-[38px] !min-h-[38px]"
+                    onClick={handleStepPrev}
+                    className="btn-stage-icon"
                     aria-label="Previous project"
                     title="Previous project"
                   >
@@ -263,8 +391,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={onNext}
-                    className="btn-stage-icon !min-w-[38px] !min-h-[38px]"
+                    onClick={handleStepNext}
+                    className="btn-stage-icon"
                     aria-label="Next project"
                     title="Next project"
                   >
@@ -272,8 +400,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={onClose}
-                    className="btn-stage-icon !min-w-[38px] !min-h-[38px]"
+                    onClick={requestClose}
+                    className="btn-stage-icon"
                     aria-label="Close project view"
                     title="Close (Esc)"
                   >
@@ -303,36 +431,69 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
 
               {/* Project Description Underneath Metadata Tags */}
               <p className="stage-stagger-item stage-description">{project.description}</p>
+
+              {/* Relocated Topics: Interactive Archive Filter Chips */}
+              {project.topics.length > 0 && (
+                <div className="stage-stagger-item dossier-topics-group">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Hash size={12} className="text-accent" />
+                    <span className="dossier-topics-label">Topics</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.topics.slice(0, 6).map((topic) =>
+                      onSelectTopic ? (
+                        <button
+                          key={topic}
+                          type="button"
+                          onClick={() => onSelectTopic(topic)}
+                          className="dossier-topic-chip is-interactive"
+                          title={`Show every project tagged #${topic}`}
+                        >
+                          #{topic}
+                        </button>
+                      ) : (
+                        <span key={topic} className="dossier-topic-chip">
+                          #{topic}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Action Links and Shader Lens Hint */}
             <div className="stage-stagger-item flex flex-col gap-3 pt-2 border-t border-[var(--border-subtle)]">
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 {project.liveUrl && (
-                  <a
+                  <PixelButton
+                    as="a"
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-stage-primary"
+                    variant="primary"
+                    size="md"
                   >
-                    <span>Launch Live Build</span>
-                    <ExternalLink size={16} />
-                  </a>
+                    <span>Open live build</span>
+                    <ExternalLink size={16} className="pixel-btn__arrow" aria-hidden="true" />
+                  </PixelButton>
                 )}
-                <a
+                <PixelButton
+                  as="a"
                   href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-stage-secondary"
+                  variant="secondary"
+                  size="md"
                 >
                   <GithubIcon size={16} />
-                  <span>View Source</span>
-                </a>
+                  <span>View source</span>
+                </PixelButton>
               </div>
 
               <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-telemetry">
                 <Sparkles size={12} className="text-accent shrink-0" />
-                <span>Sweep cursor over media to inspect live ASCII shader lens</span>
+                <span>Move across the image to read it in ASCII</span>
               </div>
             </div>
           </div>

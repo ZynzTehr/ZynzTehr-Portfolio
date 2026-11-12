@@ -1,0 +1,935 @@
+/*
+ * Mission layer: the persistent hex-orbit mark, the prologue, pixel-ripple
+ * buttons and the route cover. Loaded after global.css. Decisions live in
+ * client/DESIGN.md; motion tokens mirror src/lib/motion.ts.
+ */
+
+:root {
+  --dur-micro: 0.18s;
+  --dur-ui: 0.32s;
+  --dur-reveal: 0.64s;
+  --dur-hero: 0.9s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Orbit particles: the original landing orbit (global.scss, e041095). */
+/* Same path, period and stagger; sapphire instead of mint.            */
+/* ------------------------------------------------------------------ */
+
+@property --orbit-angle {
+  syntax: "<angle>";
+  initial-value: 180deg;
+  inherits: true;
+}
+
+@keyframes orbitParticle {
+  0% {
+    --orbit-angle: 180deg;
+    --orbit-radius: calc(min(400px, 50vw));
+    translate: calc(cos(var(--orbit-angle)) * var(--orbit-radius))
+      calc(sin(var(--orbit-angle)) * var(--orbit-radius) * -1);
+    opacity: 1;
+  }
+  50% {
+    --orbit-angle: 0deg;
+    --orbit-radius: calc(min(400px, 50vw));
+    translate: calc(cos(var(--orbit-angle)) * var(--orbit-radius))
+      calc(sin(var(--orbit-angle)) * var(--orbit-radius) * 1);
+    opacity: 1;
+  }
+  100% {
+    --orbit-angle: -180deg;
+    --orbit-radius: calc(min(400px, 50vw));
+    translate: calc(cos(var(--orbit-angle)) * var(--orbit-radius))
+      calc(sin(var(--orbit-angle)) * var(--orbit-radius) * -1);
+    opacity: 1;
+  }
+}
+
+.orbit-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  transform-origin: 50% 45%;
+  transition:
+    transform 0.55s var(--ease-in-out),
+    opacity 0.55s var(--ease-in-out);
+}
+
+.orbit-particles .particle {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  margin: -5px 0 0 -5px;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #60a5fa;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(68, 116, 255, 0.8);
+  filter: blur(4px);
+  opacity: 0;
+  animation: orbitParticle 4.5s infinite linear;
+  animation-delay: calc(var(--i) * 0.26s);
+}
+
+.orbit-particles .particle:nth-child(even) {
+  border-color: #4474ff;
+}
+
+.orbit-particles.is-collapsing {
+  transform: scale(0.04);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-particles .particle {
+    animation: none;
+    opacity: 0;
+  }
+  .orbit-particles::after {
+    content: "";
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: calc(min(400px, 50vw) * 2);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border: 1px solid rgba(96, 165, 250, 0.16);
+    border-radius: 50%;
+  }
+}
+
+@media (max-height: 560px) {
+  .orbit-particles {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Prologue                                                            */
+/* ------------------------------------------------------------------ */
+
+.prologue {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  min-height: 560px;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: -1.5rem;
+  overflow: hidden;
+}
+
+.prologue-ripple,
+.prologue-rain {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.prologue-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* One solid color. GlyphRain's native pass dims a captured opaque page, and
+     AsciiSweep paints its panels opaque (so the front panel hides the back
+     one); a solid stage keeps that panel invisible in native and fallback. */
+  background: #03060f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 2.6vh, 1.75rem);
+  padding: 4.5rem 1.25rem 3rem;
+  text-align: center;
+}
+
+.prologue-corner {
+  position: absolute;
+  width: clamp(28px, 4vw, 52px);
+  height: clamp(28px, 4vw, 52px);
+  border-color: rgba(96, 165, 250, 0.55);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.prologue-corner.corner-tl {
+  top: clamp(18px, 4vh, 40px);
+  left: clamp(18px, 4vw, 48px);
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+}
+.prologue-corner.corner-tr {
+  top: clamp(18px, 4vh, 40px);
+  right: clamp(18px, 4vw, 48px);
+  border-top-width: 1.5px;
+  border-right-width: 1.5px;
+}
+.prologue-corner.corner-bl {
+  bottom: clamp(18px, 4vh, 40px);
+  left: clamp(18px, 4vw, 48px);
+  border-bottom-width: 1.5px;
+  border-left-width: 1.5px;
+}
+.prologue-corner.corner-br {
+  bottom: clamp(18px, 4vh, 40px);
+  right: clamp(18px, 4vw, 48px);
+  border-bottom-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+.prologue-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prologue-mark {
+  filter: drop-shadow(0 0 14px rgba(68, 116, 255, 0.55));
+}
+
+.prologue-kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  color: var(--accent-bright);
+}
+
+.prologue-stepper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.prologue-beat-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: rgba(10, 17, 36, 0.72);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  overflow: hidden;
+  transition:
+    color var(--dur-ui) var(--ease-out),
+    border-color var(--dur-ui) var(--ease-out),
+    background-color var(--dur-ui) var(--ease-out);
+}
+.prologue-beat-pill:hover {
+  color: var(--text-secondary);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+.prologue-beat-pill.is-active {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: rgba(14, 23, 48, 0.9);
+}
+.prologue-beat-pill.is-passed {
+  color: var(--text-secondary);
+}
+.prologue-beat-pill__code {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent-bright);
+}
+.prologue-beat-pill__track {
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.3rem;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(148, 179, 255, 0.12);
+  overflow: hidden;
+}
+.prologue-beat-pill__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--accent-core), var(--accent-bright));
+}
+.prologue-beat-pill.is-passed .prologue-beat-pill__fill {
+  transform: scaleX(1);
+}
+.prologue-beat-pill.is-active .prologue-beat-pill__fill {
+  animation: beatFill var(--beat-dur, 3.6s) linear forwards;
+}
+@keyframes beatFill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .prologue-beat-pill__label {
+    display: none;
+  }
+}
+
+.prologue-beats {
+  position: relative;
+  width: min(1040px, 100%);
+  height: clamp(190px, 28vh, 250px);
+}
+
+.prologue-sweep {
+  position: absolute !important;
+  inset: 0;
+}
+
+.beat-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 0 0.5rem;
+}
+
+.beat-panel__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  text-shadow: 0 0 28px rgba(68, 116, 255, 0.5);
+}
+
+.beat-panel__line {
+  margin: 0;
+  max-width: 620px;
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.4vw, 1.08rem);
+  line-height: 1.55;
+  /* Brighter than --text-secondary: GlyphRain dims the page by its spec 0.5. */
+  color: #dfe7ff;
+}
+
+.prologue-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.prologue-cta {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pixel-ripple buttons (Fleet Pulse treatment, Orbital palette)       */
+/* ------------------------------------------------------------------ */
+
+.pixel-ripple-wrapper {
+  display: inline-flex;
+  perspective: 650px;
+}
+
+.pixel-btn {
+  --button-lift: 0px;
+  --button-scale: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #eaf2ff;
+  border: 1px solid rgba(96, 165, 250, 0.65);
+  border-radius: 16px;
+  transform: translateY(var(--button-lift)) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg)) scale(var(--button-scale));
+  transform-origin: 50% 50%;
+  transition:
+    transform 0.28s ease-out,
+    border-color var(--dur-micro),
+    box-shadow var(--dur-micro),
+    color var(--dur-micro);
+}
+
+.pixel-btn--primary {
+  background: linear-gradient(#123a9c, #0b2366);
+  box-shadow:
+    inset 0 1px 0 rgba(191, 219, 254, 0.22),
+    inset 0 -2px 0 rgba(3, 10, 30, 0.4),
+    var(--tilt-shadow-x, 0px) var(--tilt-shadow-y, 8px) 24px rgba(0, 0, 0, 0.35);
+}
+
+.pixel-btn--secondary {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+  background: linear-gradient(rgba(14, 23, 48, 0.95), rgba(10, 17, 36, 0.95));
+  box-shadow:
+    inset 0 1px 0 rgba(191, 219, 254, 0.1),
+    var(--tilt-shadow-x, 0px) var(--tilt-shadow-y, 6px) 18px rgba(0, 0, 0, 0.3);
+}
+
+.pixel-btn.is-tilting {
+  --button-lift: -2px;
+  border-color: #93c5fd;
+  color: #ffffff;
+  transition-duration: 0.12s, 0.2s, 0.2s, 0.2s;
+}
+.pixel-btn--primary.is-tilting {
+  box-shadow:
+    inset 0 1px 0 rgba(191, 219, 254, 0.32),
+    inset 0 -2px 0 rgba(3, 10, 30, 0.4),
+    var(--tilt-shadow-x, 0px) var(--tilt-shadow-y, 9px) 28px rgba(13, 89, 255, 0.4);
+}
+
+.pixel-btn.btn-pressed {
+  --button-lift: 1px;
+  --button-scale: 0.985;
+}
+
+.pixel-btn:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 5px;
+}
+
+.pixel-btn:disabled,
+.pixel-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pixel-btn--sm {
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  border-radius: 12px;
+}
+.pixel-btn--md {
+  min-height: 46px;
+  padding: 0.7rem 1.35rem;
+  font-size: 0.92rem;
+}
+.pixel-btn--lg {
+  min-width: 232px;
+  min-height: 62px;
+  padding: 1rem 2.2rem;
+  font-size: 1.05rem;
+  border-radius: 20px;
+}
+
+.pixel-ripple-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.pixel-btn__label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.pixel-btn__arrow {
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+.pixel-btn:hover .pixel-btn__arrow,
+.pixel-btn:focus-visible .pixel-btn__arrow {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-btn,
+  .pixel-btn__arrow {
+    transition: none;
+    transform: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* HUD hex button: the docked mark                                      */
+/* ------------------------------------------------------------------ */
+
+.hex-btn-wrap {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 12px rgba(68, 116, 255, 0.45));
+  transition: filter var(--dur-ui) var(--ease-out);
+}
+.hex-btn-wrap:hover,
+.hex-btn-wrap:focus-within {
+  filter: drop-shadow(0 0 18px rgba(96, 165, 250, 0.7))
+    drop-shadow(0 0 32px rgba(13, 89, 255, 0.35));
+}
+
+.hex-btn {
+  --button-lift: 0px;
+  --button-scale: 1;
+  position: relative;
+  display: block;
+  isolation: isolate;
+  clip-path: polygon(50% 5.71%, 91.67% 25%, 91.67% 67.86%, 50% 87.14%, 8.33% 67.86%, 8.33% 25%);
+  transform: translateY(var(--button-lift)) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg)) scale(var(--button-scale));
+  transition: transform 0.28s ease-out;
+}
+.hex-btn.is-tilting {
+  --button-lift: -1px;
+  --button-scale: 1.04;
+  transition-duration: 0.12s;
+}
+.hex-btn.btn-pressed {
+  --button-scale: 0.97;
+}
+.hex-btn:focus-visible {
+  outline: none;
+}
+.hex-btn:focus-visible .hex-btn__edge {
+  stroke: #eaf2ff;
+  stroke-width: 7;
+}
+
+.hex-btn__base,
+.hex-btn__top {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hex-btn__base {
+  z-index: 0;
+}
+.hex-btn__top {
+  z-index: 2;
+}
+
+.hex-btn__edge {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.hex-btn-wrap.is-docking .hex-btn__edge {
+  animation: hexEdgeDraw var(--dur-hero) var(--ease-out) both;
+}
+@keyframes hexEdgeDraw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hex-btn__glyph {
+  transform-origin: 60px 60px;
+  transition: transform var(--dur-reveal) var(--ease-out);
+}
+.hex-btn-wrap:hover .hex-btn__glyph {
+  transform: rotate(-8deg) scale(1.06);
+}
+.hex-btn__glyph .brand-mark-satellite {
+  animation: hexSatellite 6s linear infinite;
+}
+@keyframes hexSatellite {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hex-btn,
+  .hex-btn__glyph {
+    transition: none;
+    transform: none !important;
+  }
+  .hex-btn__glyph .brand-mark-satellite,
+  .hex-btn-wrap.is-docking .hex-btn__edge {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Route cover                                                          */
+/* ------------------------------------------------------------------ */
+
+.route-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+  visibility: hidden;
+}
+.route-cover.is-active {
+  visibility: visible;
+  pointer-events: auto;
+}
+.route-cover__field {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(68, 116, 255, 0.28) 0%,
+      rgba(13, 89, 255, 0.08) 32%,
+      transparent 62%
+    ),
+    #050a1a;
+}
+.route-cover__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.route-cover__mark {
+  opacity: 0;
+  filter: drop-shadow(0 0 24px rgba(68, 116, 255, 0.7));
+  will-change: transform, opacity;
+}
+
+/* ------------------------------------------------------------------ */
+/* Section heading mask reveal (the heading grammar)                    */
+/* ------------------------------------------------------------------ */
+
+.mask-reveal {
+  position: relative;
+  display: inline-block;
+}
+.mask-reveal__block {
+  position: absolute;
+  inset: 0.05em -0.12em;
+  background: linear-gradient(90deg, var(--accent-core), var(--accent-primary));
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+.chapter-kicker {
+  letter-spacing: 0.22em !important;
+}
+
+.chapter-orbital-hint {
+  max-width: 520px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Act I: orbit tiles face the viewer or dim away                       */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 769px) {
+  .banner .slider .item .project-tile-3d {
+    opacity: calc(0.42 + 0.58 * max(var(--facing, 1), 0));
+    transition: opacity var(--dur-ui) linear;
+  }
+  .banner .slider .item.is-rear .project-tile-3d > * {
+    opacity: 0;
+    transition: opacity var(--dur-ui) linear;
+  }
+  .banner .slider .item .project-tile-3d > * {
+    transition: opacity var(--dur-ui) linear;
+  }
+}
+
+.category-pill {
+  gap: 0.4rem;
+}
+.category-pill .pixel-btn__label {
+  gap: 0.4rem;
+}
+
+.play-morph {
+  position: relative;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+.play-morph > svg {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity var(--dur-ui) var(--ease-out),
+    transform var(--dur-ui) var(--ease-out);
+}
+.play-morph__play {
+  opacity: 0;
+  transform: scale(0.5) rotate(-90deg);
+}
+.play-morph:not(.is-playing) .play-morph__pause {
+  opacity: 0;
+  transform: scale(0.5) rotate(90deg);
+}
+.play-morph:not(.is-playing) .play-morph__play {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Project stage: rain falls over the media, details stay crisp above   */
+/* ------------------------------------------------------------------ */
+
+.stage-rain > canvas[aria-hidden] {
+  z-index: 2;
+}
+.stage-dossier {
+  position: relative;
+  z-index: 3;
+}
+
+@media (max-width: 768px) {
+  .notch-bottom-right {
+    max-width: 60%;
+    padding: 0.36rem 0.56rem 0.36rem 0.62rem;
+    border-top-left-radius: 13px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Act II: index                                                        */
+/* ------------------------------------------------------------------ */
+
+.archive-open-prompt {
+  border: 1px dashed rgba(96, 165, 250, 0.28);
+  border-radius: var(--radius-lg);
+  background: rgba(10, 17, 36, 0.55);
+}
+
+.filter-scope-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.card-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 8px;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+.card-icon-link:hover,
+.card-icon-link:focus-visible {
+  background: rgba(68, 116, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+/* upgrades.md Laser: viewport-sized so offset 140 and reveal 400 fit. Below the
+   beam a mask hides content, so cards only exist above the line: they print
+   out of the laser as the page scrolls. */
+.archive-laser {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-reveal) var(--ease-out);
+}
+.archive-laser.is-on {
+  opacity: 1;
+}
+.archive-laser > div:first-child {
+  position: absolute !important;
+  inset: 0;
+}
+.archive-laser__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(3, 6, 15, 0) 0,
+    rgba(3, 6, 15, 0.94) 10px,
+    #03060f 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-laser {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Act III: transmission                                                */
+/* ------------------------------------------------------------------ */
+
+.transmission__inner {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 2.6rem);
+}
+.coda-ambient-beam {
+  position: absolute;
+  inset: -40% -20% auto auto;
+  width: 70%;
+  height: 160%;
+  background: radial-gradient(ellipse at center, rgba(68, 116, 255, 0.22), transparent 62%);
+  animation: ambientCodaDrift 14s ease-in-out infinite;
+  pointer-events: none;
+}
+.coda-mark {
+  display: inline-flex;
+  filter: drop-shadow(0 0 12px rgba(68, 116, 255, 0.55));
+}
+.coda-stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: rgba(10, 17, 36, 0.7);
+}
+.coda-stat-tile__value {
+  font-family: var(--font-mono);
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-bright);
+  font-variant-numeric: tabular-nums;
+}
+.coda-stat-tile__value--text {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.coda-stat-tile__label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coda-ambient-beam {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Scroll widget: the React atom and its chevron (no label)             */
+/* ------------------------------------------------------------------ */
+
+.scroll-widget {
+  position: fixed;
+  top: 0;
+  right: clamp(0.75rem, 2vw, 2rem);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: rgba(10, 17, 36, 0.82);
+  backdrop-filter: blur(12px);
+  color: var(--accent-bright);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  will-change: transform;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+.scroll-widget:hover {
+  border-color: #93c5fd;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.45),
+    0 0 22px rgba(68, 116, 255, 0.35);
+}
+.scroll-widget__dial {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.scroll-widget__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.scroll-widget__ring-track {
+  fill: none;
+  stroke: rgba(148, 179, 255, 0.14);
+  stroke-width: 2;
+}
+.scroll-widget__ring-fill {
+  fill: none;
+  stroke: var(--accent-bright);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.scroll-widget__atom {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.55));
+}
+.scroll-widget__atom svg {
+  width: 100%;
+  height: 100%;
+}
+.scroll-widget__chevron {
+  display: inline-flex;
+  transition: transform var(--dur-reveal) var(--ease-out);
+}
+.scroll-widget.is-top .scroll-widget__chevron {
+  animation: chevronNudge 1.8s ease-in-out infinite;
+}
+.scroll-widget.is-away .scroll-widget__chevron {
+  transform: rotate(180deg);
+}
+@keyframes chevronNudge {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-widget.is-top .scroll-widget__chevron {
+    animation: none;
+  }
+}

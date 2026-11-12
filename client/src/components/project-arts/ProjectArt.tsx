@@ -49,7 +49,7 @@ const ProjectArt: React.FC<ProjectArtProps> = ({
     case "capstone-project":
       return <CapstoneArt />;
 
-    // zynztehr-profile removed — now in DevHud HexAvatar
+    // zynztehr-profile removed: the HUD hex button links to the profile
 
     case "tic-tac-toe-withai":
     case "tic-tac-toe-with-ai":
@@ -108,8 +108,9 @@ const ProjectArt: React.FC<ProjectArtProps> = ({
               alt={projectName}
               className="w-full h-full rounded-xl block object-cover object-top"
               onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80";
+                // No stock-photo stand-in: hide the broken image and let the card's
+                // navy surface and the project name carry the tile.
+                (e.target as HTMLImageElement).style.visibility = "hidden";
               }}
             />
           }

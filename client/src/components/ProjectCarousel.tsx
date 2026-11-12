@@ -1,5 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Sparkles } from "lucide-react";
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
+import { gsap } from "../lib/gsap";
+import { DUR, EASE } from "../lib/motion";
+import { prefersReducedMotion } from "../lib/useReducedMotion";
+import PixelButton from "./fx/PixelButton";
+import { Play, Pause, ChevronLeft, ChevronRight, Eye, Layers, Orbit, Sparkles } from "lucide-react";
 import { categories, type Project } from "../data/projects";
 import Earth3D from "./Earth3D";
 import CardMediaPreview from "./CardMediaPreview";
@@ -9,6 +13,8 @@ interface ProjectCarouselProps {
   onSelectProject: (project: Project, originRect: DOMRect | null) => void;
   activeCategory: string;
   onSelectCategory: (category: string) => void;
+  /** Hidden behind an open project: stop the orbit and the globe without unmounting. */
+  paused?: boolean;
 }
 
 const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
@@ -16,6 +22,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   onSelectProject,
   activeCategory,
   onSelectCategory,
+  paused = false,
 }) => {
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
@@ -25,12 +32,14 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const angleRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
   const stepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
+  const prevCategoryRef = useRef(activeCategory);
 
   const displayProjects = projects.slice(0, 10);
   const quantity = displayProjects.length || 1;
@@ -42,6 +51,80 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Act I entrance: the globe zooms up, then the tiles deploy into orbit.
+  // gsap.from in a layout effect sets the start state before first paint.
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".chapter-orbital-header", {
+        y: 14,
+        opacity: 0,
+        duration: DUR.reveal,
+        delay: 0.1,
+        ease: EASE.out,
+        clearProps: "transform,opacity",
+      });
+      gsap.from(".earth-container", {
+        opacity: 0,
+        scale: 0.82,
+        duration: DUR.hero * 1.3,
+        delay: 0.15,
+        ease: EASE.out,
+        clearProps: "transform,opacity",
+      });
+      gsap.from(".project-tile-3d", {
+        opacity: 0,
+        scale: 0.86,
+        duration: DUR.reveal,
+        stagger: 0.04,
+        delay: 0.3,
+        ease: EASE.out,
+        clearProps: "transform,opacity",
+      });
+      gsap.from([".category-filter-container", ".carousel-controls"], {
+        y: 14,
+        opacity: 0,
+        duration: DUR.reveal,
+        stagger: 0.08,
+        delay: 0.45,
+        ease: EASE.out,
+        clearProps: "transform,opacity",
+      });
+    }, wrapperRef);
+    return () => ctx.revert();
+  }, []);
+
+  // Re-stage the orbit when the category changes (never on mount).
+  useLayoutEffect(() => {
+    if (prevCategoryRef.current === activeCategory) return;
+    prevCategoryRef.current = activeCategory;
+    if (sliderRef.current && window.innerWidth <= 768) {
+      sliderRef.current.scrollTo({ left: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    }
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".project-tile-3d", {
+        opacity: 0.2,
+        scale: 0.9,
+        duration: DUR.reveal,
+        stagger: 0.035,
+        ease: EASE.out,
+        clearProps: "transform,opacity",
+      });
+    }, wrapperRef);
+    return () => ctx.revert();
+  }, [activeCategory]);
+
+  /** A category switch also swings the orbit forward a step, so the change reads as motion. */
+  const stepOrbitForCategory = () => {
+    if (window.innerWidth <= 768 || prefersReducedMotion()) return;
+    setIsStepping(true);
+    angleRef.current += 28;
+    setRotationAngle(angleRef.current);
+    if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+    stepTimeoutRef.current = setTimeout(() => setIsStepping(false), 640);
+  };
+
   useEffect(() => {
     if (isMobile) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -52,8 +135,8 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       const delta = (timestamp - lastTimestamp) / 1000;
       lastTimestamp = timestamp;
 
-      if (isRotating && !isHovered && !isStepping) {
-        angleRef.current = (angleRef.current + 11.25 * delta) % 360;
+      if (isRotating && !isHovered && !isStepping && !paused) {
+        angleRef.current = (angleRef.current + 10.5 * delta) % 360;
         setRotationAngle(angleRef.current);
       }
 
@@ -70,13 +153,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         clearTimeout(stepTimeoutRef.current);
       }
     };
-  }, [isRotating, isHovered, isStepping, isMobile]);
-
-  useEffect(() => {
-    if (sliderRef.current && window.innerWidth <= 768) {
-      sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
-    }
-  }, [activeCategory]);
+  }, [isRotating, isHovered, isStepping, isMobile, paused]);
 
   const handleSliderScroll = () => {
     if (!sliderRef.current || window.innerWidth > 768) return;
@@ -128,7 +205,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
       stepTimeoutRef.current = setTimeout(() => {
         setIsStepping(false);
-      }, 550);
+      }, 580);
     },
     [displayProjects.length, quantity],
   );
@@ -172,13 +249,24 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   };
 
   return (
-    <div className="project-showcase-wrapper w-full flex flex-col items-center">
+    <div ref={wrapperRef} className="project-showcase-wrapper w-full flex flex-col items-center">
+      {/* Chapter 01 Narrative Cue */}
+      <div className="chapter-orbital-header w-full flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-5 mb-1 px-1">
+        <div className="inline-flex items-center gap-2">
+          <Orbit size={14} className="text-accent" aria-hidden="true" />
+          <span className="chapter-kicker">ACT I // ORBIT</span>
+        </div>
+        <p className="chapter-orbital-hint m-0 text-xs text-[var(--text-muted)] text-center sm:text-left">
+          Hover a system to see it running. Select it for the full view.
+        </p>
+      </div>
+
       <div className="banner" style={{ "--quantity": quantity } as React.CSSProperties}>
-        <Earth3D reverse={true} size={650} />
+        <Earth3D reverse={true} size={650} paused={paused} />
 
         <div
           ref={sliderRef}
-          className="slider"
+          className={`slider ${!isRotating ? "paused-rotation" : ""}`}
           onScroll={handleSliderScroll}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -188,21 +276,29 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               ? undefined
               : {
                   transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
-                  transition: isStepping ? "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+                  transition: isStepping ? "transform 0.58s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
                 }
           }
         >
           {displayProjects.map((project, index) => {
             const isCardActive = isMobile ? index === safeMobileIndex : hoveredId === project.id;
+            // How squarely this tile faces the viewer (1 front, -1 back). Rear tiles
+            // dim and hide their text instead of showing it mirrored.
+            const facing = isMobile
+              ? 1
+              : Math.cos(((rotationAngle + (index * 360) / quantity) * Math.PI) / 180);
 
             return (
               <div
                 key={project.id}
                 role="button"
                 tabIndex={0}
-                aria-label={`Open ${project.name} showcase`}
-                className={`item ${index === safeMobileIndex ? "active-tile" : ""}`}
-                style={{ "--position": index + 1 } as React.CSSProperties}
+                aria-label={`${project.name}: open project details`}
+                data-project-tile={project.id}
+                className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${facing < 0 ? "is-rear" : ""}`}
+                style={
+                  { "--position": index + 1, "--facing": facing.toFixed(3) } as React.CSSProperties
+                }
                 onClick={(e) => handleCardActivate(project, index, e.currentTarget)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -237,8 +333,8 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                     <span className="tile-category-tag">{project.category}</span>
                     <h3 className="tile-title truncate">{project.name}</h3>
                     <div className="tile-inspect-hint">
-                      <Eye size={12} className="mr-1" />
-                      <span>Expand View</span>
+                      <Eye size={12} className="mr-1" aria-hidden="true" />
+                      <span>Open</span>
                     </div>
                   </div>
                 </div>
@@ -254,23 +350,32 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         aria-label="Filter projects by category"
         className="category-filter-container flex justify-center flex-wrap gap-2 mt-6"
       >
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            role="tab"
-            aria-selected={activeCategory === cat}
-            className={`btn-category-pill ${activeCategory === cat ? "active" : ""}`}
-            onClick={() => {
-              setActiveMobileIndex(0);
-              onSelectCategory(cat);
-            }}
-          >
-            {cat === "Recent" && <Layers size={14} className="mr-1.5" />}
-            {cat === "3D & Creative UI" && <Sparkles size={14} className="mr-1.5" />}
-            {cat}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const isActive = activeCategory === cat;
+          return (
+            <PixelButton
+              key={cat}
+              variant={isActive ? "primary" : "secondary"}
+              size="sm"
+              role="tab"
+              aria-selected={isActive}
+              className={`category-pill ${isActive ? "is-active" : ""}`}
+              onClick={() => {
+                if (activeCategory === cat) return;
+                setActiveMobileIndex(0);
+                stepOrbitForCategory();
+                onSelectCategory(cat);
+              }}
+            >
+              {cat === "Recent" && <Layers size={14} aria-hidden="true" />}
+              {cat === "3D & Creative UI" && <Sparkles size={14} aria-hidden="true" />}
+              <span>{cat}</span>
+              {isActive && (
+                <span className="category-count-chip font-telemetry">{displayProjects.length}</span>
+              )}
+            </PixelButton>
+          );
+        })}
       </div>
 
       {/* 3D Stage Controls */}
@@ -279,33 +384,34 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           type="button"
           className="btn-carousel-ctrl"
           onClick={() => handleRotate("left")}
-          title="Rotate Left"
-          aria-label="Rotate Left"
+          title="Previous system"
+          aria-label="Previous system"
         >
           <ChevronLeft size={18} />
         </button>
 
         {!isMobile && (
-          <button
-            type="button"
-            className="btn-carousel-ctrl btn-play-pause"
+          <PixelButton
+            variant="secondary"
+            size="sm"
             onClick={togglePlayPause}
-            title={isRotating ? "Pause Rotation" : "Resume Rotation"}
-            aria-label={isRotating ? "Pause Rotation" : "Resume Rotation"}
+            aria-pressed={!isRotating}
+            title={isRotating ? "Pause the orbit" : "Resume the orbit"}
           >
-            {isRotating ? <Pause size={16} /> : <Play size={16} />}
-            <span className="ml-1.5 text-sm font-medium">
-              {isRotating ? "Pause Orbit" : "Auto Orbit"}
+            <span className={`play-morph ${isRotating ? "is-playing" : ""}`} aria-hidden="true">
+              <Pause size={16} className="play-morph__pause" />
+              <Play size={16} className="play-morph__play" />
             </span>
-          </button>
+            <span>{isRotating ? "Pause orbit" : "Resume orbit"}</span>
+          </PixelButton>
         )}
 
         <button
           type="button"
           className="btn-carousel-ctrl"
           onClick={() => handleRotate("right")}
-          title="Rotate Right"
-          aria-label="Rotate Right"
+          title="Next system"
+          aria-label="Next system"
         >
           <ChevronRight size={18} />
         </button>

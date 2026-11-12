@@ -3,6 +3,18 @@ import { Film } from "lucide-react";
 import type { Project } from "../data/projects";
 import ProjectArt from "./project-arts/ProjectArt";
 import DecryptReveal from "./canvasui/DecryptReveal";
+import { DECRYPT_REVEAL_SPEC } from "./canvasui/spec";
+import { useMediaQuery, useReducedMotion } from "../lib/useReducedMotion";
+
+/**
+ * Object to context in a stable card frame (motion dossier: Lando's helmet
+ * cards). At rest the card shows its SVG art, the idea of the project. On
+ * hover or focus the live snapshot (and motion clip) decodes in through
+ * DecryptReveal at the owner's configured props: the decode radius opens from
+ * 0 to the configured 400 so the cipher-to-image decode is visible, and closes
+ * again on exit before the shader unmounts. A rapid exit always restores the
+ * art; touch and reduced motion swap media without the shader.
+ */
 
 interface CardMediaPreviewProps {
   project: Project;
@@ -11,6 +23,10 @@ interface CardMediaPreviewProps {
   compact?: boolean;
 }
 
+const OPEN_MS = 640;
+const CLOSE_MS = 320;
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+
 const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   project,
   isActive,
@@ -18,28 +34,48 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
   compact = false,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [canUseShader] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return (
-      window.matchMedia("(pointer: fine)").matches &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
-  });
-  const [reducedMotion] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const reducedMotion = useReducedMotion();
+  const finePointer = useMediaQuery("(pointer: fine)");
+  const canUseShader = finePointer && !reducedMotion;
+  const wantShader = isActive && enableShader && canUseShader;
+
+  const [shaderMounted, setShaderMounted] = useState(false);
+  const [radius, setRadius] = useState(0);
+  const [mediaFailed, setMediaFailed] = useState(false);
+  const radiusRef = useRef(0);
+  const frameRef = useRef(0);
+
+  // Open or close the decode radius; unmount the shader once closed.
+  useEffect(() => {
+    cancelAnimationFrame(frameRef.current);
+    const from = radiusRef.current;
+    const to = wantShader ? DECRYPT_REVEAL_SPEC.radius : 0;
+    const duration = wantShader ? OPEN_MS : CLOSE_MS;
+    let mountFrame = 0;
+    if (wantShader) mountFrame = requestAnimationFrame(() => setShaderMounted(true));
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const r = from + (to - from) * easeOut(t);
+      radiusRef.current = r;
+      setRadius(r);
+      if (t < 1) frameRef.current = requestAnimationFrame(tick);
+      else if (!wantShader) setShaderMounted(false);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+      cancelAnimationFrame(mountFrame);
+    };
+  }, [wantShader]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     if (isActive && !reducedMotion) {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay suppressed; poster and snapshot remain visible
-        });
-      }
+      void video.play().catch(() => {
+        // Autoplay suppressed; the snapshot stays visible.
+      });
     } else {
       video.pause();
       video.currentTime = 0;
@@ -50,11 +86,12 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
     <div className="relative w-full h-full">
       <img
         src={project.previewImage}
-        alt={`${project.name} interface preview`}
+        alt=""
         crossOrigin="anonymous"
         loading="lazy"
         decoding="async"
         className="card-snapshot-img"
+        onError={() => setMediaFailed(true)}
       />
       {project.videoUrl && isActive && !reducedMotion && (
         <video
@@ -66,14 +103,18 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
           loop
           playsInline
           preload="metadata"
+          aria-hidden="true"
           className="card-snapshot-video absolute inset-0"
         />
       )}
     </div>
   );
 
+  // Missing media: the SVG art stays as the card's face instead of a broken image.
+  const revealed = isActive && !mediaFailed;
+
   return (
-    <div className={`card-media-surface ${isActive ? "is-revealed" : ""}`}>
+    <div className={`card-media-surface ${revealed ? "is-revealed" : ""}`}>
       <div className="card-svg-resting">
         <ProjectArt
           projectId={project.id}
@@ -83,22 +124,9 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
         />
       </div>
 
-      <div className="card-snapshot-reveal">
-        {isActive && enableShader && canUseShader ? (
-          <DecryptReveal
-            className="w-full h-full"
-            radius={compact ? 115 : 195}
-            softness={0.55}
-            cell={compact ? 7 : 8}
-            color="#60a5fa"
-            background="#060b19"
-            edgeGlow={1.8}
-            edgeTint={0.8}
-            aberration={6}
-            passthrough={0.42}
-            scramble={0.12}
-            scrambleSpeed={7}
-          >
+      <div className="card-snapshot-reveal" aria-hidden={!revealed}>
+        {shaderMounted && !mediaFailed ? (
+          <DecryptReveal className="w-full h-full" {...DECRYPT_REVEAL_SPEC} radius={radius}>
             {mediaNodes}
           </DecryptReveal>
         ) : (
@@ -108,7 +136,7 @@ const CardMediaPreview: React.FC<CardMediaPreviewProps> = ({
 
       {project.videoUrl && !compact && (
         <span className="card-video-badge">
-          <Film size={10} />
+          <Film size={10} aria-hidden="true" />
           <span>Motion</span>
         </span>
       )}

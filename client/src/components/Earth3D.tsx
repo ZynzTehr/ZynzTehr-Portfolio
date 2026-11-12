@@ -7,19 +7,39 @@ interface Earth3DProps {
   reverse?: boolean;
   size?: number;
   interactive?: boolean;
+  /** Stop rendering while the orbit is hidden behind an open project. */
+  paused?: boolean;
 }
 
-const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interactive = true }) => {
+let webglProbe: boolean | null = null;
+
+/** One cached probe per page; the test context is released at once. */
+function probeWebGL(): boolean {
+  if (webglProbe !== null) return webglProbe;
+  try {
+    const testCanvas = document.createElement("canvas");
+    const gl = (testCanvas.getContext("webgl") ||
+      testCanvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    webglProbe = Boolean(gl);
+  } catch {
+    webglProbe = false;
+  }
+  return webglProbe;
+}
+
+const Earth3D: React.FC<Earth3DProps> = ({
+  reverse = true,
+  size = 650,
+  interactive = true,
+  paused = false,
+}) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [webGlSupported] = useState(() => {
-    try {
-      const testCanvas = document.createElement("canvas");
-      const gl = testCanvas.getContext("webgl") || testCanvas.getContext("experimental-webgl");
-      return !!gl;
-    } catch {
-      return false;
-    }
-  });
+  const pausedRef = useRef(paused);
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+  const [webGlSupported] = useState(probeWebGL);
   const [timePeriod, setTimePeriod] = useState<string>("Day");
 
   useEffect(() => {
@@ -348,12 +368,21 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
     // Animation Loop
     let animationFrameId: number;
     let clockTime = 0;
+    let lastFrame = performance.now();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const animate = () => {
+    const animate = (now: number = performance.now()) => {
       animationFrameId = requestAnimationFrame(animate);
-      clockTime += 0.03;
+      if (pausedRef.current) {
+        lastFrame = now;
+        return;
+      }
+      // Frame-rate independent: the tuned per-frame values assume 60 fps.
+      const k = Math.min(3, Math.max(0, (now - lastFrame) / (1000 / 60)));
+      lastFrame = now;
+      clockTime += 0.03 * k;
 
-      const baseSpeed = 0.0035;
+      const baseSpeed = reducedMotion ? 0 : 0.0035 * k;
       if (reverse) {
         earth.rotation.y -= baseSpeed;
         stars.rotation.y -= baseSpeed * 0.4;
@@ -366,8 +395,10 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       starMaterial.opacity = 0.75 + Math.sin(clockTime * 2.5) * 0.2;
 
       // Smooth mouse parallax damping
-      earth.rotation.x += (targetRotationX - earth.rotation.x) * 0.05;
-      earth.rotation.y += targetRotationY * 0.01;
+      if (!reducedMotion) {
+        earth.rotation.x += (targetRotationX - earth.rotation.x) * Math.min(1, 0.05 * k);
+        earth.rotation.y += targetRotationY * 0.01 * k;
+      }
       atmosphere.rotation.y = earth.rotation.y;
 
       renderer.render(scene, camera);
@@ -393,6 +424,7 @@ const Earth3D: React.FC<Earth3DProps> = ({ reverse = true, size = 650, interacti
       dayTexture.dispose();
       nightTexture.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
     };
   }, [reverse, size, interactive, webGlSupported]);
 
