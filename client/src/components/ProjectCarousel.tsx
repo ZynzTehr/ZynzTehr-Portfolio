@@ -19,6 +19,9 @@ import InspectHint from "./InspectHint";
 let lastTabAt = -Infinity;
 const TAB_FOCUS_WINDOW_MS = 400;
 
+/** Orbit animation time per degree of turn; the animations are only ever seeked. */
+const ORBIT_MS_PER_DEG = 1000;
+
 interface ProjectCarouselProps {
   projects: Project[];
   onSelectProject: (project: Project, originRect: DOMRect | null) => void;
@@ -99,46 +102,101 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const quantity = displayProjects.length || 1;
 
   /**
-   * Turn the orbit to angleRef. The spin writes straight to the DOM: setting
-   * React state every frame re-rendered all ten tiles 120 times a second,
-   * and the dropped frames that cost showed up in every other effect on the
-   * page. `animate` true eases a step; false snaps (the spin itself); left
-   * out, the running transition is kept (re-applying after a render).
+   * The orbit is drawn by paused Web Animations seeked to angleRef: one turns
+   * the ring, and for each tile one dims it as it faces away and one hides its
+   * text on the far side (instead of showing it mirrored). Seeking an
+   * animation restyles without selector matching. Writing inline styles or
+   * custom properties every frame did not: with a large injected stylesheet
+   * (a typical ad blocker adds ~14,000 generic selectors) each frame restyled
+   * ~1,500 elements of tile art and the page fell to 5 fps.
    */
-  const applyAngle = useCallback(
-    (animate?: boolean) => {
-      const slider = sliderRef.current;
-      if (!slider) return;
-      const tiles = Array.from(slider.children) as HTMLElement[];
-      if (isMobile) {
-        slider.style.transform = "";
-        slider.style.transition = "";
-        tiles.forEach((tile) => {
-          tile.style.setProperty("--facing", "1");
-          tile.classList.remove("is-rear");
-        });
+  const orbitAnimsRef = useRef<Animation[]>([]);
+  const turnTweenRef = useRef<gsap.core.Tween | null>(null);
+  /** Where a running step is heading, so repeated steps add up exactly. */
+  const targetAngleRef = useRef(0);
+  const projectKey = displayProjects.map((p) => p.id).join("|");
+
+  const seekOrbit = useCallback(() => {
+    const time = (((angleRef.current % 360) + 360) % 360) * ORBIT_MS_PER_DEG;
+    for (const animation of orbitAnimsRef.current) animation.currentTime = time;
+  }, []);
+
+  /** Turn to `target` degrees: eased like a step, or at once. */
+  const turnTo = useCallback(
+    (target: number, animate: boolean) => {
+      turnTweenRef.current?.kill();
+      turnTweenRef.current = null;
+      targetAngleRef.current = target;
+      if (!animate) {
+        angleRef.current = target;
+        seekOrbit();
         return;
       }
-      const angle = angleRef.current;
-      if (animate !== undefined) {
-        slider.style.transition = animate
-          ? "transform 0.58s cubic-bezier(0.16, 1, 0.3, 1)"
-          : "none";
-      }
-      slider.style.transform = `perspective(1100px) rotateX(-10deg) rotateY(${angle}deg)`;
-      // How squarely each tile faces the viewer (1 front, -1 back). Rear tiles
-      // dim and hide their text instead of showing it mirrored.
-      tiles.forEach((tile, index) => {
-        const facing = Math.cos(((angle + (index * 360) / quantity) * Math.PI) / 180);
-        tile.style.setProperty("--facing", facing.toFixed(3));
-        tile.classList.toggle("is-rear", facing < 0);
+      turnTweenRef.current = gsap.to(angleRef, {
+        current: target,
+        duration: 0.58,
+        ease: EASE.out,
+        onUpdate: seekOrbit,
       });
     },
-    [isMobile, quantity],
+    [seekOrbit],
   );
 
-  // A render rewrites the tiles' classes; put the orbit back before paint.
-  useLayoutEffect(() => applyAngle());
+  /** The angle a new step starts from: a running step's destination. */
+  const baseAngle = useCallback(
+    () => (turnTweenRef.current?.isActive() ? targetAngleRef.current : angleRef.current),
+    [],
+  );
+
+  useLayoutEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider || isMobile) return;
+    const timing: KeyframeAnimationOptions = {
+      duration: 360 * ORBIT_MS_PER_DEG,
+      iterations: Infinity,
+      easing: "linear",
+    };
+    const animations: Animation[] = [
+      slider.animate(
+        [
+          { transform: "perspective(1100px) rotateX(-10deg) rotateY(0deg)" },
+          { transform: "perspective(1100px) rotateX(-10deg) rotateY(360deg)" },
+        ],
+        timing,
+      ),
+    ];
+    Array.from(slider.children).forEach((item, index) => {
+      const card = item.querySelector<HTMLElement>(".project-tile-3d");
+      if (!card) return;
+      const dim: Keyframe[] = [];
+      const show: Keyframe[] = [];
+      for (let deg = 0; deg <= 360; deg++) {
+        // How squarely this tile faces the viewer at this orbit angle (1 front, -1 back).
+        const facing = Math.cos(((deg + (index * 360) / quantity) * Math.PI) / 180);
+        dim.push({ offset: deg / 360, opacity: 0.42 + 0.58 * Math.max(facing, 0) });
+        // The text fades out over the last few degrees before it turns away.
+        show.push({ offset: deg / 360, opacity: Math.min(1, Math.max(0, facing / 0.06)) });
+      }
+      animations.push(card.animate(dim, timing));
+      for (const layer of Array.from(card.children)) {
+        animations.push(layer.animate(show, timing));
+      }
+    });
+    animations.forEach((animation) => animation.pause());
+    orbitAnimsRef.current = animations;
+    seekOrbit();
+    return () => {
+      animations.forEach((animation) => animation.cancel());
+      orbitAnimsRef.current = [];
+    };
+  }, [isMobile, quantity, projectKey, seekOrbit]);
+
+  useEffect(
+    () => () => {
+      turnTweenRef.current?.kill();
+    },
+    [],
+  );
   const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
   useEffect(() => {
@@ -215,8 +273,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const stepOrbitForCategory = () => {
     if (window.innerWidth <= 768 || prefersReducedMotion()) return;
     setIsStepping(true);
-    angleRef.current += 28;
-    applyAngle(true);
+    turnTo(baseAngle() + 28, true);
     if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
     stepTimeoutRef.current = setTimeout(() => setIsStepping(false), 640);
   };
@@ -233,7 +290,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
       if (isRotating && !isHovered && !isStepping && !idle) {
         angleRef.current = (angleRef.current + 10.5 * delta) % 360;
-        applyAngle(false);
+        seekOrbit();
       }
 
       animFrameRef.current = requestAnimationFrame(orbitLoop);
@@ -248,7 +305,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       // The step timer is not cleared here: this effect re-runs whenever a step
       // starts, and clearing it would leave the orbit stuck in "stepping".
     };
-  }, [isRotating, isHovered, isStepping, isMobile, idle, applyAngle]);
+  }, [isRotating, isHovered, isStepping, isMobile, idle, seekOrbit]);
 
   useEffect(
     () => () => {
@@ -300,27 +357,26 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       setIsStepping(true);
 
       const step = 360 / quantity;
-      const targetAngle = direction === "left" ? angleRef.current - step : angleRef.current + step;
-      angleRef.current = targetAngle;
-      applyAngle(true);
+      const from = baseAngle();
+      turnTo(direction === "left" ? from - step : from + step, !prefersReducedMotion());
 
       if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
       stepTimeoutRef.current = setTimeout(() => {
         setIsStepping(false);
       }, 580);
     },
-    [displayProjects.length, quantity, applyAngle],
+    [displayProjects.length, quantity, turnTo, baseAngle],
   );
 
   /** Turn the orbit the short way until this tile faces the viewer (keyboard focus). */
   const bringToFront = (index: number) => {
     if (isMobile) return;
     const target = -(index * 360) / quantity;
-    const delta = ((((target - angleRef.current) % 360) + 540) % 360) - 180;
+    const from = baseAngle();
+    const delta = ((((target - from) % 360) + 540) % 360) - 180;
     if (Math.abs(delta) < 0.5) return;
-    angleRef.current += delta;
     const reduced = prefersReducedMotion();
-    applyAngle(!reduced);
+    turnTo(from + delta, !reduced);
     if (reduced) return;
     setIsStepping(true);
     if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
@@ -397,7 +453,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          // The orbit's transform is written by applyAngle.
+          // The orbit's turn is drawn by the animations in orbitAnimsRef.
         >
           {displayProjects.map((project, index) => {
             const isCardActive = isMobile ? index === safeMobileIndex : hoveredId === project.id;
@@ -409,7 +465,6 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 aria-label={`${project.name}: open project details`}
                 data-project-tile={project.id}
                 className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${!isMobile && hoveredId === project.id ? "is-engaged" : ""}`}
-                // --facing and is-rear are written by applyAngle.
                 style={{ "--position": index + 1 } as React.CSSProperties}
                 onClick={(e) => handleCardActivate(project, index, e.currentTarget)}
                 onKeyDown={(e) => {

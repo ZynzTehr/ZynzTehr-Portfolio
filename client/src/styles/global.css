@@ -404,7 +404,8 @@
         )
         border-box;
     animation: rotateBorderBeam 2.4s linear infinite;
-    opacity: 1;
+    /* Fully lit wherever it sits: !important wins over the orbit's dimming animation. */
+    opacity: 1 !important;
     box-shadow:
       0 0 28px rgba(68, 116, 255, 0.55),
       0 16px 36px rgba(0, 0, 0, 0.9);

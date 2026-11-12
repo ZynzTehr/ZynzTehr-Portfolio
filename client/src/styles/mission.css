@@ -782,22 +782,8 @@
 /* Act I: orbit tiles face the viewer or dim away                       */
 /* ------------------------------------------------------------------ */
 
-@media (min-width: 769px) {
-  .banner .slider .item .project-tile-3d {
-    opacity: calc(0.42 + 0.58 * max(var(--facing, 1), 0));
-    transition:
-      opacity var(--dur-ui) linear,
-      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.28s ease;
-  }
-  .banner .slider .item.is-rear .project-tile-3d > * {
-    opacity: 0;
-    transition: opacity var(--dur-ui) linear;
-  }
-  .banner .slider .item .project-tile-3d > * {
-    transition: opacity var(--dur-ui) linear;
-  }
-}
+/* The dimming and the far-side text fade are Web Animations seeked to the
+   orbit angle (ProjectCarousel), so no style here changes per frame. */
 
 .category-pill {
   gap: 0.4rem;
