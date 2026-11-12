@@ -871,6 +871,12 @@ function createLiquid(
   // Keep the latest pointer position without replaying a drag over later frames.
   const pointerSplats = new Map<number, Splat>();
 
+  /** Simulation clock: 120 steps a second, the look tuned on a 120 Hz display. */
+  const SIM_STEP = 1 / 120;
+  /** Catch-up limit per frame (covers 30 fps); a longer stall is dropped. */
+  const MAX_SIM_STEPS = 4;
+  let simClock = 0;
+
   let raf = 0;
   let lastTime = performance.now();
   let destroyed = false;
@@ -890,8 +896,15 @@ function createLiquid(
       running = false;
       return;
     }
-    const delta = Math.min((now - lastTime) / 1000, 1 / 30);
+    // Fixed-rate simulation: each step advects by DT while dissipation is
+    // scaled to real time, so stepping once per display frame made the smoke's
+    // shape depend on the frame rate (any jank elsewhere on the page turned the
+    // wisps into dense blobs). Step on a steady clock instead, catching up a
+    // few steps after a slow frame and dropping the rest of a long stall.
+    simClock += Math.min((now - lastTime) / 1000, SIM_STEP * MAX_SIM_STEPS);
     lastTime = now;
+    const steps = Math.min(MAX_SIM_STEPS, Math.round(simClock / SIM_STEP));
+    simClock = steps === MAX_SIM_STEPS ? 0 : simClock - steps * SIM_STEP;
     if (queued.length > 0 || pointerSplats.size > 0) {
       idleAt = now + idleDelayMs();
       let remaining = MAX_SPLATS_PER_FRAME;
@@ -908,7 +921,7 @@ function createLiquid(
       const count = Math.min(queued.length, remaining);
       for (let i = 0; i < count; i++) applySplat(...queued.shift()!);
     }
-    step(delta);
+    for (let i = 0; i < steps; i++) step(SIM_STEP);
     render();
     if (now >= idleAt && !contentDirty && queued.length === 0 && pointerSplats.size === 0) {
       running = false;
@@ -921,6 +934,7 @@ function createLiquid(
     if (destroyed || running || !visible || document.hidden) return;
     running = true;
     lastTime = performance.now();
+    simClock = 0;
     raf = requestAnimationFrame(frame);
   }
 

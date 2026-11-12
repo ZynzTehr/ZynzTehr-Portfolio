@@ -42,7 +42,6 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [rotationAngle, setRotationAngle] = useState(0);
   const [isStepping, setIsStepping] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
@@ -98,6 +97,48 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   const displayProjects = projects.slice(0, 10);
   const quantity = displayProjects.length || 1;
+
+  /**
+   * Turn the orbit to angleRef. The spin writes straight to the DOM: setting
+   * React state every frame re-rendered all ten tiles 120 times a second,
+   * and the dropped frames that cost showed up in every other effect on the
+   * page. `animate` true eases a step; false snaps (the spin itself); left
+   * out, the running transition is kept (re-applying after a render).
+   */
+  const applyAngle = useCallback(
+    (animate?: boolean) => {
+      const slider = sliderRef.current;
+      if (!slider) return;
+      const tiles = Array.from(slider.children) as HTMLElement[];
+      if (isMobile) {
+        slider.style.transform = "";
+        slider.style.transition = "";
+        tiles.forEach((tile) => {
+          tile.style.setProperty("--facing", "1");
+          tile.classList.remove("is-rear");
+        });
+        return;
+      }
+      const angle = angleRef.current;
+      if (animate !== undefined) {
+        slider.style.transition = animate
+          ? "transform 0.58s cubic-bezier(0.16, 1, 0.3, 1)"
+          : "none";
+      }
+      slider.style.transform = `perspective(1100px) rotateX(-10deg) rotateY(${angle}deg)`;
+      // How squarely each tile faces the viewer (1 front, -1 back). Rear tiles
+      // dim and hide their text instead of showing it mirrored.
+      tiles.forEach((tile, index) => {
+        const facing = Math.cos(((angle + (index * 360) / quantity) * Math.PI) / 180);
+        tile.style.setProperty("--facing", facing.toFixed(3));
+        tile.classList.toggle("is-rear", facing < 0);
+      });
+    },
+    [isMobile, quantity],
+  );
+
+  // A render rewrites the tiles' classes; put the orbit back before paint.
+  useLayoutEffect(() => applyAngle());
   const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
   useEffect(() => {
@@ -175,7 +216,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     if (window.innerWidth <= 768 || prefersReducedMotion()) return;
     setIsStepping(true);
     angleRef.current += 28;
-    setRotationAngle(angleRef.current);
+    applyAngle(true);
     if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
     stepTimeoutRef.current = setTimeout(() => setIsStepping(false), 640);
   };
@@ -192,7 +233,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
       if (isRotating && !isHovered && !isStepping && !idle) {
         angleRef.current = (angleRef.current + 10.5 * delta) % 360;
-        setRotationAngle(angleRef.current);
+        applyAngle(false);
       }
 
       animFrameRef.current = requestAnimationFrame(orbitLoop);
@@ -207,7 +248,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       // The step timer is not cleared here: this effect re-runs whenever a step
       // starts, and clearing it would leave the orbit stuck in "stepping".
     };
-  }, [isRotating, isHovered, isStepping, isMobile, idle]);
+  }, [isRotating, isHovered, isStepping, isMobile, idle, applyAngle]);
 
   useEffect(
     () => () => {
@@ -261,14 +302,14 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       const step = 360 / quantity;
       const targetAngle = direction === "left" ? angleRef.current - step : angleRef.current + step;
       angleRef.current = targetAngle;
-      setRotationAngle(targetAngle);
+      applyAngle(true);
 
       if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
       stepTimeoutRef.current = setTimeout(() => {
         setIsStepping(false);
       }, 580);
     },
-    [displayProjects.length, quantity],
+    [displayProjects.length, quantity, applyAngle],
   );
 
   /** Turn the orbit the short way until this tile faces the viewer (keyboard focus). */
@@ -278,8 +319,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     const delta = ((((target - angleRef.current) % 360) + 540) % 360) - 180;
     if (Math.abs(delta) < 0.5) return;
     angleRef.current += delta;
-    setRotationAngle(angleRef.current);
-    if (prefersReducedMotion()) return;
+    const reduced = prefersReducedMotion();
+    applyAngle(!reduced);
+    if (reduced) return;
     setIsStepping(true);
     if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
     stepTimeoutRef.current = setTimeout(() => setIsStepping(false), 640);
@@ -355,23 +397,10 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          style={
-            isMobile
-              ? undefined
-              : {
-                  transform: `perspective(1100px) rotateX(-10deg) rotateY(${rotationAngle}deg)`,
-                  transition: isStepping ? "transform 0.58s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
-                }
-          }
+          // The orbit's transform is written by applyAngle.
         >
           {displayProjects.map((project, index) => {
             const isCardActive = isMobile ? index === safeMobileIndex : hoveredId === project.id;
-            // How squarely this tile faces the viewer (1 front, -1 back). Rear tiles
-            // dim and hide their text instead of showing it mirrored.
-            const facing = isMobile
-              ? 1
-              : Math.cos(((rotationAngle + (index * 360) / quantity) * Math.PI) / 180);
-
             return (
               <div
                 key={project.id}
@@ -379,10 +408,9 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 tabIndex={0}
                 aria-label={`${project.name}: open project details`}
                 data-project-tile={project.id}
-                className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${facing < 0 ? "is-rear" : ""} ${!isMobile && hoveredId === project.id ? "is-engaged" : ""}`}
-                style={
-                  { "--position": index + 1, "--facing": facing.toFixed(3) } as React.CSSProperties
-                }
+                className={`item ${index === safeMobileIndex ? "active-tile" : ""} ${!isMobile && hoveredId === project.id ? "is-engaged" : ""}`}
+                // --facing and is-rear are written by applyAngle.
+                style={{ "--position": index + 1 } as React.CSSProperties}
                 onClick={(e) => handleCardActivate(project, index, e.currentTarget)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
