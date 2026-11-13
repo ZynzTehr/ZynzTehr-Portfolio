@@ -93,10 +93,17 @@ const SiteNav: React.FC = () => {
   // The bar grows out of the banner card, or shrinks back into it. Web
   // Animations, not a GSAP timeline: the card holds ~40 elements and a
   // per-frame inline style write restyles them all under an ad blocker's
-  // injected stylesheet. Each change starts from what is on screen (a running
-  // morph included), so a quick dock/undock reverses smoothly.
+  // injected stylesheet.
+  //
+  // The card scrolls with the page while the bar is fixed, and a scroll that
+  // docks the bar (crossing DOCK_Y) usually keeps easing for a few frames. So
+  // the card's end of the clip follows the card every frame of the morph, and
+  // the backdrop crossfades with the card instead of cutting: it fades in over
+  // the card as the bar grows out, and fades out over it once it has shrunk
+  // back on. An interrupted morph carries on from the shape on screen.
   const firstRun = useRef(true);
   const morphRef = useRef<Animation[]>([]);
+  const trackRef = useRef(0);
   useLayoutEffect(() => {
     const bg = bgRef.current;
     const bar = barRef.current;
@@ -106,49 +113,66 @@ const SiteNav: React.FC = () => {
     firstRun.current = false;
     const vw = document.documentElement.clientWidth;
     const barH = bar.offsetHeight;
+    // Tall enough to cover the card at any scroll inside the morph (its lowest
+    // point is at the top of the page). bg has no children, so this is cheap.
     const r = card?.getBoundingClientRect();
-    const h = Math.max(barH, r ? r.bottom : barH);
-    bg.style.height = `${h}px`; // bg has no children: cheap
-    const cardClip = r
-      ? `inset(${r.top}px ${vw - r.right}px ${h - r.bottom}px ${r.left}px round 24px)`
-      : `inset(0px 0px ${h - barH}px 0px round 0px)`;
+    const h = Math.max(barH, r ? r.bottom + window.scrollY : barH);
+    bg.style.height = `${h}px`;
     const barClip = `inset(0px 0px ${h - barH}px 0px round 0px)`;
-    const opacityOf = (el: Element) => getComputedStyle(el).opacity;
-    const barFrom = opacityOf(bar);
-    const cardFrom = card ? opacityOf(card) : "1";
+    const clipOfCard = () => {
+      const c = card?.getBoundingClientRect();
+      return c
+        ? `inset(${c.top}px ${vw - c.right}px ${h - c.bottom}px ${c.left}px round 24px)`
+        : barClip;
+    };
+    const style = getComputedStyle(bg);
+    const bgShown = parseFloat(style.opacity) > 0.01;
+    // What is on screen now: mid-morph, the running clip; otherwise the bar's
+    // (docking) or the card's own (undocking) shape.
+    const clipNow = bgShown && style.clipPath !== "none" ? style.clipPath : null;
+    const bgFrom = style.opacity;
+    const barFrom = getComputedStyle(bar).opacity;
+    const cardFrom = card ? getComputedStyle(card).opacity : "1";
+    cancelAnimationFrame(trackRef.current);
     morphRef.current.forEach((a) => a.cancel());
-    const ms = (s: number) => (instant ? 0 : s * 1000);
+    const ms = (sec: number) => (instant ? 0 : sec * 1000);
     const easeOut = cssEase(EASE.out);
     const hold = { fill: "both" } as const;
     const next: Animation[] = [];
+    let clipAnim: Animation;
+    let clipKeys: () => Keyframe[];
+    let span: number;
     if (docked) {
+      const from = clipNow ?? barClip;
+      clipKeys = () => [{ clipPath: from }, { clipPath: clipOfCard() }];
+      clipAnim = bg.animate(clipKeys(), { duration: ms(DUR.ui), easing: easeOut, ...hold });
       next.push(
+        clipAnim,
         bar.animate([{ opacity: barFrom }, { opacity: 0 }], { duration: ms(DUR.micro), ...hold }),
-        bg.animate([{ clipPath: barClip }, { clipPath: cardClip }], {
-          duration: ms(DUR.ui),
-          easing: easeOut,
+        // Fades out over the card once it has landed on it.
+        bg.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: ms(DUR.micro * 1.4),
+          delay: ms(DUR.ui - 0.08),
           ...hold,
         }),
-        // The bar backdrop disappears once it has shrunk onto the card.
-        bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 0, delay: ms(DUR.ui), ...hold }),
       );
       if (card)
         next.push(
-          // Back at once, under the backdrop shrinking onto it, so nothing
-          // flashes when the backdrop goes.
           card.animate([{ opacity: cardFrom }, { opacity: 1 }], {
             duration: ms(DUR.micro),
             ...hold,
           }),
         );
+      span = DUR.ui + DUR.micro * 1.4;
     } else {
+      clipKeys = clipNow
+        ? () => [{ clipPath: clipNow }, { clipPath: barClip }]
+        : () => [{ clipPath: clipOfCard() }, { clipPath: barClip }];
+      clipAnim = bg.animate(clipKeys(), { duration: ms(DUR.reveal), easing: easeOut, ...hold });
       next.push(
-        bg.animate([{ opacity: 1 }], { duration: 0, fill: "forwards" }),
-        bg.animate([{ clipPath: cardClip }, { clipPath: barClip }], {
-          duration: ms(DUR.reveal),
-          easing: easeOut,
-          ...hold,
-        }),
+        clipAnim,
+        // Fades in over the card, then the bar grows out of it.
+        bg.animate([{ opacity: bgFrom }, { opacity: 1 }], { duration: ms(DUR.micro), ...hold }),
         bar.animate([{ opacity: barFrom }, { opacity: 1 }], {
           duration: ms(DUR.ui),
           delay: instant ? 0 : 180,
@@ -159,14 +183,31 @@ const SiteNav: React.FC = () => {
         next.push(
           card.animate([{ opacity: cardFrom }, { opacity: 0 }], {
             duration: ms(DUR.micro),
+            delay: ms(DUR.micro),
             ...hold,
           }),
         );
+      span = DUR.reveal;
     }
     morphRef.current = next;
+    if (instant || !card) return;
+    // Follow the card while the morph runs (setKeyframes keeps the progress).
+    const until = performance.now() + span * 1000 + 50;
+    let last = "";
+    const track = () => {
+      const keys = clipKeys();
+      const key = JSON.stringify(keys);
+      if (key !== last) {
+        last = key;
+        (clipAnim.effect as KeyframeEffect).setKeyframes(keys);
+      }
+      if (performance.now() < until) trackRef.current = requestAnimationFrame(track);
+    };
+    trackRef.current = requestAnimationFrame(track);
   }, [docked, reducedMotion]);
   useEffect(
     () => () => {
+      cancelAnimationFrame(trackRef.current);
       morphRef.current.forEach((a) => a.cancel());
       morphRef.current = [];
     },
