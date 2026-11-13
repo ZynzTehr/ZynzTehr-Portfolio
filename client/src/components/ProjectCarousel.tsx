@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { gsap } from "../lib/gsap";
-import { DUR, EASE } from "../lib/motion";
+import { animateFrom, DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion } from "../lib/useReducedMotion";
 import PixelButton from "./fx/PixelButton";
 import MaskHeading from "./MaskHeading";
@@ -86,16 +86,15 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     const was = prevPausedRef.current;
     prevPausedRef.current = paused;
     if (!was || paused || !wrapperRef.current || prefersReducedMotion()) return;
-    const tween = gsap.from(wrapperRef.current, {
-      opacity: 0,
-      y: 14,
-      duration: DUR.reveal,
-      ease: EASE.out,
-      clearProps: "transform,opacity",
-    });
-    return () => {
-      tween.kill();
-    };
+    // A Web Animation, not a GSAP tween: the wrapper holds ~1,700 elements, and
+    // a per-frame inline style write on it restyles all of them under an ad
+    // blocker's injected stylesheet (see animateFrom).
+    const anims = animateFrom(
+      wrapperRef.current,
+      { opacity: 0, transform: "translateY(14px)" },
+      { duration: DUR.reveal },
+    );
+    return () => anims.forEach((a) => a.cancel());
   }, [paused]);
 
   const displayProjects = projects.slice(0, 10);
@@ -197,6 +196,27 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     },
     [],
   );
+
+  // The engaged tile brightens to full over the orbit's dimming, then eases
+  // back to it when released: an animation layered above the dim one (newer
+  // animations win), since a CSS transition never sees an animated value.
+  useEffect(() => {
+    if (!hoveredId || isMobile) return;
+    const card = sliderRef.current?.querySelector<HTMLElement>(
+      `[data-project-tile="${CSS.escape(hoveredId)}"] .project-tile-3d`,
+    );
+    if (!card) return;
+    const timing = { duration: DUR.ui * 1000, easing: "linear" };
+    const lit = card.animate([{ opacity: getComputedStyle(card).opacity }, { opacity: 1 }], {
+      ...timing,
+      fill: "forwards",
+    });
+    return () => {
+      const from = getComputedStyle(card).opacity;
+      lit.cancel();
+      if (card.isConnected) card.animate([{ opacity: from, offset: 0 }], timing);
+    };
+  }, [hoveredId, isMobile]);
   const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
   useEffect(() => {
@@ -206,46 +226,51 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   }, []);
 
   // Act I entrance: the globe zooms up, then the tiles deploy into orbit.
-  // gsap.from in a layout effect sets the start state before first paint.
+  // Web Animations started in a layout effect hold their start state from the
+  // first paint. The tiles fade on .item (the orbit animates .project-tile-3d's
+  // opacity) and grow on .project-tile-3d's own scale.
   useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      gsap.from(".chapter-orbital-header", {
-        y: 14,
-        opacity: 0,
-        duration: DUR.reveal,
-        delay: 0.1,
-        ease: EASE.out,
-        clearProps: "transform,opacity",
-      });
-      gsap.from(".earth-container", {
-        opacity: 0,
-        scale: 0.82,
-        duration: DUR.hero * 1.3,
-        delay: 0.15,
-        ease: EASE.out,
-        clearProps: "transform,opacity",
-      });
-      gsap.from(".project-tile-3d", {
-        opacity: 0,
-        scale: 0.86,
-        duration: DUR.reveal,
-        stagger: 0.04,
-        delay: 0.3,
-        ease: EASE.out,
-        clearProps: "transform,opacity",
-      });
-      gsap.from([".category-filter-container", ".carousel-controls"], {
-        y: 14,
-        opacity: 0,
-        duration: DUR.reveal,
-        stagger: 0.08,
-        delay: 0.45,
-        ease: EASE.out,
-        clearProps: "transform,opacity",
-      });
-    }, wrapperRef);
-    return () => ctx.revert();
+    const root = wrapperRef.current;
+    if (!root || prefersReducedMotion()) return;
+    const all = (selector: string) => root.querySelectorAll(selector);
+    const anims = [
+      ...animateFrom(
+        all(".chapter-orbital-header"),
+        { opacity: 0, transform: "translateY(14px)" },
+        { duration: DUR.reveal, delay: 0.1 },
+      ),
+      // Added onto the globe's own centring transform (translate(-50%, -50%)),
+      // so it grows about its centre rather than drifting in from the side.
+      ...animateFrom(
+        all(".earth-container"),
+        { opacity: 0, transform: "scale(0.82)", composite: "add" },
+        { duration: DUR.hero * 1.3, delay: 0.15 },
+      ),
+      ...animateFrom(
+        all(".banner .slider > .item"),
+        { opacity: 0 },
+        {
+          duration: DUR.reveal,
+          stagger: 0.04,
+          delay: 0.3,
+        },
+      ),
+      ...animateFrom(
+        all(".project-tile-3d"),
+        { scale: "0.86" },
+        {
+          duration: DUR.reveal,
+          stagger: 0.04,
+          delay: 0.3,
+        },
+      ),
+      ...animateFrom(
+        all(".category-filter-container, .carousel-controls"),
+        { opacity: 0, transform: "translateY(14px)" },
+        { duration: DUR.reveal, stagger: 0.08, delay: 0.45 },
+      ),
+    ];
+    return () => anims.forEach((a) => a.cancel());
   }, []);
 
   // Re-stage the orbit when the category changes (never on mount).
@@ -255,18 +280,27 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     if (sliderRef.current && window.innerWidth <= 768) {
       sliderRef.current.scrollTo({ left: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
     }
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      gsap.from(".project-tile-3d", {
-        opacity: 0.2,
-        scale: 0.9,
-        duration: DUR.reveal,
-        stagger: 0.035,
-        ease: EASE.out,
-        clearProps: "transform,opacity",
-      });
-    }, wrapperRef);
-    return () => ctx.revert();
+    const root = wrapperRef.current;
+    if (!root || prefersReducedMotion()) return;
+    const anims = [
+      ...animateFrom(
+        root.querySelectorAll(".banner .slider > .item"),
+        { opacity: 0.2 },
+        {
+          duration: DUR.reveal,
+          stagger: 0.035,
+        },
+      ),
+      ...animateFrom(
+        root.querySelectorAll(".project-tile-3d"),
+        { scale: "0.9" },
+        {
+          duration: DUR.reveal,
+          stagger: 0.035,
+        },
+      ),
+    ];
+    return () => anims.forEach((a) => a.cancel());
   }, [activeCategory]);
 
   /** A category switch also swings the orbit forward a step, so the change reads as motion. */

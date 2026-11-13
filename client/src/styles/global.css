@@ -379,8 +379,8 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
     transition:
-      box-shadow 0.28s ease,
-      opacity 0.28s ease;
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.28s ease;
     position: relative;
   }
 
@@ -404,8 +404,9 @@
         )
         border-box;
     animation: rotateBorderBeam 2.4s linear infinite;
-    /* Fully lit wherever it sits: !important wins over the orbit's dimming animation. */
-    opacity: 1 !important;
+    /* Fully lit wherever it sits: ProjectCarousel layers a brighten animation
+       over the orbit's dimming one (an animated value outranks this rule). */
+    opacity: 1;
     box-shadow:
       0 0 28px rgba(68, 116, 255, 0.55),
       0 16px 36px rgba(0, 0, 0, 0.9);

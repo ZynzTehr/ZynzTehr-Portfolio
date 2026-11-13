@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { gsap } from "../lib/gsap";
-import { DUR, EASE } from "../lib/motion";
+import { animateFrom, cssEase, DUR, EASE } from "../lib/motion";
+import { afterActsSettle } from "../lib/useActStack";
 import PixelButton from "./fx/PixelButton";
 import CloseGlyph from "./fx/CloseGlyph";
 import { ASCIIFY_SPEC, GLYPH_RAIN_SPEC } from "./canvasui/spec";
@@ -77,17 +77,15 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
         return;
       }
       isClosingRef.current = true;
-      gsap.to(stageRef.current, {
-        opacity: 0,
-        y: -10,
-        scale: 0.98,
-        duration: DUR.ui,
-        ease: EASE.in,
-        onComplete: () => {
-          isClosingRef.current = false;
-          done();
-        },
-      });
+      // From wherever the stage is (an open still settling included) to gone.
+      const exit = stageRef.current.animate(
+        [{ opacity: 0, transform: "translateY(-10px) scale(0.98)", offset: 1 }],
+        { duration: DUR.ui * 1000, easing: cssEase(EASE.in), fill: "forwards" },
+      );
+      exit.onfinish = () => {
+        isClosingRef.current = false;
+        done();
+      };
     },
     [onClose, reducedMotion],
   );
@@ -142,20 +140,25 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Smooth viewport alignment when the stage mounts or steps
-  useEffect(() => {
-    const stageEl = stageRef.current;
-    if (!stageEl) return;
-    const rect = stageEl.getBoundingClientRect();
-    const outOfView = rect.top < 72 || rect.bottom > window.innerHeight + 60;
-    if (outOfView) {
-      const targetTop = Math.max(0, window.scrollY + rect.top - 96);
-      window.scrollTo({
-        top: targetTop,
-        behavior: reducedMotion ? "auto" : "smooth",
-      });
-    }
-  }, [project.id, reducedMotion]);
+  // Smooth viewport alignment when the stage mounts or steps. It waits for the
+  // refresh that the stage's height change causes, which would otherwise
+  // cancel a smooth scroll already under way.
+  useEffect(
+    () =>
+      afterActsSettle(() => {
+        const stageEl = stageRef.current;
+        if (!stageEl) return;
+        const rect = stageEl.getBoundingClientRect();
+        const outOfView = rect.top < 72 || rect.bottom > window.innerHeight + 60;
+        if (outOfView) {
+          window.scrollTo({
+            top: Math.max(0, window.scrollY + rect.top - 96),
+            behavior: reducedMotion ? "auto" : "smooth",
+          });
+        }
+      }),
+    [project.id, reducedMotion],
+  );
 
   // FLIP growth on initial open + directional choreography when stepping projects
   useLayoutEffect(() => {
@@ -173,154 +176,88 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
     const stageEl = stageRef.current;
     if (!mediaEl || !dossierEl || !stageEl) return;
 
-    const ctx = gsap.context(() => {
-      const topLeftNotch = mediaEl.querySelector(".notch-top-left");
-      const bottomRightNotch = mediaEl.querySelector(".notch-bottom-right");
-      const mediaAsset = mediaEl.querySelector(".notched-media-asset");
-      const items = dossierEl.querySelectorAll(".stage-stagger-item");
+    // Web Animations, not GSAP tweens: these elements carry the media, the
+    // notches and the dossier, and a per-frame inline style write on them
+    // restyles their subtrees under an ad blocker's injected stylesheet.
+    const topLeftNotch = mediaEl.querySelector(".notch-top-left");
+    const bottomRightNotch = mediaEl.querySelector(".notch-bottom-right");
+    const mediaAsset = mediaEl.querySelector(".notched-media-asset");
+    const items = dossierEl.querySelectorAll(".stage-stagger-item");
+    const anims: Animation[] = [];
 
-      if (isInitialOpen) {
-        gsap.fromTo(stageEl, { opacity: 0.92 }, { opacity: 1, duration: DUR.ui, ease: EASE.out });
+    if (isInitialOpen) {
+      anims.push(...animateFrom(stageEl, { opacity: 0.92 }, { duration: DUR.ui }));
 
-        if (originRect && originRect.width > 20 && originRect.height > 20) {
-          const dest = mediaEl.getBoundingClientRect();
-          const dx = originRect.left + originRect.width / 2 - (dest.left + dest.width / 2);
-          const dy = originRect.top + originRect.height / 2 - (dest.top + dest.height / 2);
-          const sx = Math.min(1, Math.max(0.28, originRect.width / Math.max(dest.width, 1)));
-          const sy = Math.min(1, Math.max(0.28, originRect.height / Math.max(dest.height, 1)));
-
-          gsap.fromTo(
+      if (originRect && originRect.width > 20 && originRect.height > 20) {
+        const dest = mediaEl.getBoundingClientRect();
+        const dx = originRect.left + originRect.width / 2 - (dest.left + dest.width / 2);
+        const dy = originRect.top + originRect.height / 2 - (dest.top + dest.height / 2);
+        const sx = Math.min(1, Math.max(0.28, originRect.width / Math.max(dest.width, 1)));
+        const sy = Math.min(1, Math.max(0.28, originRect.height / Math.max(dest.height, 1)));
+        const y = Math.max(-260, Math.min(260, dy));
+        anims.push(
+          ...animateFrom(
             mediaEl,
-            {
-              x: dx,
-              y: Math.max(-260, Math.min(260, dy)),
-              scaleX: sx,
-              scaleY: sy,
-              opacity: 0.72,
-            },
-            {
-              x: 0,
-              y: 0,
-              scaleX: 1,
-              scaleY: 1,
-              opacity: 1,
-              duration: DUR.hero,
-              ease: EASE.out,
-              clearProps: "transform",
-            },
-          );
-        } else {
-          gsap.fromTo(
-            mediaEl,
-            { x: -24, scale: 0.96, opacity: 0 },
-            {
-              x: 0,
-              scale: 1,
-              opacity: 1,
-              duration: DUR.reveal,
-              ease: EASE.out,
-              clearProps: "transform",
-            },
-          );
-        }
-
-        if (topLeftNotch) {
-          gsap.fromTo(
-            topLeftNotch,
-            { x: -16, y: -16, opacity: 0 },
-            {
-              x: 0,
-              y: 0,
-              opacity: 1,
-              duration: DUR.reveal,
-              delay: 0.14,
-              ease: EASE.out,
-              clearProps: "transform",
-            },
-          );
-        }
-
-        if (bottomRightNotch) {
-          gsap.fromTo(
-            bottomRightNotch,
-            { x: 16, y: 16, opacity: 0 },
-            {
-              x: 0,
-              y: 0,
-              opacity: 1,
-              duration: DUR.reveal,
-              delay: 0.18,
-              ease: EASE.out,
-              clearProps: "transform",
-            },
-          );
-        }
-
-        gsap.fromTo(
-          items,
-          { opacity: 0, x: 22 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: DUR.reveal,
-            stagger: 0.055,
-            delay: 0.12,
-            ease: EASE.out,
-            clearProps: "transform",
-          },
+            { transform: `translate(${dx}px, ${y}px) scale(${sx}, ${sy})`, opacity: 0.72 },
+            { duration: DUR.hero },
+          ),
         );
       } else {
-        const dir = stepDirectionRef.current;
-
-        if (mediaAsset) {
-          gsap.fromTo(
-            mediaAsset,
-            { opacity: 0.32, scale: 1.04, x: dir * 20 },
-            {
-              opacity: 1,
-              scale: 1,
-              x: 0,
-              duration: DUR.ui,
-              ease: EASE.out,
-              clearProps: "transform",
-            },
-          );
-        }
-
-        if (topLeftNotch) {
-          gsap.fromTo(
-            topLeftNotch,
-            { x: -10, opacity: 0.45 },
-            { x: 0, opacity: 1, duration: DUR.ui, ease: EASE.out, clearProps: "transform" },
-          );
-        }
-
-        if (bottomRightNotch) {
-          gsap.fromTo(
-            bottomRightNotch,
-            { x: 10, opacity: 0.45 },
-            { x: 0, opacity: 1, duration: DUR.ui, ease: EASE.out, clearProps: "transform" },
-          );
-        }
-
-        gsap.fromTo(
-          items,
-          { opacity: 0, x: dir * 20 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: DUR.ui,
-            stagger: 0.04,
-            ease: EASE.out,
-            clearProps: "transform",
-          },
+        anims.push(
+          ...animateFrom(
+            mediaEl,
+            { transform: "translateX(-24px) scale(0.96)", opacity: 0 },
+            { duration: DUR.reveal },
+          ),
         );
       }
-    }, stageRef);
+
+      anims.push(
+        ...animateFrom(
+          topLeftNotch,
+          { transform: "translate(-16px, -16px)", opacity: 0 },
+          { duration: DUR.reveal, delay: 0.14 },
+        ),
+        ...animateFrom(
+          bottomRightNotch,
+          { transform: "translate(16px, 16px)", opacity: 0 },
+          { duration: DUR.reveal, delay: 0.18 },
+        ),
+        ...animateFrom(
+          items,
+          { opacity: 0, transform: "translateX(22px)" },
+          { duration: DUR.reveal, stagger: 0.055, delay: 0.12 },
+        ),
+      );
+    } else {
+      const dir = stepDirectionRef.current;
+      anims.push(
+        ...animateFrom(
+          mediaAsset,
+          { opacity: 0.32, transform: `translateX(${dir * 20}px) scale(1.04)` },
+          { duration: DUR.ui },
+        ),
+        ...animateFrom(
+          topLeftNotch,
+          { transform: "translateX(-10px)", opacity: 0.45 },
+          { duration: DUR.ui },
+        ),
+        ...animateFrom(
+          bottomRightNotch,
+          { transform: "translateX(10px)", opacity: 0.45 },
+          { duration: DUR.ui },
+        ),
+        ...animateFrom(
+          items,
+          { opacity: 0, transform: `translateX(${dir * 20}px)` },
+          { duration: DUR.ui, stagger: 0.04 },
+        ),
+      );
+    }
 
     return () => {
       if (isInitialOpen) initialTornDownRef.current = true;
-      ctx.revert();
+      anims.forEach((a) => a.cancel());
     };
   }, [project.id, originRect, reducedMotion]);
 
