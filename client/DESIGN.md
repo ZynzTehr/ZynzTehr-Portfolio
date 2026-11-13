@@ -49,6 +49,14 @@ One accent family (cobalt to ice) works as a moving system: the laser, the rain,
 - **Utility layer: IBM Plex Mono, with a job.** Telemetry: act kickers, counters, tags, stack chips, coordinates. Uppercase, tracked, tabular numerals.
 - **Body: Plus Jakarta Sans.** Descriptions and controls.
 - Registers meet on purpose: a mono kicker sits directly against a display headline in every act.
+- **Text glows in its own color**, in three tiers (`--glow-body`, `--glow-label`, `--glow-heading` in `global.css`; rules in mission.css "Text glow"):
+  - **Body copy:** a faint 5px halo.
+  - **Sapphire labels** (kickers, tags, telemetry, links): a 7px neon.
+  - **Headings:** a sapphire halo.
+  - **Hover and focus:** a hovered or focused control brightens all its text through `--glow-lit`.
+  - **Gradient name:** glows through a drop-shadow, since a text-shadow would show through its transparent fill.
+  - **Exclusions:** SVG art is excluded, and the glow turns off under `prefers-contrast: more` and forced colors.
+  - **Performance:** no rule puts `:hover` before a descendant combinator. That would restyle a whole act whenever hover changes under a still cursor.
 
 ### Voice and vocabulary
 

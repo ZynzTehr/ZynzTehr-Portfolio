@@ -37,6 +37,16 @@
   --font-secondary: var(--text-secondary);
   --accent-color: var(--accent-bright);
   --accent-glow: 0 0 18px rgba(68, 116, 255, 0.55), 0 0 36px rgba(13, 89, 255, 0.35);
+
+  /* Text glow (mission.css "Text glow"): each tier glows in the text's own
+     color, so blue labels glow blue and grey copy a faint grey-blue. */
+  --glow-body: 0 0 5px color-mix(in srgb, currentColor 26%, transparent);
+  --glow-label: 0 0 7px color-mix(in srgb, currentColor 55%, transparent);
+  --glow-heading:
+    0 0 2px color-mix(in srgb, currentColor 30%, transparent), 0 0 22px rgba(68, 116, 255, 0.36);
+  --glow-hover:
+    0 0 6px color-mix(in srgb, currentColor 70%, transparent),
+    0 0 18px color-mix(in srgb, currentColor 40%, transparent);
   --correct: var(--status-live);
 
   /* Geometry */

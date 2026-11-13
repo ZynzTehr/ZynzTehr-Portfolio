@@ -503,7 +503,7 @@
   align-items: center;
   gap: 0.6rem;
   pointer-events: none;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  /* text-shadow: see "Text glow" (a dark lift plus the label glow). */
 }
 
 .pixel-btn__arrow {
@@ -981,7 +981,7 @@
 }
 .transmission__head {
   max-width: 760px;
-  text-shadow: 0 2px 18px rgba(3, 6, 15, 0.85);
+  /* text-shadow: see "Text glow" (a dark lift over the black hole, then the glow). */
 }
 .transmission__horizon {
   flex: 1;
@@ -1805,4 +1805,110 @@ body::-webkit-scrollbar {
 }
 .card-glyph-rest.is-hidden {
   opacity: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Text glow                                                            */
+/* ------------------------------------------------------------------ */
+
+/* Text glows in its own color, in three tiers (tokens in global.css):
+   body copy faintly, sapphire labels as neon, headings with a sapphire halo.
+   SVG art is left crisp. These rules are unlayered, so they also decide over
+   layered component styles: any text-shadow belongs in this section.
+
+   Every element declares its glow (so currentColor is its own color), and a
+   tier names its element and that element's descendants. A hovered or
+   focused link or button brightens all its text by setting --glow-lit, which
+   its descendants inherit. No rule puts :hover before a descendant
+   combinator: Chrome would then restyle the whole subtree of any element
+   whose hover changes, and an act sliding under a still cursor changes hover
+   on the whole act. */
+:where(body *:not(svg, svg *)) {
+  text-shadow: var(--glow-lit, var(--glow-body));
+}
+
+:is(h1, h2, h3, .font-display, .tile-title, .notch-project-title),
+:is(h1, h2, h3, .font-display, .tile-title, .notch-project-title) :not(svg, svg *) {
+  text-shadow: var(--glow-lit, var(--glow-heading));
+}
+
+:is(
+  .chapter-kicker,
+  .tile-category-tag,
+  .font-telemetry,
+  .site-nav__act,
+  .notch-eyebrow,
+  .notch-stack-chip,
+  .dossier-topics-label,
+  .dossier-topic-chip,
+  a
+),
+:is(
+    .chapter-kicker,
+    .tile-category-tag,
+    .font-telemetry,
+    .site-nav__act,
+    .notch-eyebrow,
+    .notch-stack-chip,
+    .dossier-topics-label,
+    .dossier-topic-chip,
+    a
+  )
+  :not(svg, svg *) {
+  text-shadow: var(--glow-lit, var(--glow-label));
+}
+
+:is(a, button):is(:hover, :focus-visible) {
+  --glow-lit: var(--glow-hover);
+}
+
+/* Gradient-filled text: a text-shadow would show through the transparent
+   fill, so the glow is a drop-shadow of the painted glyphs instead. */
+.text-gradient,
+.text-gradient :not(svg, svg *) {
+  text-shadow: none;
+}
+.text-gradient {
+  filter: drop-shadow(0 0 12px rgba(68, 116, 255, 0.45));
+}
+
+/* Pixel button labels keep their dark lift under the glow. */
+.pixel-btn__label,
+.pixel-btn__label :not(svg, svg *) {
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.6),
+    var(--glow-lit, var(--glow-label));
+}
+
+/* Act III's words sit over the black hole: a dark lift first, then the glow. */
+.transmission__head,
+.transmission__head :not(svg, svg *) {
+  text-shadow:
+    0 2px 18px rgba(3, 6, 15, 0.85),
+    var(--glow-body);
+}
+.transmission__head :is(h1, h2, h3),
+.transmission__head :is(h1, h2, h3) :not(svg, svg *) {
+  text-shadow:
+    0 2px 18px rgba(3, 6, 15, 0.85),
+    var(--glow-heading);
+}
+.transmission__head .chapter-kicker,
+.transmission__head .chapter-kicker :not(svg, svg *) {
+  text-shadow:
+    0 2px 18px rgba(3, 6, 15, 0.85),
+    var(--glow-label);
+}
+
+/* Asked for maximum contrast, or a forced palette: plain, crisp text. */
+@media (prefers-contrast: more), (forced-colors: active) {
+  :root {
+    --glow-body: none;
+    --glow-label: none;
+    --glow-heading: none;
+    --glow-hover: none;
+  }
+  .text-gradient {
+    filter: none;
+  }
 }
