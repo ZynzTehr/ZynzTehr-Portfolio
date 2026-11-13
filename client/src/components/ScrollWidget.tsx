@@ -55,6 +55,31 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
     let running = false;
     let startTop = 160;
     let bottomMargin = 75;
+    // Layout read outside the frame loop: the footer's page position and the
+    // widget's height. Reading them per frame forced a second style pass.
+    let footerTop = Infinity;
+    let widgetHeight = widget.offsetHeight;
+    const measureFooter = () => {
+      const footer = document.querySelector(".footer-hud");
+      footerTop = footer ? footer.getBoundingClientRect().top + window.scrollY : Infinity;
+      widgetHeight = widget.offsetHeight;
+    };
+
+    // The widget's travel and the atom's spin are drawn by animations, never
+    // by inline styles: in browsers whose ad blocker injects its cosmetic
+    // stylesheet, every inline style write restyles the widget's subtree, and
+    // this runs every frame. The tuck on phones uses `translate`, untouched.
+    const move = widget.animate([{ transform: "translate3d(0, 0, 0)" }], {
+      duration: 0,
+      fill: "forwards",
+    });
+    const atom = atomRef.current;
+    const spin = atom?.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], {
+      duration: 360,
+      fill: "both",
+    });
+    spin?.pause();
+    let drawnY = NaN;
 
     const measure = () => {
       const hud = document.querySelector<HTMLElement>(".dev-hud");
@@ -79,17 +104,19 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
       const travel = Math.max(0, window.innerHeight - bottomMargin - startTop);
       targetY = startTop + progress * travel;
       // Never ride over the footer.
-      const footer = document.querySelector(".footer-hud");
-      if (footer) {
-        const limit = footer.getBoundingClientRect().top - widget.offsetHeight - 12;
+      if (Number.isFinite(footerTop)) {
+        const limit = footerTop - window.scrollY - widgetHeight - 12;
         targetY = Math.min(targetY, Math.max(12, limit));
       }
       currentY = currentY < 0 || reducedMotion ? targetY : currentY + (targetY - currentY) * 0.18;
       if (Math.abs(targetY - currentY) < 0.3) currentY = targetY;
 
-      widget.style.transform = `translate3d(0, ${currentY.toFixed(1)}px, 0)`;
-      if (atomRef.current)
-        atomRef.current.style.transform = `rotate(${(rotation % 360).toFixed(1)}deg)`;
+      const y = Math.round(currentY * 10) / 10;
+      if (y !== drawnY) {
+        drawnY = y;
+        (move.effect as KeyframeEffect).setKeyframes([{ transform: `translate3d(0, ${y}px, 0)` }]);
+      }
+      if (spin) spin.currentTime = ((rotation % 360) + 360) % 360;
 
       // Keep spinning gently while visible; settle the loop only under reduced motion.
       const settled = currentY === targetY && velocity === 0;
@@ -133,6 +160,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
 
     const onResize = () => {
       measure();
+      measureFooter();
       onScroll();
     };
 
@@ -145,6 +173,7 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
     };
 
     measure();
+    measureFooter();
     const first = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
@@ -152,6 +181,10 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
     const ro = new ResizeObserver(measure);
     const hud = document.querySelector(".dev-hud");
     if (hud) ro.observe(hud);
+    // The page grows and shrinks (the index opening, stages); the footer moves with it.
+    const pageRo = new ResizeObserver(measureFooter);
+    pageRo.observe(document.body);
+    pageRo.observe(widget);
 
     return () => {
       cancelAnimationFrame(first);
@@ -160,6 +193,9 @@ const ScrollWidget: React.FC<ScrollWidgetProps> = ({ onBackToTop }) => {
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
+      pageRo.disconnect();
+      move.cancel();
+      spin?.cancel();
     };
   }, [reducedMotion]);
 

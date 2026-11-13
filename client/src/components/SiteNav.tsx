@@ -2,8 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Globe } from "lucide-react";
 import { GithubIcon } from "./Icon";
 import BrandMark from "./BrandMark";
-import { gsap } from "../lib/gsap";
-import { DUR, EASE } from "../lib/motion";
+import { cssEase, DUR, EASE } from "../lib/motion";
 import { actFlowTop, ACT_DORMANT_SHARE, subscribeActs } from "../lib/useActStack";
 import { useReducedMotion } from "../lib/useReducedMotion";
 
@@ -91,8 +90,13 @@ const SiteNav: React.FC = () => {
     };
   }, []);
 
-  // The bar grows out of the banner card, or shrinks back into it.
+  // The bar grows out of the banner card, or shrinks back into it. Web
+  // Animations, not a GSAP timeline: the card holds ~40 elements and a
+  // per-frame inline style write restyles them all under an ad blocker's
+  // injected stylesheet. Each change starts from what is on screen (a running
+  // morph included), so a quick dock/undock reverses smoothly.
   const firstRun = useRef(true);
+  const morphRef = useRef<Animation[]>([]);
   useLayoutEffect(() => {
     const bg = bgRef.current;
     const bar = barRef.current;
@@ -104,42 +108,70 @@ const SiteNav: React.FC = () => {
     const barH = bar.offsetHeight;
     const r = card?.getBoundingClientRect();
     const h = Math.max(barH, r ? r.bottom : barH);
-    bg.style.height = `${h}px`;
+    bg.style.height = `${h}px`; // bg has no children: cheap
     const cardClip = r
       ? `inset(${r.top}px ${vw - r.right}px ${h - r.bottom}px ${r.left}px round 24px)`
       : `inset(0px 0px ${h - barH}px 0px round 0px)`;
     const barClip = `inset(0px 0px ${h - barH}px 0px round 0px)`;
-    const tl = gsap.timeline();
+    const opacityOf = (el: Element) => getComputedStyle(el).opacity;
+    const barFrom = opacityOf(bar);
+    const cardFrom = card ? opacityOf(card) : "1";
+    morphRef.current.forEach((a) => a.cancel());
+    const ms = (s: number) => (instant ? 0 : s * 1000);
+    const easeOut = cssEase(EASE.out);
+    const hold = { fill: "both" } as const;
+    const next: Animation[] = [];
     if (docked) {
-      tl.to(bar, { opacity: 0, duration: instant ? 0 : DUR.micro, ease: "none" }, 0);
-      tl.fromTo(
-        bg,
-        { clipPath: barClip },
-        { clipPath: cardClip, duration: instant ? 0 : DUR.ui, ease: EASE.out },
-        0,
+      next.push(
+        bar.animate([{ opacity: barFrom }, { opacity: 0 }], { duration: ms(DUR.micro), ...hold }),
+        bg.animate([{ clipPath: barClip }, { clipPath: cardClip }], {
+          duration: ms(DUR.ui),
+          easing: easeOut,
+          ...hold,
+        }),
+        // The bar backdrop disappears once it has shrunk onto the card.
+        bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 0, delay: ms(DUR.ui), ...hold }),
       );
-      tl.set(bg, { opacity: 0 });
-      if (card) tl.to(card, { opacity: 1, duration: instant ? 0 : DUR.micro }, ">-0.05");
+      if (card)
+        next.push(
+          // Back at once, under the backdrop shrinking onto it, so nothing
+          // flashes when the backdrop goes.
+          card.animate([{ opacity: cardFrom }, { opacity: 1 }], {
+            duration: ms(DUR.micro),
+            ...hold,
+          }),
+        );
     } else {
-      tl.set(bg, { opacity: 1 }, 0);
-      tl.fromTo(
-        bg,
-        { clipPath: cardClip },
-        { clipPath: barClip, duration: instant ? 0 : DUR.reveal, ease: EASE.out },
-        0,
+      next.push(
+        bg.animate([{ opacity: 1 }], { duration: 0, fill: "forwards" }),
+        bg.animate([{ clipPath: cardClip }, { clipPath: barClip }], {
+          duration: ms(DUR.reveal),
+          easing: easeOut,
+          ...hold,
+        }),
+        bar.animate([{ opacity: barFrom }, { opacity: 1 }], {
+          duration: ms(DUR.ui),
+          delay: instant ? 0 : 180,
+          ...hold,
+        }),
       );
-      if (card) tl.to(card, { opacity: 0, duration: instant ? 0 : DUR.micro }, 0);
-      tl.fromTo(
-        bar,
-        { opacity: 0 },
-        { opacity: 1, duration: instant ? 0 : DUR.ui, ease: "none" },
-        instant ? 0 : 0.18,
-      );
+      if (card)
+        next.push(
+          card.animate([{ opacity: cardFrom }, { opacity: 0 }], {
+            duration: ms(DUR.micro),
+            ...hold,
+          }),
+        );
     }
-    return () => {
-      tl.kill();
-    };
+    morphRef.current = next;
   }, [docked, reducedMotion]);
+  useEffect(
+    () => () => {
+      morphRef.current.forEach((a) => a.cancel());
+      morphRef.current = [];
+    },
+    [],
+  );
 
   // The card must not hold focus while the bar stands in for it.
   useEffect(() => {
@@ -148,17 +180,31 @@ const SiteNav: React.FC = () => {
     card.inert = !docked;
     return () => {
       card.inert = false;
-      card.style.opacity = "";
     };
   }, [docked]);
 
   // A crossfade, in place, scrubbed to the scroll: as an act arrives its link
   // fades out of the bar while the act's own kicker fades in; as it leaves,
   // the reverse. Nothing travels, so nothing lags behind a moving sheet.
+  // The opacities are paused animations seeked to the scroll, not inline
+  // styles: an inline write restyles the element's subtree in browsers whose
+  // ad blocker injects its cosmetic stylesheet, and this runs every frame.
   useEffect(() => {
-    const kickers = ACTS.map(() => null as HTMLElement | null);
-    const kicker = (k: number) =>
-      (kickers[k] ??= document.querySelector<HTMLElement>(`[data-act-kicker="${k}"]`));
+    const fade = (el: Element, from: number, to: number) => {
+      const a = el.animate([{ opacity: from }, { opacity: to }], { duration: 1000, fill: "both" });
+      a.pause();
+      return a;
+    };
+    const linkFades = ACTS.map(() => null as Animation | null);
+    const kickerFades = ACTS.map(() => null as Animation | null);
+    const linkFade = (k: number) => {
+      const link = linkRefs.current[k];
+      return link ? (linkFades[k] ??= fade(link, 1, 0)) : null;
+    };
+    const kickerFade = (k: number) => {
+      const el = document.querySelector(`[data-act-kicker="${k}"]`);
+      return el ? (kickerFades[k] ??= fade(el, 0, 1)) : null;
+    };
     const unsubscribe = subscribeActs((frame) => {
       ACTS.forEach((_, k) => {
         const link = linkRefs.current[k];
@@ -169,19 +215,19 @@ const SiteNav: React.FC = () => {
         // that rounds a hair short of full still counts as full.
         const raw = clamp01((share - ACT_DORMANT_SHARE) / (1 - ACT_DORMANT_SHARE));
         const phi = raw > 0.99 ? 1 : raw;
-        link.style.opacity = (1 - phi).toFixed(3);
+        const at = phi * 1000;
+        const linkAnim = linkFade(k);
+        if (linkAnim && linkAnim.currentTime !== at) linkAnim.currentTime = at;
         link.classList.toggle("is-away", onScreen);
         link.tabIndex = onScreen ? -1 : 0;
         link.setAttribute("aria-hidden", onScreen ? "true" : "false");
-        const target = kicker(k);
-        if (target) target.style.opacity = phi.toFixed(3);
+        const kickerAnim = kickerFade(k);
+        if (kickerAnim && kickerAnim.currentTime !== at) kickerAnim.currentTime = at;
       });
     });
     return () => {
       unsubscribe();
-      kickers.forEach((el) => {
-        if (el) el.style.opacity = "";
-      });
+      [...linkFades, ...kickerFades].forEach((a) => a?.cancel());
     };
   }, []);
 
