@@ -554,6 +554,7 @@ const Home: React.FC = () => {
             <PageLoadSweep
               className="text-center md:text-left"
               when="visible"
+              replay
               transparent
               background="#071022"
             >
@@ -651,20 +652,30 @@ const Home: React.FC = () => {
           <div id="index-results">
             {!isGridRevealed ? (
               <div className="archive-open-prompt text-center py-12 my-4 flex flex-col items-center justify-center gap-4">
-                <MaskHeading
-                  as="h3"
-                  className="text-base md:text-lg font-semibold text-[var(--text-primary)] font-display m-0"
+                <PageLoadSweep
+                  className="w-full"
+                  when="visible"
+                  replay
+                  transparent
+                  background="#03060f"
                 >
-                  Open the full index
-                </MaskHeading>
-                <p className="text-[var(--text-secondary)] text-sm m-0 max-w-[460px] leading-relaxed">
-                  All {projects.length} systems, searchable by name, stack or topic. They print in
-                  along the orbit line.
-                </p>
-                <PixelButton variant="primary" size="md" onClick={openIndexFromPrompt}>
-                  <Search size={16} aria-hidden="true" />
-                  <span>Open the index</span>
-                </PixelButton>
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <MaskHeading
+                      as="h3"
+                      className="text-base md:text-lg font-semibold text-[var(--text-primary)] font-display m-0"
+                    >
+                      Open the full index
+                    </MaskHeading>
+                    <p className="text-[var(--text-secondary)] text-sm m-0 max-w-[460px] leading-relaxed">
+                      All {projects.length} systems, searchable by name, stack or topic. They print
+                      in along the orbit line.
+                    </p>
+                    <PixelButton variant="primary" size="md" onClick={openIndexFromPrompt}>
+                      <Search size={16} aria-hidden="true" />
+                      <span>Open the index</span>
+                    </PixelButton>
+                  </div>
+                </PageLoadSweep>
               </div>
             ) : indexProjects.length === 0 ? (
               <div className="glass-card p-10 my-4 text-center flex flex-col items-center justify-center gap-3">
@@ -820,7 +831,7 @@ const Home: React.FC = () => {
         <div className="act__inner transmission__inner">
           <div className="transmission__layout">
             <header className="transmission__head">
-              <PageLoadSweep when="visible" transparent background="#03060f">
+              <PageLoadSweep when="visible" replay transparent background="#03060f">
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <span className="coda-mark" aria-hidden="true">
                     <BrandMark size={40} />

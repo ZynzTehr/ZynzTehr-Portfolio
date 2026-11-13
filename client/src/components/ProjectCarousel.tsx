@@ -459,7 +459,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   return (
     <div ref={wrapperRef} className="project-showcase-wrapper w-full flex flex-col items-center">
       {/* Chapter 01 Narrative Cue: sweeps in through ASCII, like the banner. */}
-      <PageLoadSweep className="w-full" when="visible" transparent background="#03060f">
+      <PageLoadSweep className="w-full" when="visible" replay transparent background="#03060f">
         <div className="chapter-orbital-header w-full flex flex-col items-center sm:items-start gap-1.5 mb-1 px-1">
           <p className="chapter-kicker m-0 inline-flex items-center gap-2">
             <Orbit size={14} className="text-accent" aria-hidden="true" />

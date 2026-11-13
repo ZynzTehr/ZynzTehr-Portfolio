@@ -10,6 +10,7 @@ import React, {
 import { AsciiSweep, type AsciiSweepOptions } from "./AsciiSweep";
 import { ASCII_SWEEP_SPEC } from "./spec";
 import { prefersReducedMotion } from "../../lib/useReducedMotion";
+import { subscribeActs } from "../../lib/useActStack";
 
 /**
  * upgrades.md: "implement this for text when pages loads". A one-shot
@@ -22,6 +23,13 @@ import { prefersReducedMotion } from "../../lib/useReducedMotion";
  * text sections), and mounts the engine only then, so a block far down the
  * page costs no WebGL context until it is reached. Until it has swept in, the
  * real text is invisible but stays in the accessibility tree.
+ *
+ * `replay` (with "visible") plays it again every time the block comes back
+ * into view. The acts are sticky sheets, so a block can stay inside the
+ * viewport while the next act covers it: a block counts as gone once it is
+ * fully out of the viewport or its act is nine tenths covered (by then the
+ * act has faded out), and it plays again once a third of it is in view and
+ * its act is no more than half covered.
  *
  * `transparent` keeps the sweep's panels see-through (AsciiSweep), for text
  * that sits on a gradient or a video rather than a flat panel.
@@ -56,6 +64,8 @@ interface PageLoadSweepProps extends Omit<AsciiSweepOptions, "onSweepEnd"> {
   native?: boolean;
   /** "load" sweeps once mounted; "visible" once the block scrolls into view. */
   when?: "load" | "visible";
+  /** With "visible": sweep again every time the block comes back into view. */
+  replay?: boolean;
 }
 
 export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
@@ -66,6 +76,7 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
   onComplete,
   native,
   when = "load",
+  replay = false,
   ...overrides
 }) => {
   const options = { ...ASCII_SWEEP_SPEC, ...overrides };
@@ -81,20 +92,62 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // "visible": arm once a third of the block is on screen.
+  // "visible": arm once a third of the block is on screen (and, with replay,
+  // reset once it has gone; see the header comment).
+  const playingRef = useRef(armed);
   useEffect(() => {
-    if (armed || completed) return;
+    playingRef.current = armed;
+  }, [armed]);
+  useEffect(() => {
+    if (when !== "visible" || prefersReducedMotion()) return;
+    if (!replay && (armed || completed)) return;
     const el = rootRef.current;
     if (!el) return;
+    const act = el.closest<HTMLElement>(".act");
+    const acts = act?.parentElement
+      ? Array.from(act.parentElement.querySelectorAll<HTMLElement>(":scope > .act"))
+      : [];
+    const actIndex = act ? acts.indexOf(act) : -1;
+    let ratio = 0;
+    let covered = 0;
+    const evaluate = () => {
+      const playing = playingRef.current;
+      if (!playing && ratio >= 0.35 && covered < 0.5) {
+        playingRef.current = true;
+        setArmed(true);
+      } else if (playing && replay && (ratio === 0 || covered >= 0.9)) {
+        playingRef.current = false;
+        firedRef.current = false;
+        setArmed(false);
+        setCompleted(false);
+        setSlotIndex(0);
+      }
+    };
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) setArmed(true);
+        const entry = entries[entries.length - 1];
+        ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+        evaluate();
       },
-      { threshold: 0.35 },
+      { threshold: [0, 0.35] },
     );
     io.observe(el);
-    return () => io.disconnect();
-  }, [armed, completed]);
+    const unsubscribe =
+      actIndex >= 0
+        ? subscribeActs((frame) => {
+            const next = frame.enter[actIndex + 1] ?? 0;
+            if (next === covered) return;
+            covered = next;
+            evaluate();
+          })
+        : () => {};
+    return () => {
+      io.disconnect();
+      unsubscribe();
+    };
+    // armed/completed only gate the one-shot case; the replay loop runs on refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [when, replay, replay ? null : armed, replay ? null : completed]);
 
   const finish = () => {
     if (!firedRef.current) {
