@@ -1,5 +1,24 @@
 [
   {
+    "id": "anibeam",
+    "name": "AniBeam",
+    "rawName": "aniBeam",
+    "description": "AniBeam is an anime discovery site on AniList's API. Browse trending titles, match your mood or pull a gacha pick, explore by decade, and open color-themed title pages. Save a list and beam it between phone and desktop with no account, and chat live about each episode.",
+    "category": "Full-Stack",
+    "language": "TypeScript",
+    "techStack": ["React", "TypeScript", "AniList GraphQL", "WebSockets"],
+    "topics": ["anime-discovery", "device-sync", "live-chat"],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/ZynzTehr/aniBeam",
+    "liveUrl": "https://ani-beam.vercel.app",
+    "mediaType": "video",
+    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.webp",
+    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.webp",
+    "videoUrl": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.mp4",
+    "updatedAt": "2026-11-13T03:44:54Z"
+  },
+  {
     "id": "zynztehr-profile",
     "name": "Profile Hub",
     "rawName": "ZynzTehr-Profile",
@@ -55,25 +74,6 @@
     "previewImage": "/media/vscode-fx/portfolio.webp",
     "videoUrl": "/media/vscode-fx/portfolio.mp4",
     "updatedAt": "2026-11-05T22:47:32Z"
-  },
-  {
-    "id": "anibeam",
-    "name": "AniBeam",
-    "rawName": "aniBeam",
-    "description": "AniBeam is an anime discovery site on AniList's API. Browse trending titles, match your mood or pull a gacha pick, explore by decade, and open color-themed title pages. Save a list and beam it between phone and desktop with no account, and chat live about each episode.",
-    "category": "Full-Stack",
-    "language": "TypeScript",
-    "techStack": ["React", "TypeScript", "AniList GraphQL", "WebSockets"],
-    "topics": ["anime-discovery", "device-sync", "live-chat"],
-    "stars": 0,
-    "forks": 0,
-    "githubUrl": "https://github.com/ZynzTehr/aniBeam",
-    "liveUrl": "https://ani-beam.vercel.app",
-    "mediaType": "video",
-    "mediaUrl": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.webp",
-    "previewImage": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.webp",
-    "videoUrl": "https://raw.githubusercontent.com/ZynzTehr/aniBeam/main/portfolio.mp4",
-    "updatedAt": "2026-11-04T01:45:55Z"
   },
   {
     "id": "jobseance",

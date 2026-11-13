@@ -9,7 +9,9 @@ const __dirname = path.dirname(__filename);
 const GITHUB_USERNAME = "ZynzTehr";
 // This portfolio and the GitHub profile README are not projects. The profile
 // hub (ZynzTehr-Profile, jorgebucio.com) is, and is listed like any other.
-const EXCLUDED_REPOS = ["ZynzTehr-Portfolio", "ZynzTehr"];
+// The portfolio itself, the profile README repo, and gate-4: a client
+// document package (proposal, agreement, pricing), not a project to showcase.
+const EXCLUDED_REPOS = ["ZynzTehr-Portfolio", "ZynzTehr", "gate-4"];
 
 /**
  * A project's media lives in its own repo root: portfolio.webp (the still) and,
