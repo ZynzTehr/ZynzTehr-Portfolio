@@ -8,7 +8,9 @@
   html {
     background-color: #03060f;
     color-scheme: dark;
-    scroll-behavior: smooth;
+    /* No scroll-behavior: smooth here. Every scroll the app makes asks for its
+       own behavior, and with smooth set on <html> ScrollTrigger rewrites
+       <html>'s inline style twice per refresh, which restyles the whole page. */
   }
 
   body {

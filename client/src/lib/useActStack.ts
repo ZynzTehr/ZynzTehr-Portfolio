@@ -55,6 +55,59 @@ export function useActsAwake(count: number): boolean[] {
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 /**
+ * Run `fn` once the acts have settled after a layout change: right after the
+ * ScrollTrigger refresh an act resize causes (useActStack refreshes from its
+ * ResizeObserver), or two frames on if no act resized. A smooth scroll must
+ * start after that refresh, because a refresh puts the scroll position back
+ * where it was and so cancels a smooth scroll already under way.
+ */
+export function afterActsSettle(fn: () => void): () => void {
+  let done = false;
+  let frame = 0;
+  const run = () => {
+    if (done) return;
+    done = true;
+    ScrollTrigger.removeEventListener("refresh", run);
+    cancelAnimationFrame(frame);
+    fn();
+  };
+  ScrollTrigger.addEventListener("refresh", run);
+  frame = requestAnimationFrame(() => {
+    frame = requestAnimationFrame(run);
+  });
+  return () => {
+    done = true;
+    ScrollTrigger.removeEventListener("refresh", run);
+    cancelAnimationFrame(frame);
+  };
+}
+
+/** Act exits are Web Animations this long, only ever seeked (time = progress x this). */
+const EXIT_MS = 1000;
+
+/**
+ * Keyframes that follow a GSAP ease, so a linear Web Animation traces the same
+ * curve the old tween did (two eases on one element need two animations).
+ */
+function easedKeyframes(ease: string, frame: (v: number) => Keyframe, steps = 48): Keyframe[] {
+  const curve = gsap.parseEase(ease);
+  return Array.from({ length: steps + 1 }, (_, i) => ({
+    ...frame(curve(i / steps)),
+    offset: i / steps,
+  }));
+}
+
+/** Opacity that holds at `from` until `start`, then runs linearly to `to` by `end`. */
+function fadeKeyframes(from: number, to: number, start: number, end: number): Keyframe[] {
+  return [
+    { opacity: from, offset: 0 },
+    { opacity: from, offset: start },
+    { opacity: to, offset: end },
+    { opacity: to, offset: 1 },
+  ];
+}
+
+/**
  * The document position an act occupies in the flow, whether or not it is
  * pinned right now. A pinned (sticky) act reports its stuck rect, so every act
  * is preceded by a zero-height `.act-anchor` that never sticks; the act's own
@@ -112,7 +165,14 @@ function offsetWithin(el: HTMLElement, act: HTMLElement): number {
  * keeps the stacking and the fades, without scale or spin.
  *
  * It also publishes an ActFrame every scrolled frame (subscribeActs) and marks
- * acts below ACT_DORMANT_SHARE with `data-dormant`, so CSS animations pause.
+ * acts below ACT_DORMANT_SHARE with `data-dormant`, pausing their CSS loops.
+ *
+ * Nothing here writes inline styles per frame. An inline style write restyles
+ * the written element's whole subtree in browsers whose ad blocker injects its
+ * cosmetic stylesheet (thousands of selectors, some keyed on [style]); on an
+ * act that is ~1,800 elements, 30-70 ms a write. So the exits are paused Web
+ * Animations seeked to the scrubbed progress, --act-top is held by an
+ * animation, and dormancy pauses the CSS loops through the animations API.
  *
  * Scroll positions are measured from each act's flow position (actFlowTop),
  * never from a rect that might be pinned. Tab focus inside an act that the
@@ -129,6 +189,38 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
     // Flow tops change only with layout (resize, an act growing), never with scroll.
     let flowTops = acts.map(actFlowTop);
     let frameReq = 0;
+    // CSS loops held while each act is dormant. Plain Web Animations (the
+    // orbit, the exits) are left alone: they are paused and seeked by design.
+    const heldLoops: CSSAnimation[][] = acts.map(() => []);
+    // Only a loop CSS still owns is resumed. One whose rule stopped matching
+    // while it was held (a blurred caret, reduced motion turned on) is
+    // cancelled by CSS ('idle'); playing it would revive it as a script loop.
+    const resumeHeld = (a: CSSAnimation) => {
+      if (
+        a.playState === "paused" &&
+        a.effect instanceof KeyframeEffect &&
+        a.effect.target?.isConnected
+      )
+        a.play();
+    };
+    const setDormant = (k: number, dormant: boolean) => {
+      const act = acts[k];
+      act.dataset.dormant = String(dormant);
+      if (dormant) {
+        heldLoops[k] = act.getAnimations({ subtree: true }).filter(
+          (a): a is CSSAnimation =>
+            a instanceof CSSAnimation &&
+            a.playState === "running" &&
+            // An engaged tile's border beam follows CSS play-state (hover,
+            // paused orbit), which an API pause/play would cut it loose from.
+            !(a.effect instanceof KeyframeEffect && a.effect.target?.matches(".project-tile-3d")),
+        );
+        heldLoops[k].forEach((a) => a.pause());
+      } else {
+        heldLoops[k].forEach(resumeHeld);
+        heldLoops[k] = [];
+      }
+    };
     const publish = () => {
       frameReq = 0;
       const vh = window.innerHeight;
@@ -138,7 +230,7 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
       lastActFrame = { vh, y, enter, share };
       acts.forEach((act, k) => {
         const dormant = share[k] < ACT_DORMANT_SHARE;
-        if ((act.dataset.dormant === "true") !== dormant) act.dataset.dormant = String(dormant);
+        if ((act.dataset.dormant === "true") !== dormant) setDormant(k, dormant);
         // A swirling act spins only its on-screen window (mission.css clips it),
         // so a tall open index never sweeps thousands of pixels across the hole.
         if (act.dataset.exit === "swirl") {
@@ -153,12 +245,29 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
       if (!frameReq) frameReq = requestAnimationFrame(publish);
     };
 
+    // --act-top (registered, non-inheriting) is held by an animation per act,
+    // updated only when it changes: all reads first, then the writes.
+    const topHolds = acts.map((act) =>
+      act.animate([{ "--act-top": "0px" }], { duration: 0, fill: "forwards" }),
+    );
+    const topValues = acts.map(() => "");
+    // An act that changes height (the index opening, filtering, a project
+    // stage) moves every trigger below it, so ScrollTrigger re-measures then,
+    // and only then: a refresh is the costliest thing on the page.
+    let heights = acts.map((act) => act.offsetHeight);
     const syncTops = () => {
       const vh = window.innerHeight;
-      acts.forEach((act) => {
-        act.style.setProperty("--act-top", `${Math.min(0, vh - act.offsetHeight)}px`);
+      const next = acts.map((act) => act.offsetHeight);
+      const resized = next.some((h, k) => h !== heights[k]);
+      heights = next;
+      next.forEach((h, k) => {
+        const top = `${Math.min(0, vh - h)}px`;
+        if (top === topValues[k]) return;
+        topValues[k] = top;
+        (topHolds[k].effect as KeyframeEffect).setKeyframes([{ "--act-top": top }]);
       });
       flowTops = acts.map(actFlowTop);
+      if (resized) ScrollTrigger.refresh();
       schedule();
     };
     syncTops();
@@ -221,40 +330,69 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
     window.addEventListener("pointerdown", onPointerDown, true);
     root.addEventListener("focusin", onFocusIn);
 
+    const exitAnims: Animation[] = [];
     const ctx = gsap.context(() => {
       acts.slice(0, -1).forEach((act, i) => {
         const incoming = acts[i + 1];
-        const tl = gsap.timeline({
-          defaults: { ease: "none" },
+        const timing: KeyframeAnimationOptions = {
+          duration: EXIT_MS,
+          fill: "both",
+          easing: "linear",
+        };
+        const anims: Animation[] = [];
+        if (act.dataset.exit === "swirl") {
+          // Pulled into the black hole: it shrinks early (about half size a
+          // quarter of the way in), then the spin quickens as it falls in.
+          if (!reducedMotion) {
+            anims.push(
+              act.animate(
+                easedKeyframes("power2.out", (v) => ({ scale: String(1 - 0.98 * v) })),
+                timing,
+              ),
+              act.animate(
+                easedKeyframes("power3.in", (v) => ({ rotate: `${540 * v}deg` })),
+                timing,
+              ),
+            );
+          }
+          anims.push(act.animate(fadeKeyframes(1, 0, 0.55, 0.95), timing));
+        } else {
+          const shade = act.querySelector<HTMLElement>(":scope > .act__shade");
+          if (!reducedMotion) {
+            anims.push(act.animate([{ scale: "1" }, { scale: "0.94" }], timing));
+            if (shade) anims.push(shade.animate([{ opacity: 0 }, { opacity: 0.7 }], timing));
+          }
+          // Gone by the time the incoming act is nine tenths in (dormant there).
+          anims.push(act.animate(fadeKeyframes(1, 0, 0.6, 0.9), timing));
+        }
+        // The incoming panel dissolves into the page backdrop as it lands.
+        const sheet = incoming.querySelector<HTMLElement>(":scope > .act__sheet");
+        if (sheet) anims.push(sheet.animate(fadeKeyframes(1, 0, 0.7, 1), timing));
+        anims.forEach((a) => a.pause());
+        exitAnims.push(...anims);
+
+        // The scroll drives a plain number; the animations follow it.
+        const exit = { progress: 0 };
+        const seek = () => {
+          const time = exit.progress * EXIT_MS;
+          for (const a of anims) a.currentTime = time;
+        };
+        seek();
+        gsap.to(exit, {
+          progress: 1,
+          ease: "none",
+          onUpdate: seek,
           scrollTrigger: {
             // From the incoming act's top meeting the viewport bottom to it
             // reaching the viewport top, measured in the flow.
             start: () => actFlowTop(incoming) - window.innerHeight,
             end: () => actFlowTop(incoming),
-            invalidateOnRefresh: true,
+            // start/end are re-read on every refresh anyway, and the tween only
+            // moves a number from 0 to 1, so there is nothing to re-record.
+            invalidateOnRefresh: false,
             scrub: reducedMotion ? true : 0.35,
           },
         });
-        if (act.dataset.exit === "swirl") {
-          // Pulled into the black hole: it shrinks early (about half size a
-          // quarter of the way in), then the spin quickens as it falls in.
-          if (!reducedMotion) {
-            tl.fromTo(act, { scale: 1 }, { scale: 0.02, ease: "power2.out", duration: 1 }, 0);
-            tl.fromTo(act, { rotate: 0 }, { rotate: 540, ease: "power3.in", duration: 1 }, 0);
-          }
-          tl.fromTo(act, { opacity: 1 }, { opacity: 0, duration: 0.4 }, 0.55);
-        } else {
-          const shade = act.querySelector<HTMLElement>(":scope > .act__shade");
-          if (!reducedMotion) {
-            tl.fromTo(act, { scale: 1 }, { scale: 0.94, duration: 1 }, 0);
-            if (shade) tl.fromTo(shade, { opacity: 0 }, { opacity: 0.7, duration: 1 }, 0);
-          }
-          // Gone by the time the incoming act is nine tenths in (dormant there).
-          tl.fromTo(act, { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0.6);
-        }
-        // The incoming panel dissolves into the page backdrop as it lands.
-        const sheet = incoming.querySelector<HTMLElement>(":scope > .act__sheet");
-        if (sheet) tl.fromTo(sheet, { opacity: 1 }, { opacity: 0, duration: 0.3 }, 0.7);
       });
     }, root);
 
@@ -273,8 +411,10 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
       window.removeEventListener("resize", syncTops);
       root.removeEventListener("focusin", onFocusIn);
       ctx.revert();
-      acts.forEach((act) => {
-        act.style.removeProperty("--act-top");
+      exitAnims.forEach((a) => a.cancel());
+      topHolds.forEach((a) => a.cancel());
+      acts.forEach((act, k) => {
+        heldLoops[k].forEach(resumeHeld);
         delete act.dataset.dormant;
         delete act.dataset.swirling;
       });

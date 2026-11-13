@@ -19,6 +19,27 @@
   }
 }
 
+/* The pixel buttons' cursor tilt is written on the button and read only by the
+   button itself, so it must not inherit: an inherited change restyles every
+   label, arrow and canvas inside on each pointer move. No initial value, so
+   each rule's var() fallback (the 6px resting shadow, 9px tilting) still applies. */
+@property --tilt-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tilt-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tilt-shadow-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tilt-shadow-y {
+  syntax: "*";
+  inherits: false;
+}
+
 /* ------------------------------------------------------------------ */
 /* Orbit particles: the original landing orbit (global.scss, e041095). */
 /* Same path, period and stagger; sapphire instead of mint.            */
@@ -1351,7 +1372,14 @@
 /* ------------------------------------------------------------------ */
 
 /* Each act is a full-bleed sheet that pins once its bottom meets the bottom of
-   the viewport (--act-top, set in JS), so the next act slides up over it. */
+   the viewport (--act-top, held by an animation in useActStack), so the next
+   act slides up over it. Registered as non-inheriting: only the act reads it,
+   so a change restyles the act alone, not its subtree. */
+@property --act-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
 .act {
   position: sticky;
   top: var(--act-top, 0px);
@@ -1452,11 +1480,15 @@
   }
 }
 
-/* A dormant act (under a tenth of the viewport) holds its CSS loops. */
-.act[data-dormant="true"],
-.act[data-dormant="true"] * {
-  animation-play-state: paused !important;
+/* While the index laser burns, focus scrolling keeps clear of the beam and the
+   sand line (Home.tsx). 0.68 is PARTICLE_SCROLL_SPEC.point (canvasui/spec.ts). */
+html[data-index-laser="on"] {
+  scroll-padding-bottom: calc((1 - 0.68) * 100vh + 24px);
 }
+
+/* A dormant act (under a tenth of the viewport) holds its CSS loops: that is
+   done through the animations API in useActStack, not a `.act[data-dormant] *`
+   rule, which would restyle all ~1,800 elements of an act at every crossing. */
 
 /* Act II centers its prompt while the index is closed. Results always start
    at the top of the sheet, so they print in from the beam as usual. */

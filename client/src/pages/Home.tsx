@@ -24,10 +24,10 @@ import ParticleScroll from "../components/canvasui/ParticleScroll";
 import Ripple from "../components/canvasui/Ripple";
 import { LASER_SPEC, PARTICLE_SCROLL_SPEC, RIPPLE_SPEC } from "../components/canvasui/spec";
 import { GithubIcon } from "../components/Icon";
-import { Flip, gsap, ScrollTrigger } from "../lib/gsap";
-import { DUR, EASE } from "../lib/motion";
+import { gsap, ScrollTrigger } from "../lib/gsap";
+import { cssEase, DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion, useReducedMotion } from "../lib/useReducedMotion";
-import { actFlowTop, useActStack, useActsAwake } from "../lib/useActStack";
+import { actFlowTop, afterActsSettle, useActStack, useActsAwake } from "../lib/useActStack";
 import BlackHole from "../components/BlackHole";
 
 /**
@@ -102,13 +102,23 @@ const Home: React.FC = () => {
   const indexAnchorRef = useRef<HTMLDivElement>(null);
   const codaRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const flipStateRef = useRef<Flip.FlipState | null>(null);
+  /** Where each index card stood (page coordinates) just before the list changed. */
+  const flipStateRef = useRef<Map<string, { x: number; y: number }> | null>(null);
 
   /** Record card positions just before the index list changes, so it can FLIP. */
   const captureFlip = useCallback(() => {
     if (prefersReducedMotion()) return;
-    const cards = document.querySelectorAll("#index-grid .project-card-col");
-    if (cards.length) flipStateRef.current = Flip.getState(cards);
+    const cards = document.querySelectorAll<HTMLElement>("#index-grid .project-card-col");
+    if (!cards.length) return;
+    const state = new Map<string, { x: number; y: number }>();
+    cards.forEach((card) => {
+      const id = card.dataset.flipId;
+      if (!id) return;
+      // Includes any glide still running, so an interrupted one continues smoothly.
+      const r = card.getBoundingClientRect();
+      state.set(id, { x: r.left + window.scrollX, y: r.top + window.scrollY });
+    });
+    flipStateRef.current = state;
   }, []);
   const lastOpenedRef = useRef<{ id: string; source: StageState["source"] } | null>(null);
 
@@ -229,9 +239,10 @@ const Home: React.FC = () => {
 
   /** Scroll once the filtered grid has committed and been re-measured; focus when it settles. */
   const scrollToIndexThenFocus = useCallback(() => {
+    // A frame for the filter to commit, then wait for the refresh its new
+    // height causes: a refresh mid-scroll would cancel the smooth scroll.
     requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        ScrollTrigger.refresh();
+      afterActsSettle(() => {
         const smooth = !prefersReducedMotion();
         const anchor = indexAnchorRef.current;
         if (anchor) {
@@ -280,26 +291,47 @@ const Home: React.FC = () => {
   }, [captureFlip]);
 
   // Filtering glides: surviving cards move from their old place, new ones rise in.
+  // A hand-rolled FLIP in Web Animations rather than GSAP Flip: Flip locks the
+  // page scroll by writing <body>'s inline style on every glide, and each such
+  // write restyles the whole page under an ad blocker's injected stylesheet.
   useLayoutEffect(() => {
     const state = flipStateRef.current;
     flipStateRef.current = null;
     if (!state) return;
-    const cards = document.querySelectorAll("#index-grid .project-card-col");
-    const tween = Flip.from(state, {
-      targets: cards,
-      duration: DUR.reveal,
-      ease: EASE.out,
-      stagger: 0.02,
-      onEnter: (els) =>
-        gsap.fromTo(
-          els,
-          { opacity: 0, scale: 0.94 },
-          { opacity: 1, scale: 1, duration: DUR.reveal, ease: EASE.out },
-        ),
+    const cards = document.querySelectorAll<HTMLElement>("#index-grid .project-card-col");
+    const easing = cssEase(EASE.out);
+    const duration = DUR.reveal * 1000;
+    const anims: Animation[] = [];
+    // Staggered like GSAP Flip: by order among the cards that were already
+    // there (moved or not); entering cards rise in at once.
+    let survivor = 0;
+    cards.forEach((card) => {
+      const from = card.dataset.flipId ? state.get(card.dataset.flipId) : undefined;
+      if (!from) {
+        anims.push(
+          card.animate([{ opacity: 0, scale: "0.94", offset: 0 }], {
+            duration,
+            easing,
+            fill: "backwards",
+          }),
+        );
+        return;
+      }
+      const order = survivor++;
+      const r = card.getBoundingClientRect();
+      const dx = from.x - (r.left + window.scrollX);
+      const dy = from.y - (r.top + window.scrollY);
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      anims.push(
+        card.animate([{ transform: `translate(${dx}px, ${dy}px)`, offset: 0 }], {
+          duration,
+          easing,
+          delay: order * 20,
+          fill: "backwards",
+        }),
+      );
     });
-    return () => {
-      tween.kill();
-    };
+    return () => anims.forEach((a) => a.cancel());
   }, [indexProjects]);
 
   useLayoutEffect(() => {
@@ -343,21 +375,21 @@ const Home: React.FC = () => {
     };
   }, [isGridRevealed]);
 
-  // Keyboard focus and scrollIntoView keep clear of the beam and the sand line.
+  // Keyboard focus and scrollIntoView keep clear of the beam and the sand line
+  // (mission.css html[data-index-laser]). An attribute, not an inline style:
+  // a style write on <html> restyles the whole page under an ad blocker's
+  // injected stylesheet.
   useEffect(() => {
     if (!isGridRevealed || !laserOn || prefersReducedMotion()) return;
     const root = document.documentElement;
-    root.style.scrollPaddingBottom = `calc((1 - ${PARTICLE_SCROLL_SPEC.point}) * 100vh + 24px)`;
+    root.dataset.indexLaser = "on";
     return () => {
-      root.style.scrollPaddingBottom = "";
+      delete root.dataset.indexLaser;
     };
   }, [isGridRevealed, laserOn]);
 
-  // Opening or folding the index (and filtering, and stages) changes the page
-  // height under every later trigger, so re-measure on both edges.
-  useEffect(() => {
-    ScrollTrigger.refresh();
-  }, [isGridRevealed, indexProjects.length, stageProject?.id]);
+  // Opening or folding the index, filtering and project stages change act
+  // heights; useActStack re-measures every trigger when that happens.
 
   useMaskReveal(homeRef, []);
   useActStack(homeRef, reducedMotion);
