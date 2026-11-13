@@ -15,6 +15,7 @@ import ProjectStage from "../components/ProjectStage";
 import CardMediaPreview from "../components/CardMediaPreview";
 import ScrollWidget from "../components/ScrollWidget";
 import SiteNav from "../components/SiteNav";
+import PageLoadSweep from "../components/canvasui/PageLoadSweep";
 import BrandMark from "../components/BrandMark";
 import MaskHeading from "../components/MaskHeading";
 import PixelButton from "../components/fx/PixelButton";
@@ -59,6 +60,8 @@ function useMaskReveal(scope: React.RefObject<HTMLElement | null>, deps: unknown
     if (!root || prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       root.querySelectorAll<HTMLElement>(".mask-reveal").forEach((el) => {
+        // A heading inside an ASCII sweep is revealed by the sweep.
+        if (el.closest("[data-ascii-reveal]")) return;
         const text = el.querySelector(".mask-reveal__text");
         const block = el.querySelector(".mask-reveal__block");
         if (!text || !block) return;
@@ -433,14 +436,6 @@ const Home: React.FC = () => {
         clearProps: "transform,opacity",
         scrollTrigger: { trigger: coda, start: "top 82%", once: true },
       });
-      gsap.from(".coda-mark", {
-        opacity: 0,
-        scale: 0.4,
-        rotate: -50,
-        duration: DUR.hero,
-        ease: EASE.out,
-        scrollTrigger: { trigger: coda, start: "top 82%", once: true },
-      });
       coda.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
         const target = Number(el.dataset.count);
         const obj = { v: 0 };
@@ -556,7 +551,12 @@ const Home: React.FC = () => {
         <div className="act__sheet" aria-hidden="true" />
         <div className="act__inner">
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div className="text-center md:text-left">
+            <PageLoadSweep
+              className="text-center md:text-left"
+              when="visible"
+              transparent
+              background="#071022"
+            >
               <p className="chapter-kicker m-0 mb-1.5">
                 <span data-act-kicker="1">ACT II // INDEX</span>
               </p>
@@ -567,7 +567,7 @@ const Home: React.FC = () => {
                 <span className="tabular-nums">{indexProjects.length}</span> of {projects.length}{" "}
                 open-source repositories, {LIVE_COUNT} running live
               </p>
-            </div>
+            </PageLoadSweep>
 
             <div className="search-bar-wrapper" onClick={revealIndex}>
               <div className={`floating-search-field ${searchInput ? "has-value" : ""}`}>
@@ -820,27 +820,29 @@ const Home: React.FC = () => {
         <div className="act__inner transmission__inner">
           <div className="transmission__layout">
             <header className="transmission__head">
-              <div className="coda-stagger flex items-center justify-center gap-3 mb-4">
-                <span className="coda-mark" aria-hidden="true">
-                  <BrandMark size={40} />
-                </span>
-                <span className="chapter-kicker" data-act-kicker="2">
-                  ACT III // EVENT HORIZON
-                </span>
-              </div>
-              <h2
-                id="transmission-title"
-                className="coda-stagger font-display font-bold text-[1.7rem] md:text-[2.4rem] leading-[1.12] text-[var(--text-primary)] m-0 mb-3"
-              >
-                Ideas that get this close don&rsquo;t escape. They ship.
-              </h2>
-              <p className="coda-stagger m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
-                {projects.length} repositories pulled in from a blank file: shaders that bend light,
-                full-stack platforms that carry real weight
-                {RPS_COUNT > 1
-                  ? `, and ${RPS_COUNT} rock-paper-scissors engines that had no business being this well engineered.`
-                  : "."}
-              </p>
+              <PageLoadSweep when="visible" transparent background="#03060f">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <span className="coda-mark" aria-hidden="true">
+                    <BrandMark size={40} />
+                  </span>
+                  <span className="chapter-kicker" data-act-kicker="2">
+                    ACT III // EVENT HORIZON
+                  </span>
+                </div>
+                <h2
+                  id="transmission-title"
+                  className="font-display font-bold text-[1.7rem] md:text-[2.4rem] leading-[1.12] text-[var(--text-primary)] m-0 mb-3"
+                >
+                  Ideas that get this close don&rsquo;t escape. They ship.
+                </h2>
+                <p className="m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
+                  {projects.length} repositories pulled in from a blank file: shaders that bend
+                  light, full-stack platforms that carry real weight
+                  {RPS_COUNT > 1
+                    ? `, and ${RPS_COUNT} rock-paper-scissors engines that had no business being this well engineered.`
+                    : "."}
+                </p>
+              </PageLoadSweep>
             </header>
 
             {/* The hole shows through here. */}

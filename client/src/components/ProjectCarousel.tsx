@@ -10,6 +10,7 @@ import { categories, type Project } from "../data/projects";
 import Earth3D from "./Earth3D";
 import CardMediaPreview from "./CardMediaPreview";
 import InspectHint from "./InspectHint";
+import PageLoadSweep from "./canvasui/PageLoadSweep";
 
 /**
  * When Tab last moved focus. Focus restored by script after a project closes
@@ -225,7 +226,8 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Act I entrance: the globe zooms up, then the tiles deploy into orbit.
+  // Act I entrance: the globe zooms up, then the tiles deploy into orbit (the
+  // header sweeps in on its own, through PageLoadSweep).
   // Web Animations started in a layout effect hold their start state from the
   // first paint. The tiles fade on .item (the orbit animates .project-tile-3d's
   // opacity) and grow on .project-tile-3d's own scale.
@@ -234,11 +236,6 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     if (!root || prefersReducedMotion()) return;
     const all = (selector: string) => root.querySelectorAll(selector);
     const anims = [
-      ...animateFrom(
-        all(".chapter-orbital-header"),
-        { opacity: 0, transform: "translateY(14px)" },
-        { duration: DUR.reveal, delay: 0.1 },
-      ),
       // Added onto the globe's own centring transform (translate(-50%, -50%)),
       // so it grows about its centre rather than drifting in from the side.
       ...animateFrom(
@@ -461,21 +458,23 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   return (
     <div ref={wrapperRef} className="project-showcase-wrapper w-full flex flex-col items-center">
-      {/* Chapter 01 Narrative Cue */}
-      <div className="chapter-orbital-header w-full flex flex-col items-center sm:items-start gap-1.5 mb-1 px-1">
-        <p className="chapter-kicker m-0 inline-flex items-center gap-2">
-          <Orbit size={14} className="text-accent" aria-hidden="true" />
-          <span data-act-kicker="0">ACT I // ORBIT</span>
-        </p>
-        <MaskHeading className="text-xl md:text-[1.7rem] font-bold leading-tight font-display m-0 text-[var(--text-primary)]">
-          The latest systems, in orbit
-        </MaskHeading>
-        <p className="chapter-orbital-hint m-0 text-xs text-[var(--text-muted)] text-center sm:text-left">
-          {canHover
-            ? "Hover a system to see it running. Select it for the full view."
-            : "Tap a system to open it. Swipe to move through the orbit."}
-        </p>
-      </div>
+      {/* Chapter 01 Narrative Cue: sweeps in through ASCII, like the banner. */}
+      <PageLoadSweep className="w-full" when="visible" transparent background="#03060f">
+        <div className="chapter-orbital-header w-full flex flex-col items-center sm:items-start gap-1.5 mb-1 px-1">
+          <p className="chapter-kicker m-0 inline-flex items-center gap-2">
+            <Orbit size={14} className="text-accent" aria-hidden="true" />
+            <span data-act-kicker="0">ACT I // ORBIT</span>
+          </p>
+          <MaskHeading className="text-xl md:text-[1.7rem] font-bold leading-tight font-display m-0 text-[var(--text-primary)]">
+            The latest systems, in orbit
+          </MaskHeading>
+          <p className="chapter-orbital-hint m-0 text-xs text-[var(--text-muted)] text-center sm:text-left">
+            {canHover
+              ? "Hover a system to see it running. Select it for the full view."
+              : "Tap a system to open it. Swipe to move through the orbit."}
+          </p>
+        </div>
+      </PageLoadSweep>
 
       <div className="banner" style={{ "--quantity": quantity } as React.CSSProperties}>
         <Earth3D reverse={true} size={650} paused={idle} />

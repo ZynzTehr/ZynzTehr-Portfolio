@@ -184,6 +184,15 @@ export interface AsciiSweepOptions {
   blend?: AsciiSweepBlend;
   /** Color of the page behind the content, as any CSS color, or "auto" to read it from the DOM. */
   background?: string;
+  /**
+   * Portfolio addition. Panels stay see-through instead of being filled with
+   * the background, so the sweep can run over an uneven backdrop (a gradient
+   * sheet, a video). The panel not on show is hidden rather than occluded,
+   * both panels hide while the canvas draws the sweep, and the front panel
+   * fades back in as the canvas fades out. `background` still sets the color
+   * that ink is measured against.
+   */
+  transparent?: boolean;
   /** Called when a sweep starts. */
   onSweepStart?: (to: number) => void;
   /** Called once the sweep has fully settled on its destination panel. */
@@ -257,6 +266,7 @@ const DEFAULTS: Required<AsciiSweepOptions> = {
   fade: 0.75,
   blend: "auto",
   background: "auto",
+  transparent: false,
   onSweepStart: () => {},
   onSweepEnd: () => {},
 };
@@ -316,6 +326,7 @@ uniform float uTime;
 uniform float uLod;
 uniform float uActive;
 uniform float uMaxX;
+uniform float uTransparent;
 
 #define S(a, b, t) smoothstep(a, b, t)
 
@@ -414,13 +425,26 @@ void main () {
   vec4 rawFrom = panel(uFrom, texUv, 0.0, fringe);
   vec4 rawTo = panel(uTo, texUv, 0.0, fringe);
 
-  vec3 base = mix(
-    mix(uBg, rawFrom.rgb, rawFrom.a),
-    mix(uBg, rawTo.rgb, rawTo.a),
-    swap);
-  // Cover wherever either panel has ink, so the live DOM never shows through
-  // mid-sweep and the two panels never appear stacked.
-  float alpha = max(rawFrom.a, rawTo.a);
+  vec3 base;
+  float alpha;
+  if (uTransparent > 0.5) {
+    // See-through panels: blend the two by their own alpha, so empty space
+    // stays empty and the backdrop shows (the live DOM is hidden meanwhile).
+    vec4 pm = mix(
+      vec4(rawFrom.rgb * rawFrom.a, rawFrom.a),
+      vec4(rawTo.rgb * rawTo.a, rawTo.a),
+      swap);
+    alpha = pm.a;
+    base = alpha > 0.001 ? pm.rgb / alpha : uBg;
+  } else {
+    base = mix(
+      mix(uBg, rawFrom.rgb, rawFrom.a),
+      mix(uBg, rawTo.rgb, rawTo.a),
+      swap);
+    // Cover wherever either panel has ink, so the live DOM never shows through
+    // mid-sweep and the two panels never appear stacked.
+    alpha = max(rawFrom.a, rawTo.a);
+  }
 
   vec2 cellTexUv = vec2(cellUv.x, 1.0 - cellUv.y);
 
@@ -1138,9 +1162,21 @@ function initializeAsciiSweep(
       // mid sweep and reflow the content underneath.
       layer.style.zIndex = front ? "1" : "0";
       layer.style.pointerEvents = front ? "" : "none";
-      // The captured element carries the page background so the front panel is
-      // opaque and fully occludes the one behind it.
-      state.content.style.backgroundColor = backgroundCss;
+      if (config.transparent) {
+        // See-through panels cannot occlude each other, so the one not on show
+        // (and, mid-sweep, both) is hidden. Natively by opacity: a clipped
+        // source canvas stops painting, so its capture goes blank. In the
+        // fallback by a clip: the fallback snapshot skips transparent
+        // elements but ignores clip-path.
+        state.content.style.backgroundColor = "transparent";
+        const hide = !front || (sweeping && !fadingOut);
+        if (htmlInCanvas) layer.style.opacity = hide ? "0" : "";
+        else layer.style.clipPath = hide ? "inset(0 0 100% 0)" : "";
+      } else {
+        // The captured element carries the page background so the front panel
+        // is opaque and fully occludes the one behind it.
+        state.content.style.backgroundColor = backgroundCss;
+      }
       // Keep the panel behind out of the tab order and the accessibility tree,
       // so assistive tech never sees both panels at once.
       if (front) layer.removeAttribute("aria-hidden");
@@ -1321,6 +1357,7 @@ function initializeAsciiSweep(
     gl!.uniform1f(uniforms.uTime, now / 1000);
     gl!.uniform1f(uniforms.uActive, active);
     gl!.uniform1f(uniforms.uMaxX, contentMaxX);
+    gl!.uniform1f(uniforms.uTransparent, config.transparent ? 1 : 0);
 
     gl!.bindFramebuffer(gl!.FRAMEBUFFER, null);
     gl!.viewport(0, 0, output.width, output.height);
@@ -1348,6 +1385,17 @@ function initializeAsciiSweep(
   /** Exact inverse of ease(), used to re-anchor the clock mid sweep. */
   function easeInverse(p: number): number {
     return 1 - Math.cbrt(1 - Math.min(Math.max(p, 0), 1));
+  }
+
+  /** Transparent panels: the front panel fades in as the canvas fades out. */
+  function revealFront() {
+    applyStacking(currentSlot);
+    const state = states[currentSlot];
+    const layer = htmlInCanvas ? state.source : state.content;
+    layer.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: reducedMotion ? 0 : FADE_OUT_S * 1000,
+      easing: "linear",
+    });
   }
 
   function frame(now: number) {
@@ -1411,7 +1459,10 @@ function initializeAsciiSweep(
     if (!sweeping && !fadingOut) {
       if (settleFrames > 0) {
         settleFrames -= 1;
-        if (settleFrames === 0) fadingOut = true;
+        if (settleFrames === 0) {
+          fadingOut = true;
+          if (config.transparent) revealFront();
+        }
       } else if (active === 0) {
         running = false;
         return;
