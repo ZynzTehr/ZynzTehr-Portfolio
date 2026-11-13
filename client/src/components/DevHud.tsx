@@ -1,12 +1,11 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Globe, Code2 } from "lucide-react";
 import { GithubIcon } from "./Icon";
 import HexPixelButton from "./fx/HexPixelButton";
 import PixelButton from "./fx/PixelButton";
-import PageLoadSweep from "./canvasui/PageLoadSweep";
 import { dockCover } from "../lib/routeCover";
 import { gsap } from "../lib/gsap";
-import { DUR, EASE } from "../lib/motion";
+import { animateFrom, DUR, EASE } from "../lib/motion";
 import { prefersReducedMotion } from "../lib/useReducedMotion";
 
 interface DevHudProps {
@@ -16,8 +15,8 @@ interface DevHudProps {
 /**
  * Act I opens here. When the visitor arrives through Launch, the route cover's
  * mark flies into the hex button (the dock) and its edge draws in. The identity
- * text gets the page-load AsciiSweep, and the repository counter runs only once
- * that sweep has landed, so it is never counting out of sight.
+ * text fades in, and the repository counter runs only once it has, so it is
+ * never counting out of sight.
  */
 const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
   const hudRef = useRef<HTMLElement>(null);
@@ -72,6 +71,8 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
     return () => ctx.revert();
   }, []);
 
+  const identityRef = useRef<HTMLDivElement>(null);
+
   const runCounter = useCallback(() => {
     if (prefersReducedMotion()) {
       setDisplayCount(projectCount);
@@ -86,6 +87,23 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
     });
   }, [projectCount]);
 
+  // The identity text fades in (a Web Animation: no inline style writes), then
+  // the counter runs.
+  useEffect(() => {
+    const el = identityRef.current;
+    if (!el || prefersReducedMotion()) {
+      runCounter();
+      return;
+    }
+    const [fade] = animateFrom(el, { opacity: 0 }, { duration: DUR.reveal, delay: 0.15 });
+    let live = true;
+    fade.finished.then(() => live && runCounter()).catch(() => {});
+    return () => {
+      live = false;
+      fade.cancel();
+    };
+  }, [runCounter]);
+
   return (
     <header ref={hudRef} className="dev-hud w-full mb-4">
       <div className="dev-hud__panel glass-card mb-2 p-4 md:p-6 w-full">
@@ -94,37 +112,35 @@ const DevHud: React.FC<DevHudProps> = ({ projectCount }) => {
             <span ref={hexRef} className="inline-flex">
               <HexPixelButton size={66} />
             </span>
-            <PageLoadSweep background="#0a1124" onComplete={runCounter}>
-              <div className="text-center md:text-left">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 mb-1">
-                  <h1 className="text-2xl md:text-[1.85rem] font-bold leading-tight m-0 text-gradient font-display">
-                    Jorge Bucio
-                  </h1>
-                  <span className="badge-status-pulse">
-                    <span className="status-dot" />
-                    Available
-                  </span>
-                </div>
-                <p className="m-0 text-[var(--text-secondary)] text-sm flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <Code2
-                    size={15}
-                    className="text-accent hidden md:inline-block"
-                    aria-hidden="true"
-                  />
-                  <span className="text-balance">Full-stack and creative systems engineer</span>
-                  <span className="text-[var(--text-muted)] hidden md:inline" aria-hidden="true">
-                    /
-                  </span>
-                  <span className="text-accent font-telemetry font-medium tabular-nums basis-full md:basis-auto">
-                    {displayCount} repositories
-                  </span>
-                </p>
-                <p className="hidden sm:block m-0 mt-1.5 text-xs text-[var(--text-muted)] max-w-[540px]">
-                  Interactive web applications, WebGL shaders and production software, each built
-                  from a blank file.
-                </p>
+            <div ref={identityRef} className="text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 mb-1">
+                <h1 className="text-2xl md:text-[1.85rem] font-bold leading-tight m-0 text-gradient font-display">
+                  Jorge Bucio
+                </h1>
+                <span className="badge-status-pulse">
+                  <span className="status-dot" />
+                  Available
+                </span>
               </div>
-            </PageLoadSweep>
+              <p className="m-0 text-[var(--text-secondary)] text-sm flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <Code2
+                  size={15}
+                  className="text-accent hidden md:inline-block"
+                  aria-hidden="true"
+                />
+                <span className="text-balance">Full-stack and creative systems engineer</span>
+                <span className="text-[var(--text-muted)] hidden md:inline" aria-hidden="true">
+                  /
+                </span>
+                <span className="text-accent font-telemetry font-medium tabular-nums basis-full md:basis-auto">
+                  {displayCount} repositories
+                </span>
+              </p>
+              <p className="hidden sm:block m-0 mt-1.5 text-xs text-[var(--text-muted)] max-w-[540px]">
+                Interactive web applications, WebGL shaders and production software, each built from
+                a blank file.
+              </p>
+            </div>
           </div>
 
           <nav aria-label="Elsewhere" className="flex gap-2.5 shrink-0">
