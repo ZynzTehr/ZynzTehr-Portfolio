@@ -21,8 +21,7 @@ import PixelButton from "../components/fx/PixelButton";
 import GlowCaret from "../components/fx/GlowCaret";
 import Laser from "../components/canvasui/Laser";
 import ParticleScroll from "../components/canvasui/ParticleScroll";
-import Ripple from "../components/canvasui/Ripple";
-import { LASER_SPEC, PARTICLE_SCROLL_SPEC, RIPPLE_SPEC } from "../components/canvasui/spec";
+import { LASER_SPEC, PARTICLE_SCROLL_SPEC } from "../components/canvasui/spec";
 import { GithubIcon } from "../components/Icon";
 import { gsap, ScrollTrigger } from "../lib/gsap";
 import { cssEase, DUR, EASE } from "../lib/motion";
@@ -819,84 +818,82 @@ const Home: React.FC = () => {
         className="act act--3 transmission"
       >
         <div className="act__inner transmission__inner">
-          <Ripple className="transmission__ripple" native={false} {...RIPPLE_SPEC}>
-            <div className="transmission__layout">
-              <header className="transmission__head">
-                <div className="coda-stagger flex items-center justify-center gap-3 mb-4">
-                  <span className="coda-mark" aria-hidden="true">
-                    <BrandMark size={40} />
+          <div className="transmission__layout">
+            <header className="transmission__head">
+              <div className="coda-stagger flex items-center justify-center gap-3 mb-4">
+                <span className="coda-mark" aria-hidden="true">
+                  <BrandMark size={40} />
+                </span>
+                <span className="chapter-kicker" data-act-kicker="2">
+                  ACT III // EVENT HORIZON
+                </span>
+              </div>
+              <h2
+                id="transmission-title"
+                className="coda-stagger font-display font-bold text-[1.7rem] md:text-[2.4rem] leading-[1.12] text-[var(--text-primary)] m-0 mb-3"
+              >
+                Ideas that get this close don&rsquo;t escape. They ship.
+              </h2>
+              <p className="coda-stagger m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
+                {projects.length} repositories pulled in from a blank file: shaders that bend light,
+                full-stack platforms that carry real weight
+                {RPS_COUNT > 1
+                  ? `, and ${RPS_COUNT} rock-paper-scissors engines that had no business being this well engineered.`
+                  : "."}
+              </p>
+            </header>
+
+            {/* The hole shows through here. */}
+            <div className="transmission__horizon" aria-hidden="true" />
+
+            <div className="transmission__foot">
+              <div className="coda-stagger grid grid-cols-3 gap-2.5 md:gap-3">
+                <div className="coda-stat-tile">
+                  <span className="coda-stat-tile__value" data-count={projects.length}>
+                    {projects.length}
                   </span>
-                  <span className="chapter-kicker" data-act-kicker="2">
-                    ACT III // EVENT HORIZON
+                  <span className="coda-stat-tile__label">Repositories pulled in</span>
+                </div>
+                <div className="coda-stat-tile">
+                  <span className="coda-stat-tile__value" data-count={LIVE_COUNT}>
+                    {LIVE_COUNT}
                   </span>
+                  <span className="coda-stat-tile__label">Still transmitting, live</span>
                 </div>
-                <h2
-                  id="transmission-title"
-                  className="coda-stagger font-display font-bold text-[1.7rem] md:text-[2.4rem] leading-[1.12] text-[var(--text-primary)] m-0 mb-3"
-                >
-                  Ideas that get this close don&rsquo;t escape. They ship.
-                </h2>
-                <p className="coda-stagger m-0 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
-                  {projects.length} repositories pulled in from a blank file: shaders that bend
-                  light, full-stack platforms that carry real weight
-                  {RPS_COUNT > 1
-                    ? `, and ${RPS_COUNT} rock-paper-scissors engines that had no business being this well engineered.`
-                    : "."}
-                </p>
-              </header>
-
-              {/* The hole shows through here. */}
-              <div className="transmission__horizon" aria-hidden="true" />
-
-              <div className="transmission__foot">
-                <div className="coda-stagger grid grid-cols-3 gap-2.5 md:gap-3">
-                  <div className="coda-stat-tile">
-                    <span className="coda-stat-tile__value" data-count={projects.length}>
-                      {projects.length}
-                    </span>
-                    <span className="coda-stat-tile__label">Repositories pulled in</span>
-                  </div>
-                  <div className="coda-stat-tile">
-                    <span className="coda-stat-tile__value" data-count={LIVE_COUNT}>
-                      {LIVE_COUNT}
-                    </span>
-                    <span className="coda-stat-tile__label">Still transmitting, live</span>
-                  </div>
-                  <div className="coda-stat-tile">
-                    <span className="coda-stat-tile__value coda-stat-tile__value--text">
-                      TS · React · WebGL2
-                    </span>
-                    <span className="coda-stat-tile__label">Source of the gravity</span>
-                  </div>
-                </div>
-
-                <div className="coda-stagger flex flex-wrap items-center justify-center gap-3">
-                  <PixelButton
-                    as="a"
-                    href="https://jorgebucio.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="primary"
-                    size="md"
-                  >
-                    <Globe size={16} aria-hidden="true" />
-                    <span>Open profile hub</span>
-                  </PixelButton>
-                  <PixelButton
-                    as="a"
-                    href="https://github.com/ZynzTehr"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="secondary"
-                    size="md"
-                  >
-                    <GithubIcon size={16} />
-                    <span>Follow @ZynzTehr</span>
-                  </PixelButton>
+                <div className="coda-stat-tile">
+                  <span className="coda-stat-tile__value coda-stat-tile__value--text">
+                    TS · React · WebGL2
+                  </span>
+                  <span className="coda-stat-tile__label">Source of the gravity</span>
                 </div>
               </div>
+
+              <div className="coda-stagger flex flex-wrap items-center justify-center gap-3">
+                <PixelButton
+                  as="a"
+                  href="https://jorgebucio.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="primary"
+                  size="md"
+                >
+                  <Globe size={16} aria-hidden="true" />
+                  <span>Open profile hub</span>
+                </PixelButton>
+                <PixelButton
+                  as="a"
+                  href="https://github.com/ZynzTehr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="md"
+                >
+                  <GithubIcon size={16} />
+                  <span>Follow @ZynzTehr</span>
+                </PixelButton>
+              </div>
             </div>
-          </Ripple>
+          </div>
         </div>
       </section>
 

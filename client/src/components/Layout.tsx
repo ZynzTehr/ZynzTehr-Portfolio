@@ -1,8 +1,10 @@
-import React, { useLayoutEffect, useRef, type ReactNode } from "react";
+import React, { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { Globe } from "lucide-react";
 import { GithubIcon } from "./Icon";
 import Liquid from "./canvasui/Liquid";
-import { LIQUID_SPEC } from "./canvasui/spec";
+import Ripple from "./canvasui/Ripple";
+import { LIQUID_SPEC, RIPPLE_SPEC } from "./canvasui/spec";
+import { setClickRipple, splashRippleAt } from "../lib/clickRipple";
 import RouteCover from "./RouteCover";
 import { gsap } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
@@ -19,6 +21,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const reducedMotion = useReducedMotion();
   const finePointer = useMediaQuery("(pointer: fine)");
   const enableFluidCursor = finePointer && !reducedMotion;
+
+  // Every press anywhere sends a ripple across the page (upgrades.md Ripple,
+  // trigger "click"). The overlay lets clicks through, so it listens on the
+  // window. Only the primary button: a right-click opens a menu, not a splash.
+  useEffect(() => {
+    if (reducedMotion) return;
+    const onPress = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      splashRippleAt(event.clientX, event.clientY);
+    };
+    window.addEventListener("pointerdown", onPress, { capture: true, passive: true });
+    return () => window.removeEventListener("pointerdown", onPress, { capture: true });
+  }, [reducedMotion]);
 
   // The footer fades in as it enters the viewport. gsap.from in a layout
   // effect hides it before first paint, so it never flashes.
@@ -51,6 +66,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Liquid className="w-full h-full" native={false} {...LIQUID_SPEC}>
             <div className="w-full h-full" />
           </Liquid>
+        </div>
+      )}
+
+      {/* Click ripple (upgrades.md "Ripple"), over everything including the nav.
+          The overlay path: it shines the wave crests rather than bending the
+          page, which would mean re-capturing the whole page every frame. */}
+      {!reducedMotion && (
+        <div aria-hidden="true" className="fixed inset-0 pointer-events-none z-[60]">
+          <Ripple
+            className="w-full h-full"
+            native={false}
+            {...RIPPLE_SPEC}
+            onReady={setClickRipple}
+          >
+            <div className="w-full h-full" />
+          </Ripple>
         </div>
       )}
 

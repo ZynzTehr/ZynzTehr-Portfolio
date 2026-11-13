@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { useNavigate } from "react-router-dom";
 import GlyphRain from "../components/canvasui/GlyphRain";
 import { AsciiSweep } from "../components/canvasui/AsciiSweep";
-import Ripple, { type RippleHandle } from "../components/canvasui/Ripple";
-import { ASCII_SWEEP_SPEC, GLYPH_RAIN_SPEC, RIPPLE_SPEC } from "../components/canvasui/spec";
+import { splashRippleAt } from "../lib/clickRipple";
+import { ASCII_SWEEP_SPEC, GLYPH_RAIN_SPEC } from "../components/canvasui/spec";
 import OrbitParticles from "../components/OrbitParticles";
 import BrandMark from "../components/BrandMark";
 import PixelButton from "../components/fx/PixelButton";
@@ -108,7 +108,6 @@ const Landing: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const markRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const rippleRef = useRef<RippleHandle | null>(null);
   const timers = useRef<number[]>([]);
   const slotsRef = useRef(slots);
   const slotIndexRef = useRef(slotIndex);
@@ -267,7 +266,7 @@ const Landing: React.FC = () => {
         return;
       }
       const origin = from ?? { x: window.innerWidth / 2, y: window.innerHeight * 0.45 };
-      rippleRef.current?.splashAtClient(origin.x, origin.y, 1.2);
+      splashRippleAt(origin.x, origin.y, 1.2);
       setLaunching(true);
       setRainBoost(true);
       // Let the orbit visibly spiral inward before the cover opens over it.
@@ -297,110 +296,101 @@ const Landing: React.FC = () => {
         open-source systems, {LIVE_COUNT} running live.
       </h1>
 
-      {/* No native capture wraps another: Ripple and GlyphRain take their overlay
-          paths so AsciiSweep's own native capture (and its band) can show. */}
-      <Ripple
-        className="prologue-ripple"
-        native={false}
-        {...RIPPLE_SPEC}
-        onReady={(handle) => {
-          rippleRef.current = handle;
-        }}
-      >
-        <GlyphRain className="prologue-rain" native={false} {...rainOptions}>
-          <div className="prologue-stage">
-            <div className="prologue-head-slot" aria-hidden="true" />
+      {/* No native capture wraps another: GlyphRain takes its overlay path so
+          AsciiSweep's own native capture (and its band) can show. Clicks ripple
+          through the site-wide overlay (Layout). */}
+      <GlyphRain className="prologue-rain" native={false} {...rainOptions}>
+        <div className="prologue-stage">
+          <div className="prologue-head-slot" aria-hidden="true" />
 
-            {/* The beats live under the rain: dimmed page, light pools (upgrades.md). */}
-            <div className="prologue-beats" aria-hidden="true">
-              {reducedMotion ? (
-                <BeatPanel beat={BEATS[activeBeat]} />
-              ) : (
-                <AsciiSweep
-                  className="prologue-sweep"
-                  {...ASCII_SWEEP_SPEC}
-                  background="#03060f"
-                  directional={false}
-                  index={slotIndex}
-                  onSweepEnd={onSweepEnd}
-                  alternate={<BeatPanel beat={slots[1] === null ? null : BEATS[slots[1]]} />}
-                >
-                  <BeatPanel beat={slots[0] === null ? null : BEATS[slots[0]]} />
-                </AsciiSweep>
-              )}
-            </div>
-            <div className="prologue-actions-slot" aria-hidden="true" />
+          {/* The beats live under the rain: dimmed page, light pools (upgrades.md). */}
+          <div className="prologue-beats" aria-hidden="true">
+            {reducedMotion ? (
+              <BeatPanel beat={BEATS[activeBeat]} />
+            ) : (
+              <AsciiSweep
+                className="prologue-sweep"
+                {...ASCII_SWEEP_SPEC}
+                background="#03060f"
+                directional={false}
+                index={slotIndex}
+                onSweepEnd={onSweepEnd}
+                alternate={<BeatPanel beat={slots[1] === null ? null : BEATS[slots[1]]} />}
+              >
+                <BeatPanel beat={slots[0] === null ? null : BEATS[slots[0]]} />
+              </AsciiSweep>
+            )}
           </div>
-        </GlyphRain>
+          <div className="prologue-actions-slot" aria-hidden="true" />
+        </div>
+      </GlyphRain>
 
-        {/* Controls stay crisp above the rain's dim. */}
-        <div className="prologue-ui">
-          <div className="prologue-head">
-            <div ref={markRef} className="prologue-mark" aria-hidden="true">
-              <BrandMark size={46} />
-            </div>
-            <p className="prologue-chrome prologue-kicker">ZYNZTEHR // PROLOGUE</p>
-            <div
-              className="prologue-chrome prologue-stepper"
-              role="group"
-              aria-label="Prologue beats"
-            >
-              {BEATS.map((beat, idx) => {
-                const state =
-                  activeBeat === idx ? "is-active" : activeBeat > idx ? "is-passed" : "";
-                return (
-                  <button
-                    key={beat.code}
-                    type="button"
-                    onClick={() => jumpTo(idx)}
-                    aria-current={activeBeat === idx ? "step" : undefined}
-                    className={`prologue-beat-pill ${state}`}
-                  >
-                    <span className="prologue-beat-pill__code">{beat.code}</span>
-                    <span className="prologue-beat-pill__label">{beat.kicker}</span>
-                    <span className="prologue-beat-pill__track" aria-hidden="true">
-                      <span
-                        key={activeBeat === idx ? `run-${beatRun}` : "idle"}
-                        className="prologue-beat-pill__fill"
-                        style={
-                          {
-                            "--beat-dur": `${PROLOGUE.sweep + PROLOGUE.hold}s`,
-                          } as React.CSSProperties
-                        }
-                      />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+      {/* Controls stay crisp above the rain's dim. */}
+      <div className="prologue-ui">
+        <div className="prologue-head">
+          <div ref={markRef} className="prologue-mark" aria-hidden="true">
+            <BrandMark size={46} />
           </div>
-
-          <div className="prologue-beats-gap" aria-hidden="true" />
-
-          <div className="prologue-actions">
-            <div ref={ctaRef} className={`prologue-cta ${ctaVisible ? "is-shown" : ""}`}>
-              {ctaVisible ? (
-                <PixelButton
-                  variant="primary"
-                  size="lg"
-                  delayActivate={reducedMotion ? 0 : 260}
-                  onActivate={() => launch(ctaCenter())}
+          <p className="prologue-chrome prologue-kicker">ZYNZTEHR // PROLOGUE</p>
+          <div
+            className="prologue-chrome prologue-stepper"
+            role="group"
+            aria-label="Prologue beats"
+          >
+            {BEATS.map((beat, idx) => {
+              const state = activeBeat === idx ? "is-active" : activeBeat > idx ? "is-passed" : "";
+              return (
+                <button
+                  key={beat.code}
+                  type="button"
+                  onClick={() => jumpTo(idx)}
+                  aria-current={activeBeat === idx ? "step" : undefined}
+                  className={`prologue-beat-pill ${state}`}
                 >
-                  <span>Launch</span>
-                </PixelButton>
-              ) : null}
-            </div>
-            <PixelButton
-              variant="secondary"
-              size="sm"
-              className="prologue-chrome"
-              onClick={() => launch()}
-            >
-              Skip intro
-            </PixelButton>
+                  <span className="prologue-beat-pill__code">{beat.code}</span>
+                  <span className="prologue-beat-pill__label">{beat.kicker}</span>
+                  <span className="prologue-beat-pill__track" aria-hidden="true">
+                    <span
+                      key={activeBeat === idx ? `run-${beatRun}` : "idle"}
+                      className="prologue-beat-pill__fill"
+                      style={
+                        {
+                          "--beat-dur": `${PROLOGUE.sweep + PROLOGUE.hold}s`,
+                        } as React.CSSProperties
+                      }
+                    />
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </Ripple>
+
+        <div className="prologue-beats-gap" aria-hidden="true" />
+
+        <div className="prologue-actions">
+          <div ref={ctaRef} className={`prologue-cta ${ctaVisible ? "is-shown" : ""}`}>
+            {ctaVisible ? (
+              <PixelButton
+                variant="primary"
+                size="lg"
+                delayActivate={reducedMotion ? 0 : 260}
+                onActivate={() => launch(ctaCenter())}
+              >
+                <span>Launch</span>
+              </PixelButton>
+            ) : null}
+          </div>
+          <PixelButton
+            variant="secondary"
+            size="sm"
+            className="prologue-chrome"
+            onClick={() => launch()}
+          >
+            Skip intro
+          </PixelButton>
+        </div>
+      </div>
 
       <OrbitParticles collapsing={launching} />
     </section>
