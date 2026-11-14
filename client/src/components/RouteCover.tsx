@@ -13,6 +13,12 @@ import { coverRuntime, getCoverState, setCoverState, subscribeCover } from "../l
  * interrupted navigation never strands the visitor behind it.
  */
 
+/** The hex button draws its logo at 0.8 of its width (HexPixelButton). */
+const GLYPH_SCALE = 0.8;
+/** When the flying mark starts to dissolve, and how long it takes (s). */
+const DOCK_FADE_AT_S = 0.05;
+const DOCK_FADE_S = 0.25;
+
 const RouteCover: React.FC = () => {
   const snapshot = useSyncExternalStore(subscribeCover, getCoverState, getCoverState);
   const fieldRef = useRef<HTMLDivElement>(null);
@@ -82,11 +88,34 @@ const RouteCover: React.FC = () => {
         },
       });
       if (target && from.width > 0) {
-        const dx = target.left + target.width / 2 - (from.left + from.width / 2);
-        const dy = target.top + target.height / 2 - (from.top + from.height / 2);
-        const s = target.height / from.height;
-        tl.to(mark, { x: dx, y: dy, scale: s, duration: DUR.hero, ease: EASE.out }, 0);
-        tl.to(mark, { opacity: 0, duration: DUR.micro, ease: "none" }, DUR.hero - DUR.micro);
+        // The hex button is still settling (the HUD panel slides in), so the
+        // flight re-reads it every frame. It aims at the button's own logo,
+        // which is centred and drawn at GLYPH_SCALE of the button's width.
+        const fromX = from.left + from.width / 2;
+        const fromY = from.top + from.height / 2;
+        const flight = { p: 0 };
+        tl.to(
+          flight,
+          {
+            p: 1,
+            duration: DUR.hero,
+            ease: EASE.out,
+            onUpdate: () => {
+              const t = coverRuntime.dockTarget?.() ?? target;
+              const s = (t.width * GLYPH_SCALE) / from.width;
+              gsap.set(mark, {
+                x: (t.left + t.width / 2 - fromX) * flight.p,
+                y: (t.top + t.height / 2 - fromY) * flight.p,
+                scale: 1 + (s - 1) * flight.p,
+              });
+            },
+          },
+          0,
+        );
+        // The mark dissolves on the way in, gone before it reaches the
+        // banner, while the button's own logo fades up in its place
+        // (.hex-btn-wrap.is-docking in mission.css). Two logos never overlap.
+        tl.to(mark, { opacity: 0, duration: DOCK_FADE_S, ease: "power1.in" }, DOCK_FADE_AT_S);
       } else {
         tl.to(mark, { opacity: 0, scale: 0.8, duration: DUR.ui, ease: EASE.in }, 0);
       }

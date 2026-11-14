@@ -16,7 +16,7 @@ Working design document for the portfolio. It follows the creative-direction bri
 - **Organizing idea: a mission in orbit around one persistent object, the sapphire hex-orbit mark.** It is the subject's own mark (the hex already anchors the HUD here, and the orbit is the site's whole premise), so it fails the swap test for any other brand. Its roles:
   1. Prologue: the spiraling orbit particles circle the call sign; the mark locks on and settles.
   2. Launch: the particles spiral inward and the mark expands into the route cover.
-  3. Orbit: the cover collapses into the HUD hex button (dock); the globe carries the orbit ring.
+  3. Orbit: the cover collapses into the HUD hex button (dock); the globe carries the orbit ring. The flying mark dissolves on its way in (gone about 0.3s into the 0.9s flight) and the button's own logo rises in its place, so two logos never show at once.
   4. Index: the laser horizon is the orbit line seen edge-on; cards print out of it.
   5. Event horizon: the mark returns to sign off over the black hole Act II falls into.
      The favicon is the same mark.

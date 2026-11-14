@@ -750,6 +750,21 @@
     stroke-dashoffset: 0;
   }
 }
+/* The arriving mark dissolves on its way in (RouteCover), and the button's
+   own logo rises in its place, so the two never show at once. */
+.hex-btn-wrap.is-docking .hex-btn__glyph {
+  animation: hexGlyphIn 0.5s var(--ease-out) 0.28s both;
+}
+@keyframes hexGlyphIn {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 .hex-btn__glyph {
   transform-origin: 60px 60px;
@@ -778,7 +793,8 @@
     transform: none !important;
   }
   .hex-btn__glyph .brand-mark-satellite,
-  .hex-btn-wrap.is-docking .hex-btn__edge {
+  .hex-btn-wrap.is-docking .hex-btn__edge,
+  .hex-btn-wrap.is-docking .hex-btn__glyph {
     animation: none;
   }
 }
