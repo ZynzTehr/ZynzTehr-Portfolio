@@ -466,7 +466,8 @@ const ProjectStage: React.FC<ProjectStageProps> = ({
                 </PixelButton>
               </div>
 
-              <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-telemetry">
+              {/* The ASCII read follows a pointer, so touch screens skip the hint. */}
+              <div className="hidden md:flex [@media(hover:none)]:hidden items-center gap-1.5 text-xs text-[var(--text-muted)] font-telemetry">
                 <Sparkles size={12} className="text-accent shrink-0" />
                 <span>Move across the image to read it in ASCII</span>
               </div>

@@ -12,8 +12,8 @@ import { useReducedMotion } from "../lib/useReducedMotion";
  * The hole is not at the centre of the frame, so the frame is placed by hand:
  * - landscape: the frame covers the screen as composed (hole on the right),
  *   and Act III's words sit in the dark on the left;
- * - portrait: the frame is scaled so the hole sits mid-screen between the
- *   words and the numbers, its edges fading into the void.
+ * - portrait: the frame is scaled so the hole sits right of centre between
+ *   the words and the numbers, its edges fading into the void.
  * Where the hole lands on screen is published as --bh-x / --bh-y-from-bottom
  * on the root, so Act II swirls into the hole itself.
  *
@@ -48,9 +48,11 @@ function placeFrame(vw: number, vh: number) {
     hx = (vw - w) / 2 + HOLE_X * w;
     hy = (vh - h) / 2 + HOLE_Y * h;
   } else {
-    // Hole mid-screen; the frame wide enough that its far edge nearly leaves the screen.
+    // Hole on the right, as on wide screens, between the words and the
+    // numbers. The frame is wide enough that its right edge (the hole sits at
+    // 78% of it) stays just off screen, so no cut edge shows.
     w = vw * 1.6;
-    hx = vw / 2;
+    hx = vw * 0.66;
     hy = vh * 0.56;
   }
   const h = (w * FRAME_H) / FRAME_W;

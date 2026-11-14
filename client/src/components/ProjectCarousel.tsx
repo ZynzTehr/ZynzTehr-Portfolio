@@ -34,6 +34,13 @@ interface ProjectCarouselProps {
   dormant?: boolean;
 }
 
+/**
+ * Narrow screens and short ones (phones in landscape) get the swipeable strip
+ * instead of the 3D orbit, which needs about 500px of height. Matches the
+ * strip block in global.css.
+ */
+const isStripLayout = () => window.innerWidth <= 768 || window.innerHeight <= 500;
+
 const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   projects,
   onSelectProject,
@@ -47,7 +54,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isStepping, setIsStepping] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(isStripLayout);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -56,6 +63,8 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const animFrameRef = useRef<number | null>(null);
   const stepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const touchLastPos = useRef<{ x: number; y: number } | null>(null);
+  const steppingScrollRef = useRef(false);
   const isDraggingRef = useRef(false);
   const prevCategoryRef = useRef(activeCategory);
   const prevPausedRef = useRef(paused);
@@ -221,7 +230,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const safeMobileIndex = Math.min(activeMobileIndex, Math.max(0, displayProjects.length - 1));
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(isStripLayout());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -274,7 +283,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   useLayoutEffect(() => {
     if (prevCategoryRef.current === activeCategory) return;
     prevCategoryRef.current = activeCategory;
-    if (sliderRef.current && window.innerWidth <= 768) {
+    if (sliderRef.current && isStripLayout()) {
       sliderRef.current.scrollTo({ left: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
     }
     const root = wrapperRef.current;
@@ -302,7 +311,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   /** A category switch also swings the orbit forward a step, so the change reads as motion. */
   const stepOrbitForCategory = () => {
-    if (window.innerWidth <= 768 || prefersReducedMotion()) return;
+    if (isStripLayout() || prefersReducedMotion()) return;
     setIsStepping(true);
     turnTo(baseAngle() + 28, true);
     if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
@@ -346,8 +355,22 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   );
 
   const handleSliderScroll = () => {
-    if (!sliderRef.current || window.innerWidth > 768) return;
+    if (!sliderRef.current || !isStripLayout()) return;
     const container = sliderRef.current;
+    // Previous/Next set the tile themselves; their smooth scroll must not
+    // re-pick it (near an end it would jump to the end tile).
+    if (steppingScrollRef.current) return;
+    // The first and last tiles can never scroll to the centre, so the ends of
+    // the strip select them outright.
+    const maxLeft = container.scrollWidth - container.clientWidth;
+    if (container.scrollLeft <= 2) {
+      setActiveMobileIndex(0);
+      return;
+    }
+    if (container.scrollLeft >= maxLeft - 2) {
+      setActiveMobileIndex(container.children.length - 1);
+      return;
+    }
     const center = container.scrollLeft + container.clientWidth / 2;
     let closestIdx = 0;
     let minDiff = Infinity;
@@ -365,7 +388,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   const handleRotate = useCallback(
     (direction: "left" | "right") => {
-      if (sliderRef.current && window.innerWidth <= 768) {
+      if (sliderRef.current && isStripLayout()) {
         setActiveMobileIndex((prev) => {
           const clampedPrev = Math.min(prev, Math.max(0, displayProjects.length - 1));
           const nextIndex =
@@ -374,10 +397,24 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               : Math.min(displayProjects.length - 1, clampedPrev + 1);
 
           const targetItem = sliderRef.current?.children[nextIndex] as HTMLElement | undefined;
-          if (targetItem && sliderRef.current) {
+          const strip = sliderRef.current;
+          if (targetItem && strip) {
             const targetLeft =
-              targetItem.offsetLeft - (sliderRef.current.clientWidth - targetItem.clientWidth) / 2;
-            sliderRef.current.scrollTo({ left: targetLeft, behavior: "smooth" });
+              targetItem.offsetLeft - (strip.clientWidth - targetItem.clientWidth) / 2;
+            const maxLeft = strip.scrollWidth - strip.clientWidth;
+            // Mute the scroll handler until this scroll ends (a clamped
+            // target may not scroll at all, hence the timeout).
+            if (Math.abs(Math.min(Math.max(targetLeft, 0), maxLeft) - strip.scrollLeft) > 1) {
+              steppingScrollRef.current = true;
+              const release = () => {
+                steppingScrollRef.current = false;
+                strip.removeEventListener("scrollend", release);
+                window.clearTimeout(timer);
+              };
+              const timer = window.setTimeout(release, 900);
+              strip.addEventListener("scrollend", release);
+            }
+            strip.scrollTo({ left: targetLeft, behavior: "smooth" });
           }
           return nextIndex;
         });
@@ -428,6 +465,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!touchStartPos.current || e.touches.length === 0) return;
+    touchLastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     const deltaX = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
     const deltaY = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
     if (deltaX > 8 || deltaY > 8) {
@@ -436,6 +474,17 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   };
 
   const handleTouchEnd = () => {
+    // The 3D orbit turns a step on a sideways swipe (the strip scrolls natively).
+    const start = touchStartPos.current;
+    const last = touchLastPos.current;
+    touchLastPos.current = null;
+    if (!isMobile && start && last) {
+      const dx = last.x - start.x;
+      const dy = last.y - start.y;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        handleRotate(dx < 0 ? "right" : "left");
+      }
+    }
     setTimeout(() => {
       isDraggingRef.current = false;
       touchStartPos.current = null;
@@ -444,7 +493,7 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   const handleCardActivate = (project: Project, index: number, cardElement: HTMLElement | null) => {
     if (isDraggingRef.current) return;
-    if (window.innerWidth <= 768) {
+    if (isStripLayout()) {
       setActiveMobileIndex(index);
     }
     // The stage covers the orbit, so this tile never gets its mouseleave or
@@ -469,23 +518,30 @@ const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
             The latest systems, in orbit
           </MaskHeading>
           <p className="chapter-orbital-hint m-0 text-xs text-[var(--text-muted)] text-center sm:text-left">
-            {canHover
-              ? "Hover a system to see it running. Select it for the full view."
-              : "Tap a system to open it. Swipe to move through the orbit."}
+            {!canHover
+              ? "Tap a system to open it. Swipe to move through the orbit."
+              : isMobile
+                ? "Select a system for the full view. The arrows move through the orbit."
+                : "Hover a system to see it running. Select it for the full view."}
           </p>
         </div>
       </PageLoadSweep>
 
-      <div className="banner" style={{ "--quantity": quantity } as React.CSSProperties}>
+      {/* Touch handlers on the whole banner: a swipe anywhere over the 3D
+          orbit (not only on a tile) turns it. */}
+      <div
+        className="banner"
+        style={{ "--quantity": quantity } as React.CSSProperties}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <Earth3D reverse={true} size={650} paused={idle} />
 
         <div
           ref={sliderRef}
           className={`slider ${!isRotating ? "paused-rotation" : ""}`}
           onScroll={handleSliderScroll}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
           // The orbit's turn is drawn by the animations in orbitAnimsRef.
         >
           {displayProjects.map((project, index) => {

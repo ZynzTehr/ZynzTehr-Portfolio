@@ -4,7 +4,7 @@ import { GithubIcon } from "./Icon";
 import Liquid from "./canvasui/Liquid";
 import Ripple from "./canvasui/Ripple";
 import { LIQUID_SPEC, RIPPLE_SPEC } from "./canvasui/spec";
-import { setClickRipple, splashRippleAt } from "../lib/clickRipple";
+import { setClickRipple, splashPressAt } from "../lib/clickRipple";
 import RouteCover from "./RouteCover";
 import { gsap } from "../lib/gsap";
 import { DUR, EASE } from "../lib/motion";
@@ -29,7 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (reducedMotion) return;
     const onPress = (event: PointerEvent) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      splashRippleAt(event.clientX, event.clientY);
+      splashPressAt(event.clientX, event.clientY);
     };
     window.addEventListener("pointerdown", onPress, { capture: true, passive: true });
     return () => window.removeEventListener("pointerdown", onPress, { capture: true });

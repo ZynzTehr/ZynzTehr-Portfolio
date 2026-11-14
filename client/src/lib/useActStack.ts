@@ -391,6 +391,12 @@ export function useActStack(rootRef: RefObject<HTMLElement | null>, reducedMotio
             // moves a number from 0 to 1, so there is nothing to re-record.
             invalidateOnRefresh: false,
             scrub: reducedMotion ? true : 0.35,
+            // A refresh can move the trigger under a still page (a filter
+            // shrinks Act II right after a jump); with no scroll the scrub
+            // never catches up, so jump the exit to where the page now is.
+            onRefresh: (self) => {
+              self.animation?.progress(self.progress);
+            },
           },
         });
       });

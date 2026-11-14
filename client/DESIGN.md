@@ -54,6 +54,7 @@ One accent family (cobalt to ice) works as a moving system: the laser, the rain,
   - **Sapphire labels** (kickers, tags, telemetry, links): a 7px neon.
   - **Headings:** a sapphire halo.
   - **Hover and focus:** a hovered or focused control brightens all its text through `--glow-lit`.
+  - **White text and icons:** on top of its tier, white text wears the search caret's blue glow (`--glow-white`), and white icons and logos (Lucide icons, the GitHub mark, the close glyph) the same glow as a drop-shadow (`--glow-white-icon`). Each layer's alpha is computed from the element's own color (relative color syntax), so the glow fades to nothing on text that is not white. Truncated text needs room for it: the orbit `.tile-title` pads out and takes the padding back with a negative margin, and index card titles wrap instead of clamping.
   - **Gradient name:** glows through a drop-shadow, since a text-shadow would show through its transparent fill.
   - **Exclusions:** SVG art is excluded, and the glow turns off under `prefers-contrast: more` and forced colors.
   - **Performance:** no rule puts `:hover` before a descendant combinator. That would restyle a whole act whenever hover changes under a still cursor.
@@ -99,6 +100,13 @@ Durations come from `src/lib/motion.ts`: micro 0.18s, ui 0.32s, reveal 0.64s, he
 | Event horizon          | Scroll into view                     | Act II absorbed; sign-off and next step              | Stats counted, CTAs visible over the hole | n/a                                                                              | Final numbers shown                                                 |
 
 Keyboard: every action reachable by Tab; visible focus ring in ice; the stage traps no keys from inputs. Touch: no hover-only content; cards open on tap. Optional media: when WebGL or video fails, content and actions remain.
+
+Phones and tablets:
+
+- **Breakpoints.** Phones (640px and below) get a two-row nav bar (84px); acts pad their tops to clear it. Short act labels take over at 960px and below, and the nav icons are 40px touch targets at 900px and below. The orbit becomes a swipeable strip at 768px and below and on screens 500px tall or less (`isStripLayout`). Index cards go compact below 768px (agreeing with Tailwind's `md`) and on short screens.
+- **Short screens** (phones in landscape): the prologue fits one screen, with Launch and Skip sharing a row; the project view sets its media beside its details; Act III takes a smaller heading and a wider column over a wider scrim.
+- **Act III** keeps its composition at every aspect ratio: the hole on the right, the words set left.
+- **Touch:** a sideways swipe turns the 3D orbit; the search field is 16px so iOS does not zoom; hover-only hints (Inspect, the ASCII read) are hidden; a tap ripples once, where it lands.
 
 ## Acceptance and evidence
 

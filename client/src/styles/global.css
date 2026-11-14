@@ -47,6 +47,13 @@
   --glow-hover:
     0 0 6px color-mix(in srgb, currentColor 70%, transparent),
     0 0 18px color-mix(in srgb, currentColor 40%, transparent);
+  /* White text also wears the search caret's glow (mission.css .glow-caret).
+     Each layer's alpha is the text's whiteness: full at #f4f7ff, fading out
+     by rgb(205,205,205), so blue labels and grey-blue copy keep only their
+     own tier above. Added after the tier glow in every text-shadow rule. */
+  /* Without relative color syntax, no white glow (see @supports below). */
+  --glow-white: 0 0 transparent;
+  --glow-white-icon: none;
   --correct: var(--status-live);
 
   /* Geometry */
@@ -54,6 +61,29 @@
   --radius-lg: 18px;
   --radius-md: 12px;
   --notch-r: 16px;
+}
+
+/* A token that fails to compute would void the whole text-shadow list it
+   sits in (every tier's glow), so the white glow is defined only where
+   relative color syntax works. */
+@supports (color: rgb(from currentColor r g b)) {
+  :root {
+    --glow-white:
+      0 0 4px rgb(from currentColor 147 197 253 / clamp(0, (min(r, g, b) - 205) / 30, 1)),
+      0 0 10px rgb(from currentColor 96 165 250 / clamp(0, (min(r, g, b) - 205) / 30, 1)),
+      0 0 18px rgb(from currentColor 68 116 255 / clamp(0, (min(r, g, b) - 205) / 35, 0.85));
+    /* The same glow for white icons (mission.css "Text glow"). A drop-shadow's
+       blur is a standard deviation, half a text-shadow's blur radius. */
+    --glow-white-icon: drop-shadow(
+        0 0 2px rgb(from currentColor 147 197 253 / clamp(0, (min(r, g, b) - 205) / 30, 1))
+      )
+      drop-shadow(
+        0 0 5px rgb(from currentColor 96 165 250 / clamp(0, (min(r, g, b) - 205) / 30, 1))
+      )
+      drop-shadow(
+        0 0 9px rgb(from currentColor 68 116 255 / clamp(0, (min(r, g, b) - 205) / 35, 0.85))
+      );
+  }
 }
 
 @property --border-angle {
@@ -460,7 +490,12 @@
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin: 2px 0 5px 0;
+    /* The title truncates (overflow: hidden), which would box in its glow:
+       padding gives the glow room, and the negative margin takes it back out
+       of the layout. */
+    --glow-room: 0.6rem;
+    padding: var(--glow-room);
+    margin: calc(2px - var(--glow-room)) calc(-1 * var(--glow-room)) calc(5px - var(--glow-room));
     font-family: var(--font-display);
     /* Normal width: the orbit tiles are narrow and long names must fit. */
     font-stretch: 100%;
@@ -980,8 +1015,9 @@
     }
   }
 
-  /* Mobile Responsiveness (<= 768px) */
-  @media screen and (max-width: 768px) {
+  /* Mobile Responsiveness (<= 768px, and short screens such as phones in
+     landscape: ProjectCarousel isStripLayout) */
+  @media screen and (max-width: 768px), screen and (max-height: 500px) {
     :root {
       --notch-r: 12px;
     }
@@ -1040,7 +1076,10 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       gap: 12px;
-      padding: 0.5rem 1rem 1rem 1rem;
+      /* Room for the active tile's lift and glow, which the scroller clips;
+         the negative margin keeps the strip's place in the layout. */
+      padding: 1.5rem 1.25rem 1.75rem;
+      margin-block: -1rem;
       scrollbar-width: thin;
       scrollbar-color: rgba(96, 165, 250, 0.4) rgba(255, 255, 255, 0.05);
     }
@@ -1074,17 +1113,19 @@
     }
 
     .banner .slider .item .tile-category-tag {
-      font-size: 0.54rem;
+      font-size: 0.6875rem;
     }
 
     .banner .slider .item .tile-title {
-      font-size: 0.68rem;
-      margin: 1px 0 2px 0;
+      font-size: 0.78rem;
+      --glow-room: 0.45rem;
+      margin: calc(1px - var(--glow-room)) calc(-1 * var(--glow-room)) calc(2px - var(--glow-room));
       line-height: 1.2;
     }
 
+    /* "Inspect" is a hover affordance; a tap opens the project. */
     .banner .slider .item .tile-inspect-hint {
-      font-size: 0.6rem;
+      display: none;
     }
 
     .banner .slider .item.active-tile {
@@ -1106,9 +1147,8 @@
           )
           border-box;
       animation: rotateBorderBeam 2.4s linear infinite;
-      box-shadow:
-        0 0 22px rgba(68, 116, 255, 0.5),
-        0 10px 24px rgba(0, 0, 0, 0.9);
+      /* Kept inside the scroller's padding, which would clip a wider glow. */
+      box-shadow: 0 0 14px rgba(68, 116, 255, 0.5);
       border-color: transparent;
     }
 
@@ -1116,26 +1156,6 @@
       display: flex;
       margin-top: 0.25rem;
       margin-bottom: 1.25rem;
-    }
-
-    .project-grid-card {
-      border-radius: 14px;
-    }
-
-    .grid-card-media {
-      height: 112px;
-    }
-
-    .grid-category-badge {
-      top: 6px;
-      left: 6px;
-      font-size: 0.54rem;
-      padding: 0.16rem 0.44rem;
-    }
-
-    .project-grid-card .tech-pill-small {
-      font-size: 0.56rem;
-      padding: 0.12rem 0.34rem;
     }
 
     .project-stage-grid {
@@ -1175,6 +1195,31 @@
 
     .stage-description {
       font-size: 0.9rem;
+    }
+  }
+
+  /* Index cards, compact. Below Tailwind's md (768px) so a 768px tablet gets
+     one card style, not half of each; also short screens, where the laser
+     leaves a short band above it. */
+  @media screen and (max-width: 767.98px), screen and (max-height: 500px) {
+    .project-grid-card {
+      border-radius: 14px;
+    }
+
+    .grid-card-media {
+      height: 112px;
+    }
+
+    .grid-category-badge {
+      top: 6px;
+      left: 6px;
+      font-size: 0.6875rem;
+      padding: 0.16rem 0.44rem;
+    }
+
+    .project-grid-card .tech-pill-small {
+      font-size: 0.6875rem;
+      padding: 0.12rem 0.34rem;
     }
   }
 

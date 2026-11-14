@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { useNavigate } from "react-router-dom";
 import GlyphRain from "../components/canvasui/GlyphRain";
 import { AsciiSweep } from "../components/canvasui/AsciiSweep";
-import { splashRippleAt } from "../lib/clickRipple";
+import { splashUnlessPressed } from "../lib/clickRipple";
 import { ASCII_SWEEP_SPEC, GLYPH_RAIN_SPEC } from "../components/canvasui/spec";
 import OrbitParticles from "../components/OrbitParticles";
 import BrandMark from "../components/BrandMark";
@@ -10,7 +10,7 @@ import PixelButton from "../components/fx/PixelButton";
 import { launchCover } from "../lib/routeCover";
 import { projects } from "../data/projects";
 import { gsap } from "../lib/gsap";
-import { DUR, EASE, PROLOGUE } from "../lib/motion";
+import { animateFrom, DUR, EASE, PROLOGUE } from "../lib/motion";
 import { prefersReducedMotion, useReducedMotion } from "../lib/useReducedMotion";
 import { loadHome } from "../lib/loadHome";
 
@@ -39,21 +39,21 @@ const BEATS: Beat[] = [
     kicker: "Signal",
     headline: "Zynz Tehr",
     line: "Jorge Bucio, full-stack and creative systems engineer",
-    size: "clamp(2.9rem, 13vw, 6.4rem)",
+    size: "clamp(2.4rem, min(13vw, 17svh), 6.4rem)",
   },
   {
     code: "02",
     kicker: "Craft",
     headline: "Built from a blank file",
     line: "Hand-written WebGL shaders, real-time systems and interfaces that answer back",
-    size: "clamp(1.6rem, 4.6vw, 3.4rem)",
+    size: "clamp(1.5rem, min(4.6vw, 9svh), 3.4rem)",
   },
   {
     code: "03",
     kicker: "Launch",
     headline: `${projects.length} systems in orbit`,
     line: `${LIVE_COUNT} running live. All of them open source.`,
-    size: "clamp(1.8rem, 5vw, 3.8rem)",
+    size: "clamp(1.6rem, min(5vw, 10svh), 3.8rem)",
   },
 ];
 
@@ -108,6 +108,8 @@ const Landing: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const markRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  /** How far Skip glided aside when Launch bloomed (short screens), to undo it. */
+  const skipGlideRef = useRef(0);
   const timers = useRef<number[]>([]);
   const slotsRef = useRef(slots);
   const slotIndexRef = useRef(slotIndex);
@@ -197,16 +199,19 @@ const Landing: React.FC = () => {
         ease: EASE.out,
         delay: 0.1,
       });
-      gsap.from(".prologue-chrome", {
-        opacity: 0,
-        y: 10,
-        duration: DUR.reveal,
-        ease: EASE.out,
-        stagger: 0.08,
-        delay: 0.25,
-      });
     }, sectionRef);
-    return () => ctx.revert();
+    // Web Animations on `translate`, not a tween of `transform`: Skip intro is
+    // a pixel button, whose transform carries its tilt and eases through a
+    // CSS transition, and a tween there could settle mid-transition (10px low).
+    const chrome = animateFrom(
+      sectionRef.current.querySelectorAll(".prologue-chrome"),
+      { opacity: 0, translate: "0 10px" },
+      { duration: DUR.reveal, stagger: 0.08, delay: 0.25 },
+    );
+    return () => {
+      ctx.revert();
+      chrome.forEach((a) => a.cancel());
+    };
   }, [reducedMotion]);
 
   // The CTA blooms in when beat 03 lands.
@@ -220,10 +225,42 @@ const Landing: React.FC = () => {
       ease: EASE.out,
       clearProps: "transform,opacity",
     });
+    // Short screens set Launch and Skip in one row, Skip centred alone until
+    // Launch arrives; Skip then glides aside from the centre instead of jumping.
+    const skip = ctaRef.current.parentElement?.querySelector<HTMLElement>(
+      ":scope > :not(.prologue-cta)",
+    );
+    const row = ctaRef.current.parentElement;
+    let glide: Animation | undefined;
+    if (skip && row && window.matchMedia("(max-height: 560px)").matches) {
+      const r = row.getBoundingClientRect();
+      const b = skip.getBoundingClientRect();
+      const dx = r.left + r.width / 2 - (b.left + b.width / 2);
+      skipGlideRef.current = dx;
+      [glide] = animateFrom(skip, { translate: `${dx.toFixed(1)}px 0` }, { duration: DUR.reveal });
+    }
     return () => {
       tween.kill();
+      glide?.cancel();
     };
   }, [showCta, reducedMotion, settledStart]);
+
+  // Jumping back a beat hides Launch again: Skip glides back to the centre.
+  useLayoutEffect(() => {
+    const dx = skipGlideRef.current;
+    if (showCta || !dx || reducedMotion) return;
+    skipGlideRef.current = 0;
+    const skip = ctaRef.current?.parentElement?.querySelector<HTMLElement>(
+      ":scope > :not(.prologue-cta)",
+    );
+    if (!skip) return;
+    const [glide] = animateFrom(
+      skip,
+      { translate: `${(-dx).toFixed(1)}px 0` },
+      { duration: DUR.reveal },
+    );
+    return () => glide?.cancel();
+  }, [showCta, reducedMotion]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -245,6 +282,14 @@ const Landing: React.FC = () => {
     };
   }, []);
 
+  // Home opens at its top. The router keeps the window's scroll, and a short
+  // screen may have scrolled the prologue to reach Launch; the cover (or the
+  // fade) hides the jump.
+  const enterHome = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    void navigate("/home");
+  }, [navigate]);
+
   const launch = useCallback(
     (from?: { x: number; y: number }) => {
       if (launchingRef.current) return;
@@ -259,24 +304,26 @@ const Landing: React.FC = () => {
           fill: "forwards",
         });
         const go = () => {
-          if (mountedRef.current) void navigate("/home");
+          if (mountedRef.current) enterHome();
         };
         if (fade) fade.onfinish = go;
         else go();
         return;
       }
       const origin = from ?? { x: window.innerWidth / 2, y: window.innerHeight * 0.45 };
-      splashRippleAt(origin.x, origin.y, 1.2);
+      // A tap already rippled where it landed (Layout); only keyboard
+      // activation needs the splash from here.
+      splashUnlessPressed(origin.x, origin.y, 1.2);
       setLaunching(true);
       setRainBoost(true);
       // Let the orbit visibly spiral inward before the cover opens over it.
       later(() => {
         void launchCover(origin).then(() => {
-          if (mountedRef.current) void navigate("/home");
+          if (mountedRef.current) enterHome();
         });
       }, 340);
     },
-    [clearTimers, later, navigate, reducedMotion],
+    [clearTimers, later, enterHome, reducedMotion],
   );
 
   const ctaCenter = () => {

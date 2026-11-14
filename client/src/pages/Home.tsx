@@ -273,6 +273,15 @@ const Home: React.FC = () => {
 
   const handleSelectTopic = useCallback(
     (topic: string) => {
+      // From deep in the grid, jump up to the index first: filtering to one
+      // topic shrinks Act II to about a screen, and with the page still scrolled
+      // past it the browser would clamp onto Act III, which folds the index
+      // and drops the filter. Nothing above the anchor changes, so it stays put.
+      const anchor = indexAnchorRef.current;
+      if (anchor) {
+        const top = anchor.getBoundingClientRect().top + window.scrollY;
+        if (window.scrollY > top) window.scrollTo({ top, behavior: "instant" });
+      }
       captureFlip();
       setActiveTopic(topic);
       setSearchInput("");
@@ -651,7 +660,7 @@ const Home: React.FC = () => {
 
           <div id="index-results">
             {!isGridRevealed ? (
-              <div className="archive-open-prompt text-center py-12 my-4 flex flex-col items-center justify-center gap-4">
+              <div className="archive-open-prompt text-center py-12 px-5 md:px-8 my-4 flex flex-col items-center justify-center gap-4">
                 <PageLoadSweep
                   className="w-full"
                   when="visible"
@@ -751,7 +760,7 @@ const Home: React.FC = () => {
                             <div className="grid-card-body p-3 md:p-6 flex flex-col justify-between grow">
                               <div>
                                 <div className="flex justify-between items-start mb-1.5 md:mb-2">
-                                  <h3 className="text-xs md:text-lg font-bold leading-snug text-[var(--text-primary)] font-display m-0 truncate">
+                                  <h3 className="min-w-0 text-xs md:text-lg font-bold leading-snug text-[var(--text-primary)] font-display m-0 break-words">
                                     {project.name}
                                   </h3>
                                   <ArrowUpRight
@@ -773,9 +782,11 @@ const Home: React.FC = () => {
                                     </span>
                                   ))}
                                 </div>
-                                <div className="card-footer-meta flex justify-between items-center pt-2 border-t border-[var(--border-subtle)] text-[0.65rem] md:text-xs">
-                                  <span className="text-[var(--text-muted)] font-telemetry">
-                                    {project.language} · {formatProjectDate(project.updatedAt)}
+                                <div className="card-footer-meta flex justify-between items-center pt-2 border-t border-[var(--border-subtle)] text-[0.7rem] md:text-xs">
+                                  <span className="card-meta text-[var(--text-muted)] font-telemetry">
+                                    <span>{project.language}</span>
+                                    <span className="card-meta__sep"> · </span>
+                                    <span>{formatProjectDate(project.updatedAt)}</span>
                                   </span>
                                   <div className="flex gap-1.5">
                                     {project.liveUrl && (
@@ -832,7 +843,7 @@ const Home: React.FC = () => {
           <div className="transmission__layout">
             <header className="transmission__head">
               <PageLoadSweep when="visible" replay transparent background="#03060f">
-                <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="transmission__kicker flex items-center gap-3 mb-4">
                   <span className="coda-mark" aria-hidden="true">
                     <BrandMark size={40} />
                   </span>
@@ -875,7 +886,7 @@ const Home: React.FC = () => {
                 </div>
                 <div className="coda-stat-tile">
                   <span className="coda-stat-tile__value coda-stat-tile__value--text">
-                    TS · React · WebGL2
+                    {"TS\u00a0· React\u00a0· WebGL2"}
                   </span>
                   <span className="coda-stat-tile__label">Source of the gravity</span>
                 </div>

@@ -36,6 +36,8 @@ import { subscribeActs } from "../../lib/useActStack";
  */
 
 const FADE_TAIL_MS = 520;
+/** Room past the block for the text glow (its widest layer blurs 18px). */
+const GLOW_BLEED_PX = 24;
 
 /**
  * The sweep draws a copy of the content. Drop ids (headings are referenced by
@@ -184,6 +186,12 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
   // see-through panels, and before a "visible" sweep is armed, they are
   // invisible instead.
   const hideReal = !completed && (options.transparent || !armed);
+  // The sweep draws its copy into a canvas, which crops anything painted past
+  // its edges, such as the text glow. See-through panels get a canvas that
+  // bleeds past the block on every side, with the copy padded by the same
+  // amount so it still lines up with the real text. An opaque panel keeps
+  // the block's exact box, or its background would cover the neighbours.
+  const bleed = options.transparent ? GLOW_BLEED_PX : 0;
   return (
     <div
       ref={rootRef}
@@ -197,12 +205,16 @@ export const PageLoadSweep: React.FC<PageLoadSweepProps> = ({
           {...options}
           native={native}
           index={slotIndex}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          style={{ position: "absolute", inset: -bleed }}
           onSweepEnd={() => {
             finish();
             window.setTimeout(() => setCompleted(true), FADE_TAIL_MS);
           }}
-          alternate={<div aria-hidden="true">{stripIdentity(children)}</div>}
+          alternate={
+            <div aria-hidden="true" style={bleed ? { padding: bleed } : undefined}>
+              {stripIdentity(children)}
+            </div>
+          }
         >
           <div className="w-full h-full" />
         </AsciiSweep>
